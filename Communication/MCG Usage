@@ -1,0 +1,42 @@
+The MCG class inside the Communication module is designed to take care of the SSH protocol that connects the host LTPy
+computer to the Power PMAC controlling all the hardware on the QSYS Gantry.
+
+Example usage:
+
+1) init and open an interactive shell:
+
+    myshell = Gantry()
+    myshell.username = "myname"
+    myshell.password = "mypassword"
+    myshell.openssh()
+
+
+2) send message and receive text outout
+    #First method:
+    message = "mymessage"
+    myshell.send_message(mymessage)
+    out = myshell.simple_output()
+
+    #second method
+    out = myshell.send_receive("mymessage")
+
+3) close connection:
+
+    myshell.close_connection()
+
+Methods are provided to:
+    open ssh connection as a terminal.
+    close connection
+    send messages down to the host
+    listen to the output
+    receive, format and display output in simple (i.e. one liner useful for further computation) and complex forms.
+    initialize the pmac
+    check connection status
+
+The properties of the object are a minimal set allowing for connection both ways.
+
+Username and password are to be provided by the user by appropriate methods.
+IP is set to the loopback interface for safety ( and testing). Refer to the QSYS and Omron Manuals in the docs for
+specifics
+
+
