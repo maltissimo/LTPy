@@ -121,8 +121,6 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
         #       motor[2].actpos
         #       Motor[2].ActPos = 1.93359375
         #       - must introduce a safety check with the air supply to the system.
-
-
         """     
             Implemented in MGC.py on 20240508
             
