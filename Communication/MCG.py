@@ -9,10 +9,10 @@ Contains all the info necessary for the communication between Main Computer (MC)
 Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 """
 
-GPASCII = "gpascii -2\n"  # this is needed to start the interpreter on the Pmac, i.e. to init the Pmac
-EOT = "\04"  # End of transmission character, to close connection
+GPASCII = "gpascii -2"  # this is needed to start the interpreter on the Pmac, i.e. to init the Pmac
+EOT = "\x04"  # End of transmission character, to close connection to the PMAC. the SSH stays open. Equivalent to pass CTRL+C
 delim = "\r\n"
-
+right = "STDIN Open for ASCII Input"
 class Pmac_Shell():
     """
     Object modeling the connection to the Pmac as an interactive shell. Main methods:
@@ -25,7 +25,7 @@ class Pmac_Shell():
     Checks connection status
 
     """
-    def __init__(self, ssh = None, pmac_shell = None, pmac_ip = "127.0.0.1", username = "", password = "", alive = False, nbytes = 512, rawoutput = None, textoutput = "No output from the shell!"):
+    def __init__(self, ssh = None, pmac_shell = None, pmac_ip = "127.0.0.1", username = "", password = "", alive = False, nbytes = 1024, rawoutput = None, textoutput = "No output from the shell!"):
         """
         Inits some attributes. The initial IP is set to be the loobpack interface. Username and password are attributes
         that  must be user defined.
@@ -172,28 +172,37 @@ class Gantry(Pmac_Shell):
     set echo to off (see details in the function header).
     """
 
-    def __init__(self,  pmac_ip = "127.0.0.1", username = "", password = "", alive = False, nbytes = 512, echo = None, isinit = False):
+    def __init__(self,  pmac_ip = "127.0.0.1", username = "", password = "", alive = False, nbytes = 1024, echo = None, isinit = False):
         super().__init__(pmac_ip = pmac_ip, username = username, password = password, alive = alive, nbytes = nbytes )
         self.echo = echo  # this has to be checked and initialized to the value on the PMAC. Must be 1 to avoid echoing of command issued to PMAC
         self.isinit = isinit # Set to False for safety reasons.
 
     def send_receive(self, message):
         """
-        This function compounds the send_message and the simple_output methods of the Pmac_Shell class.
+        This function compounds the send_message and the simple_output methods of the Pmac_Shell class. This function is
+        to be used ONLY with an open SSH on a PMAC terminal, as it will otherwise produce unintellegible outputs.
+
         :param message: a string containing the message to be set to the PMAC
         :return: a string output
         """
         if self.alive is not False:
             self.send_message(message) # this sends the message down to the SSH connection
             time.sleep(0.02)
-            output = self.simple_output()
-            return(output)
+            while self.pmac_shell.recv_ready():  # there is space and scope here to add a timeout
+                if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
+                    self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("UTF-8")
+            lines = self.rawoutput.split(delim)
+            return (str(lines[-2]))
+
+            """output = self.simple_output()
+            return(output)"""
+
         else:
             return("Connection not active")
 
     def pmac_init(self):
         """
-        Initializes the Pmac with the proper string, defined above the Gantry_Connectio class.
+        Initializes the Pmac with the proper string, defined above the Gantry_Connection class.
 
         :return:
         self.send_message(GPASCII)
@@ -201,17 +210,38 @@ class Gantry(Pmac_Shell):
         response = self.simple_output()
 
         """
-        response = self.send_receive(GPASCII)
-
-        if response != "STDIN Open for ASCII Input":
-            raise ValueError ("PMAC not ready. ")
-            self.isinit = False
-        elif response == "STDIN Open for ASCII Input":
-            self.isinit = True # Pmac is now ready for accepting input
+        self.send_message(GPASCII)
+        response = self.simple_output()
+        if response == right:
+            self.isinit = True
+            return(response)
         else:
+            return(response)
+        """self.rawoutput = None
+        while self.pmac_shell.recv_ready():  # there is space and scope here to add a timeout
+            if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
+                self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("ascii")
+                self.rawoutput += self.pmac_shell.recv(self.nbytes).decode("ascii")
+                self.rawoutput += self.pmac_shell.recv(self.nbytes).decode("ascii")
+        lines = self.rawoutput.split(delim)
+        response = lines
+        #print(response)
+        if response[-1] == right:
+            self.isinit = True  # Pmac is now ready for accepting input
+            return (response)"""
 
-            raise ValueError ("Wrong output")
+        """  
+        response[-1] != right:
+            #raise ValueError("Wrong output")
             print(response)
+            self.isinit = False
+            return(response)
+        elif response[-1] == right:
+            """
+
+    def pmac_close(self):
+        self.send_message(EOT)
+        self.isinit = False
 
     def set_echo(self):
         """
@@ -235,9 +265,9 @@ class Gantry(Pmac_Shell):
         :return:
         """
 
-        echo0 = send_receive("echo\n")
-        if echo0 == 0:
-            echo0 = send_receive("echo 1\n")
+        echo0 = self.send_receive("echo\n")
+        if echo0 == str(0):
+            echo0 = self.send_receive("echo 1\n")
             self.echo = echo0
         else:
             self.echo = str(1)
