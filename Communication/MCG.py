@@ -120,7 +120,7 @@ class Pmac_Shell():
             if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
                 self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("UTF-8")
         lines = self.rawoutput.split(delim)
-        return(str(lines[-2]))
+        return(str(lines[1]))
     def format_output(self):
         """
         Formats the output of a shell.recv()command.
@@ -144,10 +144,11 @@ class Pmac_Shell():
         :return:
         """
         if self.rawoutput is not None:  #checking that the attribute has been assigned seems sane.
-            self.textoutput = ""
-            for i in self.format_output():
-                self.textoutput +=  i
-                self.textoutput += "\n"
+            self.textoutput = []
+            if self.pmac_shell.recv_ready():
+                self.rawoutput = self.pmac_shell.recv(nbytes).decode("ascii")
+                lines = self.rawoutput.split(delim)
+            self.textoutput.extend(lines)
 
         else:
             self.textoutput = "Something went wrong with the connection"
@@ -192,7 +193,7 @@ class Gantry(Pmac_Shell):
                 if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
                     self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("UTF-8")
             lines = self.rawoutput.split(delim)
-            return (str(lines[-2]))
+            return (str(lines[1]))
 
             """output = self.simple_output()
             return(output)"""
@@ -228,9 +229,9 @@ class Gantry(Pmac_Shell):
         #print(response)
         if response[-1] == right:
             self.isinit = True  # Pmac is now ready for accepting input
-            return (response)"""
+            return (response)
 
-        """  
+        
         response[-1] != right:
             #raise ValueError("Wrong output")
             print(response)
