@@ -189,11 +189,10 @@ class Gantry(Pmac_Shell):
         """
         if self.alive is not False:
             self.send_message(message) # this sends the message down to the SSH connection
-            time.sleep(0.02)
-             # there is space and scope here to add a timeout
             self.receive_message()
+            alan = t.textoutput[1]
 
-            return (str(self.textoutput[-3]))
+            return (str(alan))
 
             """output = self.simple_output()
             return(output)"""
