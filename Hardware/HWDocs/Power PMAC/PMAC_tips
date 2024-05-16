@@ -1,0 +1,38 @@
+See the software Manual, it sits on the Github page.
+
+-> check hm, hmz, home and homez. :
+do not work unless the selectAxes=selectSOMETHING \requestHost=requestHome command pair has
+been issued.
+
+-> check there is some sw handle for air availability
+-> check jog command.
+	Very sophisticated. If one declares a j=0 position (wherever on the positioning of the system), then:
+	j=0 #sets the "zero" position for the move
+	#5j12348 #will jog motor 5 to 12348 motor units from j=0.
+	#5j:1000 #will jog motor 5 1000 units from the actual motor position.
+
+-> check if motor 1, 2 and 3 can be used as pitch/roll/Z via command line (i.e. as axis).
+yes they can, but via "cpx rapid abs" kinda line
+
+
+
+Motor[6].MaxPos=158000
+Motor[6].MinPos=-146000
+Motor[5].MinPos = -29000
+Motor[5].MaxPos = 1476000
+
+Motor[1].MinPos = 0
+Motor[1].MaxPos = 0
+Motor[2].MinPos = 0
+Motor[2].MaxPos = 0
+Motor[3].MinPos = 0
+Motor[3].MaxPos = 0
+Motor[4].MinPos = -62.5
+Motor[4].MaxPos = 242.5
+
+#5p will report position of motor 5, with respect to HomePos, i.e. as:
+	motor[5].Actpos - motor[5].Homepos
+
+
+-> can have multiple ssh sessions, the PMAC will answer to everyone, so perhaps consider
+2 connections, one for sending commands, the other for receiving outputs
