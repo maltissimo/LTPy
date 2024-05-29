@@ -121,7 +121,7 @@ class Motor():
 Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
     """
 
-    def __init__(self, motorID=9, ishomed = False, motorname = "", cs = 0, pmac_name ~ "", act_pos= 0.0, jogspeed 0.0, homepos = 0):
+    def __init__(self, motorID=9, ishomed = False, cs = 0, pmac_name = None, act_pos= 0.0, jogspeed = 0.0, homepos = 0):
         """
         Init function for the motor object. In the QSYS convention the RTT stage has 4 motors:
         1, 2 and 3 are combined together in motors A, B and Z providing Roll/Tip, Pitch/Tilt rotations and translation along
@@ -148,13 +148,13 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
         :param homepos: is the motor reference position after powerup and init (in motorunits).
         """
 
-        self.motorid = motorID # set by default to 9, as motor number 9 is not present on the machine.
+        self.motorId = motorID # set by default to 9, as motor number 9 is not present on the machine.
         # self.mode = mode
         # self.speed = speed
         self.ishomed = ishomed # refer to page 983 Motor[x].HomeComplete of PMAC Software reference Manual. Set to False for safety
-        self.motorname = "Motor_" + str(motorID)  # this is internal, and needed for comms with the Pmac. must be inited by user
+        #self.motorname = "Motor_" + str(self.motorID)  # this is internal, and needed for comms with the Pmac. must be inited by user
         self.cs = cs # this is the Coordinate System for each motor
-        self.pmac_name = self.motor_conv(self.motorname)
+        self.pmac_name = "Motor[" + str(self.motorId) + "]" # This would be Motor[xxx]
         self.jogspeed = jogspeed
         self.homepos = homepos
 
@@ -189,16 +189,14 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
         according to the QSYS convention specified above.
 
         :param axis: a string specifying the axis to be moved.
-        :return: an int value for the system of reference of the selected axis.
         """
         if axis == "X" or axis == "Y":
-            sr = str(3)
+            self.cs = str(3)
         elif axis == "Pitch" or axis == "pitch" or axis == "Roll" or axis == "roll" or axis == "Z":
-            sr = str(1)
+            self.cs = str(1)
         elif axis == "Rot" or axis == "rot" or axis == "rotation" or axis == "Rotation":
-            sr = str(2)
+            self.cs = str(2)
 
-        return (sr)
     @classmethod
     def axis_conversion(cls, axis):
         """
@@ -249,7 +247,7 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
         return (out)
 
 
-    def motor_conv(self, motorName):
+    def motor_conv(self, motorname):
         """
         This function converts the name of a motor to a Pmac compatible, i.e.
         Motor_i -> Motor[i]
@@ -258,7 +256,7 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
         :param motorName: the name of the motor to be converted into
         :return: the Pmac-Compatible name of the motor
         """
-        index = motorName[-1]
+        index = self.motorName[-1]
         self.pmac_name = motorName[:len(motorName) - 2] + "[" + index + "]"
         return (self.pmac_name)
 
