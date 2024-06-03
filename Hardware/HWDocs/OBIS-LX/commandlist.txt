@@ -1,0 +1,62 @@
+*IDN?											Laser Identification String
+*RST											None
+*TST?											<System Fault code>
+SYSTem:COMMunicate:HANDshaking					ON/OFF
+SYSTem:COMMunicate:HANDshaking?					Returns ON or OFF
+SYSTem:COMMunicate:PROMpt						ON/OFF
+SYSTem:COMMunicate:PROMpt?						Returns ON or OFF
+SYSTem:AUTostart								ON/OFF
+SYSTem:AUTostart?								Returns ON or OFF
+SYSTem:INFormation:AMODulation:TYPe   			1 or 2
+SYSTem:INFormation:AMODulation:TYPe?			1 or 2, for 50 Ohm or 2 kOhm respectively
+SYSTem:STATus?									Gets the status code in a HEX string (see Manual, page 42)
+SYSTem:FAULt?									Queries the fault(s) 
+SYSTem:INDicator:LASer							Turns ON or OFF the Laser indicator
+SYSTem:INDicator:LASer?							Returns ON or OFF
+SYSTem:ERRor:COUNt?								Integer count of error records stored (up to 20). See page 46 of Operator's manual part 3 for detailed description.
+SYSTem:ERRor:NEXT?								Next available error record
+SYSTem:ERRor:CLEar								Returns None
+SYSTem:INFormation:MODel?						Returns model name
+SYSTem:INFormation:MDATe?						Returns Manufacture date
+SYSTem:INFormation:CDATe?						Returns Calibration date
+SYSTem:INFormation:SNUMber?						Returns laser's serial number
+SYSTem:INFormation:PNUMber?						Returns the laser's manufacturer part number
+SYSTem:INFormation:FVERsion?					Returns the current firmware version
+SYSTem:INFormation:PVERsion?					Returns the current OBIS protocol version
+SYSTem:INFormation:WAVelength?					Returns Laser's wavelength, [nm]
+SYSTem:INFormation:POWer?						Returns Power rating [W]
+SYSTem:INFormation:TYPe?						DDL(Direct Diode Laser) or OPSL (Obis LS) or MASTER or OTHER
+SOURce:POWer:NOMinal?							<x.xxxx> String, [W]
+SOURce:POWer:LIMit:LOW?							<x.xxxx> String, [W]
+SOURce:POWer:LIMit:HIGH?						<x.xxxx> String, [W]
+SYSTem:INFormation:USER							Any info
+SYSTem:INFormation:USER?						Returns what's stored in the parameter
+SYSTem:INFormation:FCDate						Alphanumeric String
+SYSTem:INFormation:FCDate?						Alphanumeric String
+SYSTem:CYCLes?									Integer
+SYSTem:HOURs?									<x.xx> hours
+SYSTem:DIODe:HOURs?								<x.xx> hours
+SOURce:POWer:LEVel?								<x.xxxx> String, [W]
+SOURce:POWer:CURRent?							<x.xxxx> String, [A]
+SOURce:TEMPerature:BASeplate?					<x.xU>, where U is C of F
+SYSTem:LOCK?									Returns ON or OFF
+SOURce:AM:INTernal								CWP or CWC
+SOURce:AM:EXTernal								DIGITAL or ANALOG or MIXED or DIGSO or MIXSO	
+SOURce:AM:SOURce?								CWP or CWC or DIGITAL or ANALOG or MIXED or DIGSO or MIXSO
+SOURce:POWer:LEVel:IMMediate:AMPLitude 			<value>, [W]
+SOURce:POWer:LEVel:IMMediate:AMPLitude? 		<x.xxxxx>, [W]
+SOURce:AM:STATe									ON or OFF	
+SOURce:AM:STATe?								Returns ON or OFF
+SYSTem:CDRH										ON or OFF
+SYSTem:CDRH?									Returns ON or OFF
+SOURce:TEMPerature:APRobe						ON or OFF
+SOURce:TEMPerature:APRobe?						Returns ON or OFF
+SOURce:POWer:CALibration						None
+SOURce:POWer:UNCalibration						None
+SOURce:AModulation:BLANKing						ON or OFF
+SOURce:AModulation:BLANKing?					Returns ON or OFF
+SOURce:TEMPerature:PROTection:INTernal:HIGH?	<x.xU>, where U is C or F
+SOURce:TEMPerature:PROTection:INTernal:LOW?		<x.xU>, where U is C or F
+SOURce:TEMPerature:DIODe?						<x.xU>, where U is C or F
+SOURce:TEMPerature:DSETpoint?					<x.xU>, where U is C or F
+SOURce:TEMPerature:INTernal?					<x.xU>, where U is C or F

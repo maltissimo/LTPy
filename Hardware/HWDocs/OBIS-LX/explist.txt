@@ -1,0 +1,61 @@
+*IDN?		                                    Gets the laser's identification string
+*RST		                                    Causes a device to warm boot if implemented
+*TST?		                                    Runs a laser self-test procedure, if implemented
+SYSTem:COMMunicate:HANDshaking		            Toggles the system handshaking
+SYSTem:COMMunicate:HANDshaking?		            Queries the system handshaking
+SYSTem:COMMunicate:PROMpt		                Toggles the system command prompt
+SYSTem:COMMunicate:PROMpt?		                Queries the system command prompt
+SYSTem:AUTostart		                        Enables or disables the laser Auto Start feature
+SYSTem:AUTostart?		                        Queries the laser Auto Start feature
+SYSTem:INFormation:AMODulation:TYPe		        Sets the analog modulation type
+SYSTem:INFormation:AMODulation:TYPe?	        Queries the analog modulation type
+SYSTem:STATus?		                            Queries the system status
+SYSTem:FAULt?		                            Queries current system faults
+SYSTem:INDicator:LASer		                    Turn ON/OFF laser status indicator(s)
+SYSTem:INDicator:LASer?		                    Queries laser status indicator(s)
+SYSTem:ERRor:COUNt?		                        Queries the number of error records in the error queue
+SYSTem:ERRor:NEXT?		                        Queries the next error record(s) in the error queue
+SYSTem:ERRor:CLEar		                        Clears all error records in the error queue
+SYSTem:INFormation:MODel?		                Retrieves the model name of the laser
+SYSTem:INFormation:MDATe?		                Retrieves the manufacture date of the device
+SYSTem:INFormation:CDATe?		                Retrieves the calibration date of the device
+SYSTem:INFormation:SNUMber?		                Retrieves the serial number of the laser
+SYSTem:INFormation:PNUMber?		                Retrieves the manufacturer part number of the laser
+SYSTem:INFormation:FVERsion?		            Retrieves the current firmware version
+SYSTem:INFormation:PVERsion?		            Retrieves the current OBIS protocol version
+SYSTem:INFormation:WAVelength?		            Retrieves the wavelength of the laser
+SYSTem:INFormation:POWer?		                Retrieves the power rating of the laser
+SYSTem:INFormation:TYPe?		                Retrieves the device type
+SOURce:POWer:NOMinal?		                    Returns the nominal CW laser output power
+SOURce:POWer:LIMit:LOW?		                    Returns the minimum CW laser output power
+SOURce:POWer:LIMit:HIGH?		                Returns the maximum CW laser output power
+SYSTem:INFormation:USER		                    Enters and stores user-defined information
+SYSTem:INFormation:USER?		                Queries user-defined information
+SYSTem:INFormation:FCDate		                Enters and stores date of last field calibration
+SYSTem:INFormation:FCDate?		                Queries date of last field calibration
+SYSTem:CYCLes?		                            Returns the number of ON/OFF power cycles
+SYSTem:HOURs?		                            Returns the hours the laser has been powered on
+SYSTem:DIODe:HOURs?		                        Returns the hours the laser diode has operated
+SOURce:POWer:LEVel?		                        Returns the present output power of the laser
+SOURce:POWer:CURRent?		                    Returns the present output current of the laser
+SOURce:TEMPerature:BASeplate?		            Returns the present laser base plate temperature
+SYSTem:LOCK?		                            Returns the status of the system interlock
+SOURce:AM:INTernal		                        Sets the laser operating mode to internal CW
+SOURce:AM:EXTernal		                        Sets the laser operating mode to external modulation
+SOURce:AM:SOURce?		                        Queries the current operating mode of the laser
+SOURce:POWer:LEVel:IMMediate:AMPLitude	        Sets present laser power level
+SOURce:AM:STATe		                            Turns the laser ON or OFF
+SOURce:AM:STATe?		                        Queries the current laser emission status
+SYSTem:CDRH		                                Enables or disables the CDRH laser emission delay
+SYSTem:CDRH?		                            Queries the status of the CDRH laser emission delay
+SOURce:TEMPerature:APRobe		                Enables/disables temperature control of the laser diode
+SOURce:TEMPerature:APRobe?		                Queries temperature control of the laser diode
+SOURce:POWer:CALibration		                Starts a self-laser power calibration
+SOURce:POWer:UNCalibration		                Undoes the filed calibration
+SOURce:AModulation:BLANKing		                Enables/disables Blanking in Analog Modulation mode
+SOUR:AM:BLAN?		                            Queries present state of Analog Modulation Blanking
+SOURce:TEMPerature:PROTection:INTernal:HIGH?	Queries the high internal temperature limit settings
+SOURce:TEMPerature:PROTection:INTernal:LOW?		Queries the low internal temperature limit settings
+SOURce:TEMPerature:DIODe?		                Queries the present laser diode temperature
+SOURce:TEMPerature:DSETpoint?		            Queries the diode set point temperature
+SOURce:TEMPerature:INTernal?		            Queries the present internal laser temperature

@@ -1,0 +1,62 @@
+*IDN? Gets the laser's identification string 3-37
+*RST Causes a device to warm boot if implemented 3-38
+*TST? Runs a laser self-test procedure, if implemented 3-38
+SYSTem:COMMunicate:HANDshaking Toggles the system handshaking 3-41
+SYSTem:COMMunicate:HANDshaking? Queries the system handshaking 3-41
+SYSTem:COMMunicate:PROMpt Toggles the system command prompt 3-41
+SYSTem:COMMunicate:PROMpt? Queries the system command prompt 3-41
+SYSTem:AUTostart Enables or disables the laser Auto Start feature 3-41
+SYSTem:AUTostart? Queries the laser Auto Start feature 3-41
+SYSTem:INFormation:AMODulation:TYPe Sets the analog modulation type 3-42
+SYSTem:INFormation:AMODulation:TYPe? Queries the analog modulation type 3-42
+SYSTem:STATus? Queries the system status 3-42
+SYSTem:FAULt? Queries current system faults 3-43
+SYSTem:INDicator:LASer Turn ON/OFF laser status indicator(s) 3-44
+SYSTem:INDicator:LASer? Queries laser status indicator(s) 3-44
+SYSTem:ERRor:COUNt? Queries the number of error records in the error queue 3-45
+SYSTem:ERRor:NEXT? Queries the next error record(s) in the error queue 3-45
+SYSTem:ERRor:CLEar Clears all error records in the error queue 3-46
+SYSTem:INFormation:MODel? Retrieves the model name of the laser 3-47
+SYSTem:INFormation:MDATe? Retrieves the manufacture date of the device 3-47
+SYSTem:INFormation:CDATe? Retrieves the calibration date of the device 3-47
+SYSTem:INFormation:SNUMber? Retrieves the serial number of the laser 3-48
+SYSTem:INFormation:PNUMber? Retrieves the manufacturer part number of the laser 3-48
+SYSTem:INFormation:FVERsion? Retrieves the current firmware version 3-48
+SYSTem:INFormation:PVERsion? Retrieves the current OBIS protocol version 3-48
+SYSTem:INFormation:WAVelength? Retrieves the wavelength of the laser 3-49
+SYSTem:INFormation:POWer? Retrieves the power rating of the laser 3-49
+SYSTem:INFormation:TYPe? Retrieves the device type 3-49
+SOURce:POWer:NOMinal? Returns the nominal CW laser output power 3-49
+SOURce:POWer:LIMit:LOW? Returns the minimum CW laser output power 3-49
+SOURce:POWer:LIMit:HIGH? Returns the maximum CW laser output power 3-50
+SYSTem:INFormation:USER Enters and stores user-defined information 3-50
+SYSTem:INFormation:USER? Queries user-defined information 3-50
+SYSTem:INFormation:FCDate Enters and stores date of last field calibration 3-50
+SYSTem:INFormation:FCDate? Queries date of last field calibration 3-50
+SYSTem:CYCLes? Returns the number of ON/OFF power cycles 3-51
+SYSTem:HOURs? Returns the hours the laser has been powered on 3-51
+SYSTem:DIODe:HOURs? Returns the hours the laser diode has operated 3-51
+SOURce:POWer:LEVel? Returns the present output power of the laser 3-51
+SOURce:POWer:CURRent? Returns the present output current of the laser 3-51
+SOURce:TEMPerature:BASeplate? Returns the present laser base plate temperature 3-52
+SYSTem:LOCK? Returns the status of the system interlock 3-52
+SOURce:AM:INTernal Sets the laser operating mode to internal CW 3-53
+SOURce:AM:EXTernal Sets the laser operating mode to external modulation 3-53
+SOURce:AM:SOURce? Queries the current operating mode of the laser 3-53
+SOURce:POWer:LEVel:IMMediate:AMPLitude Sets present laser power level 3-53
+SOURce:POWer:LEVel:IMMediate:AMPLitude? Queries the the laser power level in watts 3-53
+SOURce:AM:STATe Turns the laser ON or OFF 3-54
+SOURce:AM:STATe? Queries the current laser emission status 3-54
+SYSTem:CDRH Enables or disables the CDRH laser emission delay 3-54
+SYSTem:CDRH? Queries the status of the CDRH laser emission delay 3-54
+SOURce:TEMPerature:APRobe Enables/disables temperature control of the laser diode 3-54
+SOURce:TEMPerature:APRobe? Queries temperature control of the laser diode 3-54
+SOURce:POWer:CALibration Starts a self-laser power calibration 3-55
+SOURce:POWer:UNCalibration Undoes the filed calibration 3-55
+SOURce:AModulation:BLANKing Enables/disables Blanking in Analog Modulation mode 3-55
+SOURce:AModulation:BLANKing? Queries present state of Analog Modulation Blanking 3-55
+SOURce:TEMPerature:PROTection:INTernal:HIGH? Queries the high internal temperature limit settings 3-55
+SOURce:TEMPerature:PROTection:INTernal:LOW? Queries the low internal temperature limit settings 3-55
+SOURce:TEMPerature:DIODe? Queries the present laser diode temperature 3-56
+SOURce:TEMPerature:DSETpoint? Queries the diode set point temperature 3-56
+SOURce:TEMPerature:INTernal? Queries the present internal laser temperature 3-57
