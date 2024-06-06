@@ -53,7 +53,7 @@ SOURce:TEMPerature:APRobe?		                Queries temperature control of the l
 SOURce:POWer:CALibration		                Starts a self-laser power calibration
 SOURce:POWer:UNCalibration		                Undoes the filed calibration
 SOURce:AModulation:BLANKing		                Enables/disables Blanking in Analog Modulation mode
-SOUR:AM:BLAN?		                            Queries present state of Analog Modulation Blanking
+SOURce:AModulation:BLANKing	?		            Queries present state of Analog Modulation Blanking
 SOURce:TEMPerature:PROTection:INTernal:HIGH?	Queries the high internal temperature limit settings
 SOURce:TEMPerature:PROTection:INTernal:LOW?		Queries the low internal temperature limit settings
 SOURce:TEMPerature:DIODe?		                Queries the present laser diode temperature

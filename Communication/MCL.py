@@ -20,11 +20,14 @@ from the command line.
 Main communication is via pyserial, through USB. The USB is connected to MC on the ttyACM0 port
 Info on OBIS Manual, part 3/
 
+
+It is  assumed here that, since the transfer is 9600 bps, the waiting time must be no less than 70ms, otherwise the
+answers comes back either empty or garbled.
 """
-import pyserial
+import serial
 import time
 
-PORT = "ttyACM0" # /dev/ttyACM0 port over which the OBIS is connnected to MC
+PORT = "/dev/ttyACM0" # /dev/ttyACM0 port over which the OBIS is connnected to MC
 ENDL = "\r\n"   # end of communication , carriage return + new line
 BAUD = 9600 # Baudrate for the communication
 
@@ -33,8 +36,8 @@ class SerialConn(serial.Serial):
     """
     Models a connection throug the pyserial interface from the MC to the OBIS remote.
     """
-    def __init__(self, port = None, baudrate = None, lastcommand, lastouput ):
-        super():__init__(port = PORT, baudrate = BAUD,
+    def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
+        super().__init__(port = PORT, baudrate = BAUD,
                          bytesize = serial.EIGHTBITS,
                          parity = serial.PARITY_NONE,
                          stopbits = serial.STOPBITS_ONE,
@@ -56,12 +59,12 @@ class SerialConn(serial.Serial):
         :param data: string to be written
         :return:
         """
+        # self.reset_input_buffer()
         command = str(data) + ENDL
         self.write(command.encode('ascii'))
         self.lastcommand = command
-
-       """
-       this below should go in usage, not in this method.
+        """
+        this below should go in usage, not in this method.
         try: 
             command = str(data) + ENDL
             self.write(command.encode('ascii'))
@@ -78,16 +81,19 @@ class SerialConn(serial.Serial):
         :param self:
         :return: output, a string for usage
         """
+        self.lastoutput = None
+        out = self.read_all().decode('ascii').strip()
+        output = out[:-3]
+        self.lastoutput = output.strip()
 
-        output = self.read_all().decode('ascii').strip()
-        self.lastoutput = output
-
-        return(output)
+        return(output.strip())
 
     def serialmessage(self, data):
 
-        self.serialread(data)
-        answer = self.serialread()
+        self.serialsend(data)
+        time.sleep(0.07)
 
-        return(answer)
+        return(self.serialread())
+
+
 

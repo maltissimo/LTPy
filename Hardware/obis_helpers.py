@@ -1,9 +1,9 @@
 import obis_commands
 import inspect
+
 """
 Here below some helper function, defining a dictionary which contains: 
 Python command      SCPI command        Short Explanation       Possible Values         Manual page
-
 
 A further function is used to output the Description of a command.
 The possible values are explained in the file commandslits.txt. The Obis_Commands.txt contains an extraction from the manual
