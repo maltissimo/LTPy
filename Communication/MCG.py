@@ -41,7 +41,7 @@ class Pmac_Shell():
         self.rawoutput = rawoutput # Initialize the output bytes buffer string as None
         self.textoutput = textoutput
 
-    def openssh(self ):
+    def openssh(self):
         """
            This functions connects to PMAC, setting the pmac_shell attribute to a shell of ssh class (ssh.invoke_shell())
            The ip is set to be the loopback interface by default, username and password are dummy values as well.
@@ -66,7 +66,9 @@ class Pmac_Shell():
         if pmac_shell.get_transport().is_active():
             self.pmac_shell = pmac_shell
             self.alive = True
-        else: return("Connection not active!!")
+        else:
+            self.alive = False
+            return("Connection not active!!")
     def close_connection(self):
         """
         this closes the connection to the Pmac, setting alive to False. Checks if the conection is to the PMAC or not, in order to send the correct "close" commannd.
@@ -74,7 +76,7 @@ class Pmac_Shell():
         :return:
 
         """
-        if self.password == "deltatau":
+        if self.username == "root":
 
             self.send_message(EOT) # sends the End of Transmission character sequence as specified above the class
 

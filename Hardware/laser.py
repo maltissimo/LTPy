@@ -1,4 +1,4 @@
-from Hardware import obis_commands
+from obis_commands import *
 from Communication.MCL import *
 
 
@@ -70,9 +70,9 @@ class Laser (SerialConn):
         system_ouput = self.serialmessage(isOUTPOWLEVEL)
         if abs(float(system_output) - float(self.pow_level)) < 3e-5:
             self.pow_level = system_ouput
-            self.cur_level = self.serialmessage(isOUTCURLEVEL)
+            self.cur_level = self.serialmessage(OUTCURLEVEL)
 
         else:
-            self.pow_level = original_power
+            self.pow_level = original_power # better leave it unchanged
 
 
