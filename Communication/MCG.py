@@ -97,48 +97,6 @@ class Pmac_Shell():
             message = message + "\n"
 
         self.pmac_shell.send(message)
-    """
-    def listen(self):
-        
-        This function returns a bytes output of whatever the shell passed as pararameter contains.
-
-        :param shell_connection: a paramiko active shell object
-        :param nbytes: number of bytes to be listened to, default is 512
-        :return output: a bytes object
-
-        self.rawoutput = None #set it to None every time the function is called.
-        while self.pmac_shell.recv_ready():  # there is space and scope here to add a timeout
-            if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
-                self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("UTF-8")
-    def simple_output(self ):
-        
-        This function produces a single string of output after a given command is issued. It is a combination of the
-        listen method with the format_output and receive_message methods.
-
-
-        :param nbytes: set to 1024 by default.
-        :return: a string, which should be usable for processing.
-        
-        self.rawoutput = None
-        while self.pmac_shell.recv_ready():  # there is space and scope here to add a timeout
-            if self.pmac_shell.recv_ready():  # must test for recv_ready() in order for the code not to hang!
-                self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("UTF-8")
-        lines = self.rawoutput.split(delim)
-        return(str(lines[1]))
-        
-    def format_output(self):
-        
-        Formats the output of a shell.recv()command.
-        :param bytes_buffer: output from the function listen
-
-        
-        lines = self.rawoutput.split(delim)
-        if not self.rawoutput.endswith(delim):
-            self.rawoutput = lines[-1]
-            lines = lines[:-1]
-        for line in lines:
-            yield line.rstrip()
-            """
     def receive_message(self):
         """
        sets the textouput property of self as an array of strings.
@@ -191,8 +149,9 @@ class Gantry(Pmac_Shell):
         """
         if self.alive is not False:
             self.send_message(message) # this sends the message down to the SSH connection
+            time.sleep(0.005)
             self.receive_message()
-            alan = t.textoutput[1]
+            alan = self.textoutput[1]
 
             return (str(alan))
 
@@ -207,13 +166,9 @@ class Gantry(Pmac_Shell):
         Initializes the Pmac with the proper string, defined above the Gantry_Connection class.
 
         :return:
-        self.send_message(GPASCII)
-        time.sleep(0.5)
-        response = self.simple_output()
-
         """
-        self.send_message("\n")
         self.send_message(GPASCII)
+        time.sleep(0.2) # this is needed in order for the data to be transmitted and read.
         self.receive_message()
         response = self.textoutput[-2]
         if response == right:
@@ -246,9 +201,9 @@ class Gantry(Pmac_Shell):
         echo0 = self.send_receive("echo\n")
         if echo0 == str(0):
             echo0 = self.send_receive("echo 1\n")
-            self.echo = echo0
-        else:
             self.echo = str(1)
+        else:
+            self.echo = str(0)
 
 """
 if __name__ == "__main__":

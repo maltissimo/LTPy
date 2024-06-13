@@ -1,5 +1,7 @@
+
 from Communication.MCG import Gantry as gc
 import numpy as np
+import time
 """
 These are some global definitions that may be useful during measurements. The values are taken 
 directly from the config file of the Gantry PMac. It can be found inside the 
@@ -58,39 +60,29 @@ class Initer():
     minus limit
     Once this is known, it creates an object of class Motor(see below) with the appropriate naming and properties.
     """
-    def __init__(self, connection = None):
-        if connection is None:
-            self.connection = gc() # Object of class Communication.MCG.Gantry
+    def __init__(self, connection):
+        self.connection = connection
 
-    def  motors(self):
+    def motors(self):
         """
         This method enquiries the PMAC to get the number of motors on the system. At this stage, only 15 motors are
         allowed at maximum. The Gantry at elettra has only 6, so there is ample space for further extension.
         :return: motors, an array with motor nr and its CS its pmac name [ CS, motornumber, motorname]
         """
         rawarray = []
-        motor = []
+        motors = []
         no_motor_index = []
-        for i in range (15):
+        for i in range (12):
             mess = '#'+str(i)+'->'
             self.connection.send_message(mess)
-            connection.textoutput = []
+            self.connection.textoutput = []
             time.sleep(0.01)
             self.connection.receive_message()
             rawarray.append(self.connection.textoutput[1]) # This initializes the array with all the outputs from interrogating the Pmac
 
-        for i in len(range(rawarray)):
-            motor.append(rawarray[i][1])
-            motor.append(rawarray[i][3])
-            motor.append(rawarray[i][-1])
-        motor1 = np.asarray(motor)
-        motors = motor1.reshape((int(len(motor)/3)),3)
-
-        for i in range (len(motors)):
-            if motors[i][-1] != str(0):
-                no_motor_index.append(i)
-
-        motors = np.delete(motors, no_motor_index, axis = 0) # This is the list of motors present on the System.
+        for i in range(len(rawarray)):
+            if rawarray [i][0] == "&":
+                motors.append([rawarray[i][1], rawarray[i][3], rawarray[i][-1]]) # This is the list of motors present on the System.
                                                             # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
         return(motors)
 
@@ -122,7 +114,7 @@ class Motor():
      Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
      """
 
-    def __init__(self, motorID=9, ishomed=False, motorname=None, cs=0, pmac_name= None, act_pos=0.0, jogspeed=0.0,
+    def __init__(self, connection, motorID=9, ishomed=False, motorname=None, cs=0, pmac_name= None, act_pos=0.0, jogspeed=0.0,
                  homepos=0):
         """ Init function for the motor object. In the QSYS convention the RTT stage has 4 motors:
          1, 2 and 3 are combined together in motors A, B and Z providing Roll/Tip, Pitch/Tilt rotations and translation along
@@ -139,6 +131,7 @@ class Motor():
          By default the object is initialized to a non-existing motor (nr 9)
          the others are set to defaults as it looks best this way from a safety perspective.
 
+         :param connection: a shell for communicating with the pmac.
          :param motorID: the ID (integer), allowed values from 1 to 6 for Elettra Gantry
          :param cs: Coordinate System in the Pmac Convention
          :param ishomed: flag to specify whether the motor has been homed or not. Refer to motor[x].HomeComplete.
@@ -150,25 +143,27 @@ class Motor():
          """
 
 
+        self.connection = connection # a shell, possibly active...
         self.motorID = motorID  # set by default to 9, as motor number 9 is not present on the machine.
         # self.mode = mode
         # self.speed = speed
-        self.ishomed = ishomed  # refer to page 983 Motor[x].HomeComplete of PMAC Software reference Manual. Set to False for safety
-        if motorname is not None:
-            self.motorname = motorname
-        else:
-            self.motorname = "Motor_" + str(motorID)  # this is internal, and needed for comms with the Pmac. must be inited by user
         self.cs = cs  # this is the Coordinate System for each motor
-        if cs != 0:
-            self.cs = (self.sr_check())
-        self.pmac_name = pmac_name
-        if pmac_name is not None:
+        # refer to page 983 Motor[x].HomeComplete of PMAC Software reference Manual. Set to False for safety
+        if motorID is None:
+            self.motorname = motorname
             self.pmac_name = pmac_name
-        else:
+            self.atc_pos = act_pos
+            self.jogspeed = jogspeed
+            self.homepos = homepos
+            self.ishomed = ishomed
+        elif motorID is not None:
+            self.motorname = "Motor_" + str(motorID)  # this is internal, and needed for comms with the Pmac. must be inited by use
             self.pmac_name = self.motor_conv()
-        self.atc_pos = act_pos
-        self.jogspeed = jogspeed
-        self.homepos = homepos
+        if self.pmac_name is not None:
+            self.ishomed = self.homecomplete()
+            self.act_pos = self.get_pos()
+            self.jogspeed = self.getjogspeed()
+            self.homepos = self.get_homepos()
 
     @classmethod
     def sr_check(cls, axis):
@@ -245,7 +240,7 @@ class Motor():
 
     def motor_conv(self):
         index = self.motorname[-1]
-        self.pmac_name = self.motorname[:len(self.motorname) - 2] + "[" + index + "]"
+        return (self.motorname[:len(self.motorname) - 2] + "[" + index + "]")
 
     def get_pos(self):
         """
@@ -254,8 +249,10 @@ class Motor():
 
         :return: ActPos, in motor units
         """
-        message = self.motor_conv(self.motorname) + ".ActPos"+ "\n"
-        self.act_pos = float(Communication.MCG.send_receive(message))
+        message = self.pmac_name + ".ActPos"+ "\n"
+        alan = float(self.connection.send_receive(message))
+        self.act_pos = alan
+        return(alan)
 
     def move_rel_one_axis (self, axis, speed, distance="0"):
         """
@@ -304,49 +301,48 @@ class Motor():
     def stop(self):
         pass
 
-    def ishomed(self):
+    def homecomplete(self):
         command = str(self.pmac_name) + ".HomeComplete"
-        result = int(gc.send_receive(command))
+        result = int(self.connection.send_receive(command))
         if result == 1:
             self.ishomed = True
         else:
             self.ishomed = False
-
-    def getpos(self):
-        command = str(self.pmac_name) + ".ActPos"
-        result = float(gc.send_receive(command))
         return(result)
 
-    def homepos(self):
+    def get_homepos(self):
         command = str(self.pmac_name) + ".HomePos"
-        result = float(gc.send_receive(command))
+        result = float(self.connection.send_receive(command))
         self.homepos = result
+        return (result)
 
     def setjogspeed(self, value):
-        old_speed = self.getspeed()
+        old_speed = self.getjogspeed()
         command = str(self.pmac_name) + ".jogspeed=" + str(value)
-        result = gc.send_receive(command)
-        if result != command:
+        result = self.connection.send_receive(command)
+        if result != value:
             self.jogspeed = old_speed
         else:
             self.jogspeed = value
 
     def getjogspeed(self):
-        command = str(self.pmac_name) +  ".jogspeed"
-        self.jogspeed = float(gc.send_receive(command))
+        command = str(self.pmac_name) + ".jogspeed"
+        alan = float(self.connection.send_receive(command))
+        self.jogspeed = alan
+        return(alan)
 
 
-class Move:
+"""class Move:
     @staticmethod
-    def one_axis(distance, motor = Motor()):
-        """
+    def one_axis(distance, motor = Motor(connection)):
+        
             See motor definition above!!!
             this method moves a single axis, by relative (inc), with rapid speed.
 
             :param motor: axis for movement, object of class Motor
             :param distance: length of motion
             :return: a string containing the move, to be passed to a shell for execution by the PPMAC
-            """
+            
 
         move = ""
         move += str(self.cs)
@@ -361,4 +357,4 @@ class Move:
         # The next lines are for debugging
         # print(command)
         # output = str("Move: " + command + " sent as requested")
-        return (move)
+        return (move)"""
