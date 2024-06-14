@@ -34,7 +34,7 @@ class GantryHelp():
         text += "\n"
         text += " Yaw           C          4             2                 degrees      Z rot, RTT around its axis"
         return(text)
-=
+
     def Motor(self):
 
         text ="\n"
@@ -50,6 +50,32 @@ class GantryHelp():
         text += " \n"
         text += " All motions are in linear mode, i.e. slow, by default, unless specified explicitly otherwise."
 
+        return(text)
+
+class MotorHelp():
+    """
+    Some tips for using the classes and methods provided in the Motors module
+
+    M.Altissimo 13th June 2024
+    """
+    def __init__(self):
+        pass
+
+    def usage(self):
+
+        text ="\n"
+        text +="Help for Motors Module Usage. \n"
+"
+        text += "\n"
+        text +="Motor class: \n"
+        text += "Models the motors, after the main parameters explained in the PMAC Software Refernce Manual\n"
+        text += "This class is intended for single motors, i.e. X,Y and Yaw. \n"
+        text += "\n"
+        text += "CompMotor class:\n"
+        text += "Models the composite motors, it's specific to Elettra's system (i.e. Q-SYS gantry, with that many motors)\n"
+        text += "\n"
+        text += "MotorUtil class: \n"
+        text += "Interrogates Pmac with regards to how many motors are present on the system\n
         return(text)
 
 
