@@ -40,6 +40,7 @@ shell.pmac_ip = "192.168.0.200"
 shell.openssh()
 
 print("SSH connection open: ", shell.alive)
+input("...waiting")
 
 #initing the PMAC correctly:
 #shell.send_receive("\n")
@@ -49,26 +50,26 @@ if shell.isinit == False:
     shell.pmac_init()
 
 print("status of pmac initialization: ", shell.isinit)
-wait = input()
+input("...waiting...")
 
 
 #print(shell.textoutput)
 shell.set_echo()
 
-"""print(shell.textoutput)
-wait = input()
-print(shell.send_receive("echo"))
-wait = input()"""
+print("setting echo: ", shell.echo)
+input("...waiting")
 
 """Part 2: testing the  MOTORS module"""
+print("testing the MOTORS module now.")
+print('\n')
 
-print("initializing motorlist...")
-initer = Initer(shell)
-mlist = initer.motors()
-print(mlist)
-print("initializing motorlist... Done")
-wait = input()
+print("Initing MotorUtil object util = MotorUtil(shell)...")
+print("\n")
+util = MotorUtil(shell)
+motorlist = util.motor()
 
-print("initializing test motor...")
-testM = Motor(shell, motorID = mlist[4][1], cs = mlist[4][0])
+print(motorList)
+input("...waiting")
+
+
 

@@ -47,9 +47,9 @@ Further to this, here below the motor definitions for the specific Gantry in use
 Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 
 """
-
+"""
 class Initer():
-    """
+   
     This class is designed to interrogate the PMAC about the number of motors and their respective CS's.
     The result of this is store in an 2D numpy array [[ CS, motornumber, motorname]]
     The array can be then traversed to get, for each valid motor of the PMAC:
@@ -64,8 +64,9 @@ class Initer():
     """
     
     MOVED THE CODE INTO THE MotorUtil class, seemed more reasonable
-    """
+    
    pass
+   """
 
 class Motor():
     """
