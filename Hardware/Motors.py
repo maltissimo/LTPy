@@ -61,7 +61,7 @@ class Initer():
     Once this is known, it creates an object of class Motor(see below) with the appropriate naming and properties.
     """
 
-    """
+"""
     
     MOVED THE CODE INTO THE MotorUtil class, seemed more reasonable
     
@@ -132,7 +132,7 @@ class Motor():
         # self.speed = speed
         self.cs = cs  # this is the Coordinate System for each motor
         # refer to page 983 Motor[x].HomeComplete of PMAC Software reference Manual. Set to False for safety
-        if motorID is None:
+        if self.motorID is None:
             self.motorname = motorname
             self.pmac_name = pmac_name
             self.atc_pos = act_pos
@@ -140,89 +140,22 @@ class Motor():
             self.homepos = homepos
             self.ishomed = ishomed
             self.real_pos = real_pos
-        elif motorID is not None:
-            self.motorname = "Motor_" + str(motorID)  # this is internal, and needed for comms with the Pmac
-            self.pmac_name = self.motor_conv()
+        elif self.motorID == str(4):
+            #if self.motorID == 4:
+            self.motorname = "C"
+        elif self.motorID == str(5):
+            #elif self.motorID == 5:
+            self.motorname = "X"
+        elif self.motorID == str(6):
+            #elif self.motorID == 6:
+            self.motorname = "Y"
+        self.pmac_name = "Motor[" + str(self.motorID) +"]"
         if self.pmac_name is not None:
             self.ishomed = self.homecomplete()
             self.act_pos = self.get_pos()
             self.jogspeed = self.getjogspeed()
             self.homepos = self.get_homepos()
-            self.real_pos = self.calc_real_pos()
-
-    @classmethod
-    def sr_check(cls, axis):
-        """
-        This checks the axis (X, Y, Z, Roll, etc) the user wants to move, and detects the System of Reference for the move
-        according to the QSYS convention specified above.
-
-        :param axis: a string specifying the axis to be moved.
-        :param cls: the class itself
-        :return: an int value for the system of reference of the selected axis.
-        """
-        axis = axis.lower()
-        if axis == "x" or axis == "y":
-            sr = str(3)
-        elif axis == "pitch" or axis == "roll" or axis == "z":
-            sr = str(1)
-        elif axis  == "rot" or axis == "rotation":
-            sr = str(2)
-
-        return (sr)
-
-    @classmethod
-    def speed_check(cls, speed):
-        """
-        this should output as default a linear, i.e.  a slow movement
-
-        :param cls: the class itself
-        :param speed: a string, either rapid or linear
-        :return: a string useful for composing a move
-        """
-        if speed in ["Rapid", "rapid", "fast", "Fast"]:
-            out = "rapid"
-        else:
-            out = "linear"
-        return out
-
-    @classmethod
-    def mode_check(cls, mode):
-        """
-        This should output inc as default, i.e. a relative move, avoiding the user sending a motor to the moon.
-        :param mode: a string, either abs or inc
-        :return: a string useful for composing a move
-        """
-        if mode in ["Absolute", "ABS", "absolute", "Abs", "abs"]:
-            out = "abs"
-        else:
-            out = "inc"
-        return out
-
-    @classmethod
-    def axis_conversion(cls, axis):
-        """
-        Converts axis as input by user back into Pmac-understandable format
-
-
-        :param cls: the class itself
-        :param axis: X, Y, Z, pitch, roll, rot
-        :return: X,Y, Z, A, B, C depending on the user choice
-        """
-        axis = str(axis).lower()
-        if axis =="x":
-            ret = "X"
-        elif axis == "y":
-            ret = "Y"
-        elif axis == "z":
-            ret = "Z"
-        elif axis == "pitch":
-            ret = "B"
-        elif axis == "roll":
-            ret = "A"
-        elif axis == "rot" or axis == "rotation" or axis == "yaw":
-            ret = "C"
-        return (ret)
-
+            self.real_pos = self.get_real_pos()
     def motor_conv(self):
         index = self.motorname[-1]
         return (self.motorname[:len(self.motorname) - 2] + "[" + index + "]")
@@ -239,57 +172,13 @@ class Motor():
         self.act_pos = alan
         return(alan)
 
-    def move_rel_one_axis (self, axis, speed, distance="0"):
-        """
-                See motor definition above!!!
-                This method outputs a command for moving ONE AXIS only. It is possible to move more than one axis i.e.
-                &1 cpx rapid abs A-1 B15 Z13400  but this will be implemented later
-                This is an "inc" move, i.e. relative.
-
-                :param axis: axis for motion
-                :param speed: linear (i.e. slow, pmac default) or rapid.
-                :param distance: distance of motion
-                :return: a string containing the move, to be passed to a shell for execution by the PPMAC
-                """
-        move = f'&{str(self.cs)} cpx {str(speed)} inc {self.axis_conversion(axis)}{distance}\n'
-
-        """move += str(self.cs)
-        move += "cpx "
-        move += str(speed)
-        move += " inc "
-        move += " "
-        move += self.axis_conversion(axis)
-        move += " "
-        move += str(distance)
-        move += "\n"
-        # The next lines are for debugging
-        # print(command)
-        # output = str("Move: " + command + " sent as requested")"""
-        return (move)
-
-    def move_abs_one_axis (self, axis, speed, coordinate="0"):
-        """
-                See motor definition above!!!
-                This method outputs a command for moving ONE AXIS only. It is possible to move more than one axis i.e.
-                &1 cpx rapid abs A-1 B15 Z13400  but this will be implemented later
-                This is an "inc" move, i.e. relative.
-
-                :param axis: axis for motion
-                :param speed: linear (i.e. slow, pmac default) or rapid.
-                :param distance: distance of motion
-                :return: a string containing the move, to be passed to a shell for execution by the PPMAC
-                """
-        move = f'&{str(self.cs)} cpx {str(speed)} abs  {self.axis_conversion(axis)}{coordinate}\n'
-
-        return(move)
-
-    def calc_real_pos(self):
+    def get_real_pos(self):
         """
         Calculates the motor position relative to the zero, i.e. the home pos.
         Motor[x].ActPos - Motor[X].HomePos
         :return: a float value, with the motor position.
         """
-        calc = self.act_pos - self.homepos
+        calc = self.get_pos() - self.homepos
         self.real_pos = calc
         return(calc)
 
@@ -370,7 +259,7 @@ class CompMotor():
         if connection.alive == False:
             raise ValueError("Connection to PMAC not active, inizialization impossible")
         self.pmac_name = pmac_name # must be inited by user, either A, B or Z.
-        if pmac_name is not "A" or "a" or "B" or "b" or "Z" or "z":
+        if pmac_name.lower() not in ["a", "b", "z"]:
             raise ValueError("The allowed names are only A, B or Z!")
         self.cs = cs
         if self.cs != 1:
@@ -382,22 +271,22 @@ class CompMotor():
         getpos = "&1 p"
         full = self.connection.send_receive(getpos)
         split = full.split()
-        if pmac_name is not None:
+        try:
             if self.pmac_name == "A":
                 pos = split[0][1:]
             elif self.pmac_name == "B":
                 pos = split[1][1:]
             elif self.pmac_name == "Z":
                 pos = split[2][1:]
-        else:
-            raise ValueError("MotorName not initialized correctly!! Must be either A, B or Z")
+        except ValueError:
+            print("MotorName not initialized correctly!! Must be either A, B or Z")
 
         self.real_pos = float(pos)
         return(float(pos))
 
     def homecomplete (self):
 
-        ret = self.connection.send_receive("Coord[" + self.cs + "].HomeComplete")
+        ret = self.connection.send_receive("Coord[" + str(self.cs) + "].HomeComplete")
         self.ishomed = ret
         return(ret)
 
@@ -432,10 +321,20 @@ class MotorUtil():
         """
         out = [5] * 3
         for i in range(3):
-            mess = "Coord[" + str(i+1) + "].HomeComplete
+            mess = "Coord[" + str(i+1) + "].HomeComplete"
             out[i] = self.connection.send_receive(mess)
         ret = all(el == out[0] for el in out)
         return (ret)
+
+    def homeGantry(self):
+        selectAxes = "selectAxes=SelectAll"
+        gohome = "requestHost=RequestHome"
+        self.connection.send_message(selectAxes)
+        self.conntection.send_message(gohome)
+        while not self.gantryHomed():
+            print("still homing...")
+            time.sleep(1)
+        print("system homed!")
 
     def motors(self):
         """
@@ -461,67 +360,71 @@ class MotorUtil():
                                                             # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
         return(motors)
 
-    def check_in_pos(self):
-        if self.motor is not None:
-            mess = "Coord[" + self.motor.cs + "].InPos" # Using the CS, as it's more versatile than addressing the single motor
-            out = self.connection.send_receive(mess)
-        else:
-            raise ValueError("No motors specified!")
-        return (out)
-
 
 class Move():
 
-    def __init__(self, connection, motor = None, compmotor = None, cs = 0, name = None, util = None, movecomplete = True):
+    def __init__(self, connection, motor = None, cs = 0, name = None, util = None, movecomplete = True):
         self.connection = connection
         if connection.alive == False:
             raise ValueError("Connection to PMAC not active, inizialization impossible")
-        self.motor = motor # object fo class Motor
-        self.compmotor = compmotor # object of class CompMotor
+        self.motor = motor # object fo class Motor or CompMotor
         self.cs = 0
         self.util = util # an object of class MotorUtil
         self.movecomplete = movecomplete
         self.name = name
-        if self.motor is not None:
-            self.cs = self.motor.cs()
-            self.name = self.motor.motorID
-            if self.motor.motorID <= 3:
+        if hasattr(self.motor, "motorID"):
+            self.cs = self.motor.cs
+            self.name = self.motor.motorname
+            if int(self.motor.motorID) <= 3:
                 raise Warning("Addressing single motors in the RTT stage, care must be taken!!")
-        elif self.compmotor is not None:
-            self.cs = self.compmotor.cs
-            self.name = self.compmotor.pmac_name
+        else:
+            self.cs = self.motor.cs
+            self.name = self.motor.pmac_name
 
     def move_rel(self, speed = "rapid", distance = 0.0):
         #Composing the message  to be sent:
         move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
+        print(move)
         original_pos = self.motor.real_pos
         self.connection.send_message(move)
         self.movecomplete = False
+        print("moving")
         while not self.movecomplete:
             time.sleep(0.005)
-            self.movecomplete = self.util.check_in_pos()
+            self.movecomplete = self.check_in_pos()
+        print("move complete")
 
         #Updating values in the objects:
-        if self.motor is not None:
-            self.motor.act_pos = self.motor.get_pos
-        elif self.compmotor is not None:
-            self.compmotor.real_pos = self.compmotor.get_real_pos()
+        if hasattr(self.motor, "motorID"):
+            self.motor.act_pos = self.motor.get_pos()
+            #print(self.motor.act_pos)
+            self.motor.real_pos = self.motor.get_real_pos()
+        else:
+            self.motor.real_pos = self.motor.get_real_pos()
 
     def move_abs(self, speed = "rapid", coord =0.0):
         # Composing the message  to be sent:
-        move = f'&{str(self.cs)} cpx {(speed)} abs {self.name} {distance}\n'
+        move = f'&{str(self.cs)} cpx {(speed)} abs {self.name} {coord}\n'
+        print(move)
         original_pos = self.motor.real_pos
         self.connection.send_message(move)
         self.movecomplete = False
         while not self.movecomplete:
             time.sleep(0.005)
-            self.movecomplete = self.util.check_in_pos()
+            self.movecomplete = self.check_in_pos()
+        if hasattr(self.motor, "motorID"):
+            self.motor.act_pos = self.motor.get_pos()
+            self.motor.real_pos = self.motor.get_real_pos()
+        else:
+            self.motor.real_pos = self.motor.get_real_pos()
+
+    def check_in_pos(self):
         if self.motor is not None:
-            self.motor.act_pos = self.motor.get_pos
-        elif self.compmotor is not None:
-            self.compmotor.real_pos = self.compmotor.get_real_pos()
-
-
+            mess = "Coord[" + str(self.motor.cs) + "].InPos" # Using the CS, as it's more versatile than addressing the single motor. Also, same property for Motor and Compmotor.
+            out = self.connection.send_receive(mess)
+        else:
+            raise ValueError("No motors specified!")
+        return (out)
 
 
 
