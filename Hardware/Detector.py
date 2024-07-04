@@ -31,7 +31,7 @@ class Camera(py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())):
 
     def __str__(self):
         return f"Basler camera: Exposure time = {self.MyExpTime}, default nr of frames to grab = {self.grab_nr}, \
-                Image Height = {sel.height}, Image Widht = {self.width}"
+                Image Height = {self.height}, Image Widht = {self.width}"
 
     def getHeight(self):
         return(self.Height.Value)

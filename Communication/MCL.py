@@ -24,7 +24,8 @@ Info on OBIS Manual, part 3/
 It is  assumed here that, since the transfer is 9600 bps, the waiting time must be no less than 70ms, otherwise the
 answers comes back either empty or garbled.
 """
-import serial
+import serial, serial.tools.list_ports
+
 import time
 
 PORT = "/dev/ttyACM0" # /dev/ttyACM0 port over which the OBIS is connnected to MC
@@ -94,6 +95,10 @@ class SerialConn(serial.Serial):
         time.sleep(0.07)
 
         return(self.serialread())
+
+
+
+
 
 
 

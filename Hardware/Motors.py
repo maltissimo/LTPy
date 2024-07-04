@@ -334,7 +334,7 @@ class MotorUtil():
         selectAxes = "selectAxes=SelectAll"
         gohome = "requestHost=RequestHome"
         self.connection.send_message(selectAxes)
-        self.conntection.send_message(gohome)
+        self.connection.send_message(gohome)
         while not self.gantryHomed():
             print("still homing...")
             time.sleep(1)
