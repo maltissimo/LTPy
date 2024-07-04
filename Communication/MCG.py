@@ -139,6 +139,12 @@ class Gantry(Pmac_Shell):
         self.echo = echo  # this has to be checked and initialized to the value on the PMAC. Must be 1 to avoid echoing of command issued to PMAC
         self.isinit = isinit # Set to False for safety reasons.
 
+    def __str__(self):
+        """
+        this should give all the info to the factory class in Control Center.
+        """
+        return f"Gantry: IP = {self.pmac_ip}, username = {self.username}, password = {self.password}, alive = {self.alive}, echo = {self.echo}, isinit = {self.isinit}"
+
     def send_receive(self, message):
         """
         This function compounds the send_message and the simple_output methods of the Pmac_Shell class. This function is

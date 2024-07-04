@@ -267,6 +267,10 @@ class CompMotor():
         self.real_pos = self.get_real_pos()
         self.ishomed = self.homecomplete()
 
+    def __str__(self):
+        return f"Composite motor: connection = {self.connection}, pmac name = {self.pmac_name}, coordinate system = {self.cs},\
+               real position = {self.real_pos}, home completed = {self.ishomed}"
+
     def get_real_pos(self):
         getpos = "&1 p"
         full = self.connection.send_receive(getpos)

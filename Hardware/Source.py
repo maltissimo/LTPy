@@ -1,4 +1,4 @@
-from obis_commands import *
+from Hardware.obis_commands import *
 from Communication.MCL import *
 
 
@@ -21,7 +21,7 @@ class Laser (SerialConn):
         if self.wlength == wlength:
             self.wlength = self.serialmessage(isWLENGTH)
 
-        if self.pow_level = pow_level:
+        if self.pow_level == pow_level:
             self.pow_level = self.serialmessage(isOUTPOWLEVEL)
 
         if self.cur_level == cur_level:
@@ -32,6 +32,10 @@ class Laser (SerialConn):
 
         if self.p_high_lim == p_high_lim:
             self.p_high_lim = self.serialmessage(isPOWHIGHLIM)
+
+    def __str__(self):
+        return f"Laser: Comms = {self.comms_on}, laser on ={self.is_on}, wavelength = {self.wlength}, power level = {self.power_level},\
+                current = {self.cur_level}, Power lower limit = {self.p_low_lim}, Power High Limit = {self.p_high_lim}"
 
     def turnON(self, pycommand):
         """
