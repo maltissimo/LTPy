@@ -3,8 +3,16 @@ from Communication.MCL import *
 
 
 class Laser (SerialConn):
-    def __init__(self, comms_on = 'OFF', is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
-        if self.comms_on == comms_on:
+    def __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
+        self.comms_on = comms_on
+        self.is_on = is_on
+        self.wlength = wlength
+        self.pow_level = pow_level
+        self.cur_level = cur_level
+        self.p_low_lim = p_low_lim
+        self.p_high_lim = p_high_lim
+
+        if self.comms_on == "OFF":
             if self.serialmessage(isHSHAKE) == 'OFF':
                 self.serialsend(self.turnON(HSHAKE))
                 if self.serialmessage(isHSHAKE) == 'ON':
