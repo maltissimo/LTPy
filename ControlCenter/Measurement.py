@@ -87,7 +87,7 @@ class Measurement():
             #Result for this position:
             self.results += self.get_all_motor_pos()
             self.results += step_result
-            self.xmove.move_rel(self.step)
+            self.xmove.move_rel(distance = self.step)
     def centroid(self, ndarray):
         centroid = ndimage.center_of_mass(ndarray)
         return(centroid)

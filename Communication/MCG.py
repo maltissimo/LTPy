@@ -140,7 +140,7 @@ class Gantry(Pmac_Shell):
         self.isinit = isinit # Set to False for safety reasons.
 
     def __str__(self):
-        """
+        """"
         this should give all the info to the factory class in Control Center.
         """
         return f"Gantry: IP = {self.pmac_ip}, username = {self.username}, password = {self.password}, alive = {self.alive}, echo = {self.echo}, isinit = {self.isinit}"
