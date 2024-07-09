@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout,
 from PyQt5.QtCore import QTimer
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
+import sys
 class CamViewer(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -26,6 +26,7 @@ class CamViewer(QMainWindow):
         layout = QVBoxLayout()
         layout.addWidget(self.canvas)
         layout.addWidget(self.start_grabbing)
+        layout.addWidget(self.stop_grabbing)
 
         container = QWidget()
         container.setLayout(layout)
@@ -45,11 +46,11 @@ class CamViewer(QMainWindow):
         self.canvas.figure.clear()
         ax = self.canvas.figure.add_subplot(111)
         ax.imshow(data)
-        self.canvas(draw)
+        self.canvas.draw()
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    viewer = CameraViewer()
+    viewer = CamViewer()
     sys.exit(app.exec_())
 
 

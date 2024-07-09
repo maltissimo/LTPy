@@ -4,7 +4,7 @@ import numpy as np
 Contains all the info necessary for the communication between Mainc Computer (MC) and CMOS detector (Det)
 
 """
-class Camera(py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())):
+class Camera:
 
     """
     This class overloads some of hte methods provided inside pypylon. The available methods will be updated as soon as
@@ -20,6 +20,9 @@ class Camera(py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())):
     """
 
     def __init__(self, MyExpTime = 6, minexptime = 0, maxexptime = 0,  grab_nr = 10, isopen = False, height = 1400, width = 1400, gain = 0.0):
+
+        self.camera= py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())
+
         self.MyExpTime = MyExpTime # set to 6 µseconds
         self.minexptime = minexptime
         self.maxexptime = maxexptime
@@ -68,16 +71,17 @@ class Camera(py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())):
         return(myimage)
 
     def grabdata(self):
-        img_sum = np.zeros(self.height, self.width, dtype = np.uint16)
-        self.StartGrabbing(self.grab_nr)
-        while self.IsGrabbing():
-            with self.RetrieveResult(1000) as res: # the 1000 is the timeout in ms.
-                if res.GrabSucceded():
+        img_sum = np.zeros((self.height, self.width), dtype = np.uint16)
+        self.camera.StartGrabbingMax(100 * self.grab_nr)
+        self.camera.StopGrabbing()
+        while self.camera.IsGrabbing():
+            with self.camera.RetrieveResult(1000) as res: # the 1000 is the timeout in ms.
+                if res.camera.GrabSucceded():
                     img = res.Array
                     img_sum += img
                 else:
                     raise RuntimeError("Grab Failed")
-        self.StopGrabbing()
+        self.camera.StopGrabbing()
 
         return(img_sum)
 
