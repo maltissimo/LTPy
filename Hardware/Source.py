@@ -56,6 +56,7 @@ class Laser (SerialConn):
             return(pycommand)
         else:
             return(pycommand + ' ON')
+
     def turnOFF(self, pycommand):
         """
         Switches the property specified in pycommand OFF

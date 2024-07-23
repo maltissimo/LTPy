@@ -35,7 +35,7 @@ BAUD = 9600 # Baudrate for the communication
 
 class SerialConn(serial.Serial):
     """
-    Models a connection throug the pyserial interface from the MC to the OBIS remote.
+    Models a connection through the pyserial interface from the MC to the OBIS remote.
     """
     def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
         super().__init__(port = PORT, baudrate = BAUD,

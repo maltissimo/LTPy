@@ -335,10 +335,17 @@ class MotorUtil():
         gohome = "requestHost=RequestHome"
         self.connection.send_message(selectAxes)
         self.connection.send_message(gohome)
-        while not self.gantryHomed():
+
+        """while not self.gantryHomed():
             print("still homing...")
             time.sleep(1)
-        print("system homed!")
+        print("system homed!")"""
+
+    def resetGantry(self)
+        selectAxes = "selectAxes = SelectAll"
+        reset = "requestHost = RequestReset"
+        self.connection.send_message(selectAxes)
+        self.connection.send_message(reset)
 
     def motors(self):
         """
@@ -388,15 +395,15 @@ class Move():
     def move_rel(self, speed = "rapid", distance = 0.0):
         #Composing the message  to be sent:
         move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
-        print(move)
+        #print(move)
         original_pos = self.motor.real_pos
         self.connection.send_message(move)
         self.movecomplete = False
-        print("moving")
+        #print("moving")
         while not self.movecomplete:
             time.sleep(0.005)
             self.movecomplete = self.check_in_pos()
-        print("move complete")
+        #print("move complete")
 
         #Updating values in the objects:
         if hasattr(self.motor, "motorID"):
