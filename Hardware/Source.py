@@ -12,19 +12,18 @@ class Laser (SerialConn):
         self.p_low_lim = p_low_lim
         self.p_high_lim = p_high_lim
 
-        if self.comms_on == "OFF":
-            if self.serialmessage(isHSHAKE) == 'OFF':
-                self.serialsend(self.turnON(HSHAKE))
-                if self.serialmessage(isHSHAKE) == 'ON':
-                    self.comms_on = 'ON'
-            else:
-                self.comms = 'OFF'
+        if self.serialmessage(isHSHAKE) == 'OFF':
+            self.serialsend(self.turnON(HSHAKE))
+            if self.serialmessage(isHSHAKE) == 'ON':
+                self.comms_on = 'ON'
+        else:
+            self.comms = 'OFF'
 
-        if self.is_on == is_on:
-            if self.serialmessage(isLASON) == 'OFF':
-                self.serialsend(self.turnON(LASON))
-                if self.serialmessage(isLASON) == 'ON':
-                    self.is_on = "ON"
+        if self.serialmessage(isLASON) == 'OFF':
+            self.serialsend(self.turnON(LASON))
+            self.is_on = "ON"
+            if self.serialmessage(isLASON) == 'ON':
+                self.is_on = "ON"
 
         if self.wlength == wlength:
             self.wlength = self.serialmessage(isWLENGTH)
@@ -87,5 +86,11 @@ class Laser (SerialConn):
 
         else:
             self.pow_level = original_power # better leave it unchanged
+
+    def isON(self):
+        if self.serialmessage(isLASON)
+            return True
+        else:
+            return False
 
 

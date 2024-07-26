@@ -11,6 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QVBoxLayout
 from Graphics.BaseClasses import MyIndicator, MyLabel, MyPushButton, MyTextBrowser
 from Communication.MCL import *
+from ControlCenter.Control_Utilities import Utilities as Uti
 from PyQt5.QtCore import QTimer
 from Hardware.Source import *
 
@@ -18,10 +19,10 @@ class Ui_LaserController():
 
     def __init__(self):
         super().__init__()
-        self.source = Laser() # Instantiating a Source object for usage.
+        self.source = Uti.create("laser") # Instantiating a Source object for usage.
+        self.laserON = False
 
         self.setupUi()
-
 
         #This updates the labels every 200 ms.
         self.timer = QTimer(self)
@@ -159,14 +160,16 @@ class Ui_LaserController():
 
 
     def update_laser_label(self):
-        if self.source.serialmessage(isLASON):
+        if self.source.isON:
             self.laser_onoff.setText("ON")
             self.laser_onoff.turn_green()
+            self.laserON = True
         else:
             self.laser_onoff.setText("OFF")
+            self.laserON = False
 
     def toggle_laser(self):
-        if self.source.serialmessage(isLASON):
+        if self.source.isON:
             self.source.serialsend(self.source.turnON(LASON))
         else:
             self.source.serialsend(self.source.turnOFF(LASON))

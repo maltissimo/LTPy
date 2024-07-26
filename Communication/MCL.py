@@ -28,7 +28,7 @@ import serial, serial.tools.list_ports
 
 import time
 
-PORT = "/dev/ttyACM0" # /dev/ttyACM0 port over which the OBIS is connnected to MC
+PORT = None # /dev/ttyACM0 port over which the OBIS is connnected to MC
 ENDL = "\r\n"   # end of communication , carriage return + new line
 BAUD = 9600 # Baudrate for the communication
 
@@ -37,8 +37,13 @@ class SerialConn(serial.Serial):
     """
     Models a connection through the pyserial interface from the MC to the OBIS remote.
     """
-    def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
-        super().__init__(port = PORT, baudrate = BAUD,
+    def __init__(self, port = None, baudrate = BAUD):
+        if port is None:
+            port = self.detect_device()
+            if port is None:
+                raise Exception("Serial device not found!")
+
+        super().__init__(port = port, baudrate = baudrate,
                          bytesize = serial.EIGHTBITS,
                          parity = serial.PARITY_NONE,
                          stopbits = serial.STOPBITS_ONE,
@@ -51,6 +56,25 @@ class SerialConn(serial.Serial):
                          )
         self.lastcommand = None
         self.lastoutput = None
+
+    def detect_device(self, baudrate=BAUD, timeout=1):
+        """
+        Detects the serial device by attempting to open each available port and sending a test command.
+        """
+        ports = serial.tools.list_ports.comports()
+        for port in ports:
+            try:
+                ser = serial.Serial(port.device, baudrate=baudrate, timeout=timeout)
+                ser.write(b'*IDN?\r\n')  # Asks for identity. Obis should respond.
+                response = ser.read_all().decode('ascii').strip()
+                if response:  # Check if the device responds correctly
+                    print(f"Device found at {port.device}: {response}")
+                    ser.close()
+                    return port.device
+                ser.close()
+            except (serial.SerialException, UnicodeDecodeError):
+                pass
+        return None
 
     def serialsend (self, data):
         """

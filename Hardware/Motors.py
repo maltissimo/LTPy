@@ -156,6 +156,11 @@ class Motor():
             self.jogspeed = self.getjogspeed()
             self.homepos = self.get_homepos()
             self.real_pos = self.get_real_pos()
+
+    def __str__(self):
+        return f"Composite motor: connection = {self.connection}, motorID= {self.motorID}, coordinate system = {self.cs},\
+                real position = {self.real_pos}, home completed = {self.ishomed}"
+
     def motor_conv(self):
         index = self.motorname[-1]
         return (self.motorname[:len(self.motorname) - 2] + "[" + index + "]")
@@ -305,6 +310,9 @@ class MotorUtil():
             raise ValueError("Connection to PMAC not active, inizialization impossible")
         self.stillhoming = stillhoming
         self.motor = motor
+
+    def __str__(self):
+        return f"MotorUtilities: connection = {self.connection}"
 
     def homeinprog(self):
         """

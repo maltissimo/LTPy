@@ -12,6 +12,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from Graphics.BaseClasses import MyComboBox, MyIndicator, MyLabel, MyPushButton, MyQLineEdit, MyTextBrowser, MyTextEdit
 from Communication.MCG import *
 from Hardware.Motors import MotorUtil, Move, CompMotor, Motor
+from ControlCenter.Control_Utilities import Utilities
 
 
 class Ui_Motors(object):
@@ -19,7 +20,7 @@ class Ui_Motors(object):
     def __init__(self):
         super().__init__()
 
-        self.X = Motor()
+        """self.X = Motor()
         self.Y = Motor()
         self.yaw = Motor()
         self.motor1 = Motor()
@@ -34,15 +35,16 @@ class Ui_Motors(object):
         self.zmove = Move()
         self.pitchmove = Move()
         self.rollmove = Move()
-        self.yawmove = Move()
+        self.yawmove = Move()"""
 
         self.movesdict = {}
 
         self.username = None
         self.pmac_ip = None
         self.password = None
-        self.shell = Gantry() # Instantiating an object for communicating with the PMAC.
-        self.util = MotorUtil() #Instantiating an object of MotorUtil class
+        self.shell = Utilities.create("shell", pmac_ip = self.pmac_ip, username = self.username,
+                                      password = self.password)
+        self.util = Utilities.create(util, connection = self.shell) #Instantiating an object of MotorUtil class
         self.full_motorslist = []
         self.user_motorslits = []
         self.init_motors()
@@ -485,65 +487,39 @@ class Ui_Motors(object):
             QtWidgets.QMessageBox.warning(self, "ERROR!", str(e))
 
     def init_motors(self):
-        mylist = self.util.motors()
-        alan = len(mylist)
-
         try:
-            self.motor1.connection = self.shell
-            self.motor1.motorID  = mylist[0][1]
-            self.motor1.cs = mylist[0][0]
+            motor1 = self.Utilities.init_motors(connection = self.shell, motorID = 1, cs = 1)
+            motor2 = self.Utilities.init_motors(connection=self.shell, motorID=2, cs=1)
+            motor3 = self.Utilities.init_motors(connection=self.shell, motorID=3, cs=1)
+            yaw = self.Utilities.init_motors(connection= self.shell, motorID=4, cs=2)
+            X = self.Utilities.init_motors(connection= self.shell, motorID=5, cs=3)
+            Y = self.Utilities.init_motors(connection= self.shell, motorID=6, cs=3)
 
-            self.motor2.connection = self.shell
-            self.motor2.motorID = mylist[1][1]
-            self.motor2.cs = mylist[1][0]
+            Z = self.Utilities.init_motors(connection = self.shell, pmac_name = "Z", cs = 1)
+            pitch = self.Utilities.init_motors(connection = self.shell, pmac_name = "B", cs = 1)
+            roll = self.Utilities.init_motors(connection = self.shell, pmacn_name = "A", cs = 1)
 
-            self.motor3.connection = self.shell
-            self.motor3.motorID = mylist[2][1]
-            self.motor3.cs = mylise[2][0]
-
-            self.X.connection = self.shell
-            self.X.motorID = mylist[4][1]
-            self.X.cs = mylist [4][0]
-
-            self.Y.connection = self.shell
-            self.Y.motorID = mylist[5][1]
-            self.Y.cs = mylist[5][0]
-
-            self.yaw.connection = self.shell
-            self.yaw.motorID = mylist [3][1]
-            self.yaw.cs = mylist [3][0]
-
-            self.Z.connection = self.shell
-            self.Z.pmac_name = "Z"
-            self.Z.cs = 1
-
-            self.pitch.connection = self.shell
-            self.pitch.pmac_name = "B"
-            self.pitch.cs = 1
-
-            self.roll.connection = self.shell
-            self.roll.pmac_name = "A"
-            self.roll.cs = 1
 
             if self.shell is None or self.shell.alive == False or self.shell.isinit == False:
                 raise ValueError ("Pmac not connected or not correctly inited!")
 
-            QtWidgets.QMessageBox.warning(self, "All motors correctly initialized!")
             self.allMotors_inited = True
             self.full_motorslist = [
-                self.motor1,
-                self.motor2,
-                self.motor3,
-                self.yaw,
-                self.X,
-                self.Y,
-                self.Z,
-                self.pitch,
-                self.roll
+                motor1,
+                motor2,
+                motor3,
+                yaw,
+                X,
+                Y,
+                Z,
+                pitch,
+                roll
             ]
 
             self.user_motorslits = self.set_Motorlist()
             self.init_moves()
+
+            QtWidgets.QMessageBox.warning(self, "All motors correctly initialized!")
 
             #Filling the data for comboboxes:
 
@@ -553,32 +529,16 @@ class Ui_Motors(object):
 
         except ValueError as e:
             QtWidgets.QMessageBox.warning(self, "ERROR!". str(e))
+        return(X, Y, Z, pitch, roll, yaw, motor1, motor2, motor3)
 
     def init_moves(self):
         try:
-            self.xmove.connection = self.shell
-            self.xmove.motor = self.X
-            self.move.util = self.util
-
-            self.ymove.connection = self.shell
-            self.ymove.motor = self.Y
-            self.ymove.util = self.util
-
-            self.zmove.connection = self.shell
-            self.zmove.motor = self.Z
-            self.zmove.util = util
-
-            self.pitchmove.connection = self.shell
-            self.pitchmove.motor = self.pitch
-            self.pitchmove.util = self.util
-
-            self.rollmove.connection = self.shell
-            self.rollmove.motor = self.roll
-            self.rollmove.util = self.util
-
-            self.yawmove.connection = self.shell
-            self.yawmove.motor = self.yaw
-            self.yawmove.util = self.util
+            xmove = self.Utilities.init_moves(connection = self.shell, X)
+            ymove = self.Utilities.init_moves(connection=self.shell,  Y)
+            zmove = self.Utilities.init_moves(connection = self.shell, Z)
+            pitchmove = self.Utilities.init_moves(connection = self.shell, pitch)
+            rollmove = self.Utilities.init_moves(connection = self.shell, roll)
+            yawmove = self.Utilities.init_moves(connection = self.shell, yaw)
             if self.shell is None or self.shell.alive == False or self.shell.isinit == False:
                 raise ValueError("Pmac not connected or not correctly inited!")
             self.allMoves_inited = True
@@ -586,26 +546,27 @@ class Ui_Motors(object):
         except ValueError as e:
             QtWidgets.QMessageBox(self, "Error!", str(e))
 
-        QtWidgets.QMessageBox.warning(self, "All moves correctly initialized!")
+        QtWidgets.QMessageBox.warning(self, "Moves correctly initialized!")
+
 
 
     def update_dict(self):
-        self.movesdict = {"X": self.xmove,
-                          "Y": self.ymove,
-                          "Z": self.zmove,
-                          "pitch": self.pitchmove,
-                          "roll": self.rollmove,
-                          "yaw": self.yawmove
+        self.movesdict = {"X": .xmove,
+                          "Y": ymove,
+                          "Z": zmove,
+                          "pitch": pitchmove,
+                          "roll": rollmove,
+                          "yaw": yawmove
                           }
 
     def set_Motorlist(self):
         self.user_motorslits = [
-            self.X.motorname,
-            self.Y.motorname,
-            self.Z.pmac_name,
+            X.motorname,
+            Y.motorname,
+            Z.pmac_name,
             "pitch",
             "roll",
-            self.yaw.motorname
+            yaw.motorname
         ]
 
     def on_combobox_changed(self, index, MyLabel):
