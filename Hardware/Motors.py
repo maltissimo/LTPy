@@ -2,6 +2,7 @@
 from Communication.MCG import Gantry as gc
 import numpy as np
 import time
+import warnings
 """
 These are some global definitions that may be useful during measurements. The values are taken 
 directly from the config file of the Gantry PMac. It can be found inside the 
@@ -307,7 +308,7 @@ class MotorUtil():
     def __init__(self, connection, stillhoming = 1, motor = None):
         self.connection = connection # an active PMAC shell.
         if connection.alive == False:
-            raise ValueError("Connection to PMAC not active, inizialization impossible")
+            warnings.warn("Connection to PMAC not active, inizialization impossible")
         self.stillhoming = stillhoming
         self.motor = motor
 
@@ -349,7 +350,7 @@ class MotorUtil():
             time.sleep(1)
         print("system homed!")"""
 
-    def resetGantry(self)
+    def resetGantry(self):
         selectAxes = "selectAxes = SelectAll"
         reset = "requestHost = RequestReset"
         self.connection.send_message(selectAxes)

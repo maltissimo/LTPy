@@ -34,11 +34,12 @@ class Utilities():
         else:
             raise ValueError("Unknown object type!")
 
-    def init_motors(self, **kwargs):
+    @staticmethod
+    def motors_init( **kwargs):
 
         if kwargs.get("motorID"):
 
-            motor = Motors.motor(
+            motor = Motors.Motor(
                 connection = kwargs.get("connection"),
                 motorID = kwargs.get("motorID"),
                 cs = kwargs.get("cs")
@@ -51,18 +52,11 @@ class Utilities():
             )
         return motor
 
-    def init_moves(self, **kwargs, motor):
-        move = Move(connection=kwargs.get("connection"), motor=motor, util=util)
-        """xmove = Move(connection=shell, motor=motordict[4], util=util)
-        ymove = Move(connection=shell, motor=motordict[5], util=util)
-        zmove = Move(connection=shell, motor=motordict[6], util=util)
-        pitchmove = Move(connection=shell, motor=motordict[7], util=util)
-        rollmove = Move(connection=shell, motor=motordict[8], util=util)
+    @staticmethod
+    def init_moves(self, motor, **kwargs):
 
-        return(yawmove, xmove, ymove, zmove, pitchmove, rollmove)"""
+        move = Motors.Move(connection=kwargs.get("connection"), motor=motor, util=util)
+
         return move
-
-
-
 
 

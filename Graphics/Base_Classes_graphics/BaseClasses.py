@@ -53,9 +53,9 @@ class MyTextEdit(QTextEdit):
     enter_pressed = pyqtSignal()
 
     def __init__(self, parent = None, width = WIDTH, height = HEIGHT):
-        super().__init(parent)
+        super().__init__(parent)
         self.setFixedSize(width, height)
-        self.enter_pressed.connect(self.on_entered_pressed)
+        self.enter_pressed.connect(self.on_enter_pressed)
         self.initialize()
 
     def initialize(self):
@@ -66,7 +66,7 @@ class MyTextEdit(QTextEdit):
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
-        self.setInputMethodHints(Qt.ImhNone)
+        #self.setInputMethodHints(Qt.ImhNone)
         self.setPlainText(u"")
 
     def get_dimensions(self):
@@ -327,6 +327,9 @@ class MyIndicator(QLabel):
     def turn_green(self):
         self.setStyleSheet(("QLabel {bacground-color: green;"))
 
+    def turn_red(self):
+        self.setStyleSheet(("QLabel {bacground-color: red;"))
+
 class UnitsLabel(QLabel):
     """ this is now showing only for µm and degrees. It can be expanded to add other units. """
 
@@ -347,7 +350,7 @@ class UnitsLabel(QLabel):
     def update_value(self, index):
         if 0 <= index <=2:
             self.setText("µm")
-        else if 2 < index <=5:
+        elif 2 < index <=5:
             self.setText("degrees")
         else:
             self.setText("")

@@ -88,7 +88,7 @@ class Laser (SerialConn):
             self.pow_level = original_power # better leave it unchanged
 
     def isON(self):
-        if self.serialmessage(isLASON)
+        if self.serialmessage(isLASON):
             return True
         else:
             return False

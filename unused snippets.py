@@ -1,4 +1,4 @@
-this is from Motors_GUI.py
+this is from Graphics.Base_Classes_graphics.Motors_GUI
 
 """ mylist = self.util.motors()
        alan = len(mylist)

@@ -1,0 +1,282 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MeasurementGUI</class>
+ <widget class="QMainWindow" name="MeasurementGUI">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1370</width>
+    <height>984</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true">MainWindow</string>
+  </property>
+  <property name="toolTip">
+   <string notr="true"/>
+  </property>
+  <property name="statusTip">
+   <string notr="true"/>
+  </property>
+  <property name="whatsThis">
+   <string notr="true"/>
+  </property>
+  <property name="accessibleName">
+   <string notr="true"/>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QTabWidget" name="Measurements">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>0</y>
+      <width>1351</width>
+      <height>801</height>
+     </rect>
+    </property>
+    <property name="toolTipDuration">
+     <number>-1</number>
+    </property>
+    <property name="currentIndex">
+     <number>2</number>
+    </property>
+    <widget class="QWidget" name="height_tab">
+     <attribute name="title">
+      <string>Height</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="Slopes_tab">
+     <attribute name="title">
+      <string>Slopes</string>
+     </attribute>
+    </widget>
+    <widget class="QWidget" name="cam_tab">
+     <attribute name="title">
+      <string>Camera</string>
+     </attribute>
+    </widget>
+   </widget>
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>800</y>
+      <width>1351</width>
+      <height>111</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="MyLabel" name="label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>161</width>
+       <height>16</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Measurement setup</string>
+     </property>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>140</x>
+       <y>40</y>
+       <width>127</width>
+       <height>49</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_2">
+      <item>
+       <widget class="MyQLineEdit" name="points_input"/>
+      </item>
+      <item>
+       <widget class="MyLabel" name="points_label">
+        <property name="text">
+         <string># of points</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget_2">
+     <property name="geometry">
+      <rect>
+       <x>270</x>
+       <y>40</y>
+       <width>127</width>
+       <height>49</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <widget class="MyQLineEdit" name="stepsize_input"/>
+      </item>
+      <item>
+       <widget class="MyLabel" name="stepsize_label">
+        <property name="text">
+         <string>Step Size (mm)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>127</width>
+       <height>49</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout">
+      <item>
+       <widget class="MyQLineEdit" name="length_input"/>
+      </item>
+      <item>
+       <widget class="MyLabel" name="length_label">
+        <property name="text">
+         <string>Length (mm)</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>410</x>
+       <y>50</y>
+       <width>261</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="MyPushButton" name="xStartPos">
+        <property name="text">
+         <string>Start X</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="MyPushButton" name="startButton">
+        <property name="text">
+         <string>Start</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="MyPushButton" name="stopButton">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </widget>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>1370</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionStart_Measurement"/>
+    <addaction name="actionSave"/>
+    <addaction name="separator"/>
+    <addaction name="actionQuit"/>
+   </widget>
+   <widget class="QMenu" name="menuHelp">
+    <property name="title">
+     <string>Help</string>
+    </property>
+    <addaction name="separator"/>
+    <addaction name="actionGantry_Help"/>
+    <addaction name="actionLaser_Help"/>
+    <addaction name="actionCamera_Help"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuHelp"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <widget class="QToolBar" name="toolBar">
+   <property name="windowTitle">
+    <string>toolBar</string>
+   </property>
+   <attribute name="toolBarArea">
+    <enum>BottomToolBarArea</enum>
+   </attribute>
+   <attribute name="toolBarBreak">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <action name="actionStart_Measurement">
+   <property name="text">
+    <string>Start Measurement</string>
+   </property>
+  </action>
+  <action name="actionSave">
+   <property name="text">
+    <string>Save </string>
+   </property>
+  </action>
+  <action name="actionGantry_Help">
+   <property name="text">
+    <string>Gantry Help</string>
+   </property>
+  </action>
+  <action name="actionLaser_Help">
+   <property name="text">
+    <string>Laser Help</string>
+   </property>
+  </action>
+  <action name="actionCamera_Help">
+   <property name="text">
+    <string>Camera Help</string>
+   </property>
+  </action>
+  <action name="actionQuit">
+   <property name="text">
+    <string>Quit</string>
+   </property>
+  </action>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">BaseClasses.py</header>
+  </customwidget>
+  <customwidget>
+   <class>MyQLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">BaseClasses.py</header>
+  </customwidget>
+  <customwidget>
+   <class>MyPushButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

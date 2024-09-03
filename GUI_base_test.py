@@ -9,7 +9,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-from Graphics.BaseClasses import MyGroupBox, MyLabel, MyPushButton, MyTextBrowser, MyTextEdit
+from Graphics.Base_Classes_graphics.BaseClasses import MyGroupBox, MyLabel, MyPushButton, MyTextBrowser, MyTextEdit
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
