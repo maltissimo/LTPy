@@ -4,14 +4,14 @@
  <widget class="QMainWindow" name="Motors">
   <property name="geometry">
    <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>654</width>
-    <height>495</height>
+       <x>0</x>
+       <y>0</y>
+       <width>635</width>
+       <height>432</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string notr="true">MainWindow</string>
+      <string notr="true">Motor Controller</string>
   </property>
   <property name="toolTip">
    <string notr="true"/>
@@ -32,7 +32,7 @@
       <x>10</x>
       <y>0</y>
       <width>610</width>
-      <height>381</height>
+         <height>321</height>
      </rect>
     </property>
     <property name="font">
@@ -55,12 +55,12 @@
      </attribute>
      <widget class="QFrame" name="motorsdisplay">
       <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>591</width>
-        <height>171</height>
-       </rect>
+          <rect>
+              <x>0</x>
+              <y>0</y>
+              <width>601</width>
+              <height>151</height>
+          </rect>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -68,87 +68,162 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>30</y>
-         <width>591</width>
-         <height>210</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="coord_display_layout">
-        <item row="0" column="0">
-         <widget class="MyLabel" name="x_label">
-          <property name="text">
-           <string>X motor</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="MyLabel" name="y_label">
-          <property name="text">
-           <string>Y motor</string>
-          </property>
-         </widget>
-        </item>
+         <widget class="QWidget" name="layoutWidget">
+             <property name="geometry">
+                 <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>601</width>
+                     <height>151</height>
+                 </rect>
+             </property>
+             <layout class="QGridLayout" name="coord_display_layout" rowstretch="0,1,0,1" rowminimumheight="0,32,0,32">
+                 <property name="leftMargin">
+                     <number>10</number>
+                 </property>
+                 <property name="topMargin">
+                     <number>10</number>
+                 </property>
+                 <property name="rightMargin">
+                     <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                     <number>10</number>
+                 </property>
+                 <property name="spacing">
+                     <number>15</number>
+                 </property>
+                 <item row="0" column="1">
+                     <widget class="MyLabel" name="y_label">
+                         <property name="text">
+                             <string>Y motor</string>
+                         </property>
+                         <property name="alignment">
+                             <set>Qt::AlignCenter</set>
+                         </property>
+                     </widget>
+                 </item>
         <item row="0" column="2">
-         <widget class="MyLabel" name="z_label">
-          <property name="text">
-           <string>Z motor</string>
-          </property>
-         </widget>
+            <widget class="MyLabel" name="z_label">
+                <property name="text">
+                    <string>Z motor</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                </property>
+            </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="MyTextBrowser" name="x_display"/>
-        </item>
-        <item row="1" column="1">
-         <widget class="MyTextBrowser" name="y_display"/>
-        </item>
-        <item row="1" column="2">
-         <widget class="MyTextBrowser" name="z_display"/>
-        </item>
+                 <item row="1" column="0">
+                     <widget class="MyTextBrowser" name="x_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
+                 <item row="1" column="1">
+                     <widget class="MyTextBrowser" name="y_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
+                 <item row="1" column="2">
+                     <widget class="MyTextBrowser" name="z_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
         <item row="2" column="0">
-         <widget class="MyLabel" name="pitch_label">
-          <property name="text">
-           <string>Pitch motor</string>
-          </property>
-         </widget>
+            <widget class="MyLabel" name="pitch_label">
+                <property name="text">
+                    <string>Pitch motor</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                </property>
+            </widget>
         </item>
         <item row="2" column="1">
-         <widget class="MyLabel" name="roll_label">
-          <property name="text">
-           <string>Roll motor</string>
-          </property>
-         </widget>
+            <widget class="MyLabel" name="roll_label">
+                <property name="text">
+                    <string>Roll motor</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                </property>
+            </widget>
         </item>
         <item row="2" column="2">
-         <widget class="MyLabel" name="yaw_label">
-          <property name="text">
-           <string>Yaw motor</string>
-          </property>
-         </widget>
+            <widget class="MyLabel" name="yaw_label">
+                <property name="text">
+                    <string>Yaw motor</string>
+                </property>
+                <property name="alignment">
+                    <set>Qt::AlignCenter</set>
+                </property>
+            </widget>
         </item>
-        <item row="3" column="0">
-         <widget class="MyTextBrowser" name="pitch_display"/>
-        </item>
-        <item row="3" column="1">
-         <widget class="MyTextBrowser" name="roll_display"/>
-        </item>
-        <item row="3" column="2">
-         <widget class="MyTextBrowser" name="yaw_display"/>
-        </item>
-       </layout>
+                 <item row="3" column="0">
+                     <widget class="MyTextBrowser" name="pitch_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
+                 <item row="3" column="1">
+                     <widget class="MyTextBrowser" name="roll_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
+                 <item row="3" column="2">
+                     <widget class="MyTextBrowser" name="yaw_display">
+                         <property name="sizePolicy">
+                             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+                                 <horstretch>0</horstretch>
+                                 <verstretch>0</verstretch>
+                             </sizepolicy>
+                         </property>
+                     </widget>
+                 </item>
+                 <item row="0" column="0">
+                     <widget class="MyLabel" name="x_label">
+                         <property name="text">
+                             <string>X motor</string>
+                         </property>
+                         <property name="alignment">
+                             <set>Qt::AlignCenter</set>
+                         </property>
+                     </widget>
+                 </item>
+             </layout>
       </widget>
      </widget>
      <widget class="QFrame" name="motoractions">
       <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
-        <width>591</width>
-        <height>171</height>
-       </rect>
+          <rect>
+              <x>0</x>
+              <y>150</y>
+              <width>601</width>
+              <height>141</height>
+          </rect>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -156,95 +231,113 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="MyLabel" name="Move_label">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>60</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Move</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="move_abs">
-       <property name="geometry">
-        <rect>
-         <x>400</x>
-         <y>50</y>
-         <width>141</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string notr="true"/>
-       </property>
-       <property name="accessibleName">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>Move Absolute</string>
-       </property>
-      </widget>
-      <widget class="QRadioButton" name="move_rel">
-       <property name="geometry">
-        <rect>
-         <x>400</x>
-         <y>80</y>
-         <width>111</width>
-         <height>21</height>
-        </rect>
-       </property>
-       <property name="toolTip">
-        <string notr="true"/>
-       </property>
-       <property name="accessibleName">
-        <string notr="true"/>
-       </property>
-       <property name="text">
-        <string>Move Relative</string>
-       </property>
-      </widget>
-      <widget class="MyPushButton" name="pushButton_2">
-       <property name="geometry">
-        <rect>
-         <x>220</x>
-         <y>120</y>
-         <width>113</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Move</string>
-       </property>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>60</y>
-         <width>371</width>
-         <height>80</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_2">
-        <item>
-         <widget class="MyComboBox" name="motor_selector"/>
-        </item>
-        <item>
-         <widget class="MyTextEdit" name="distance"/>
-        </item>
-        <item>
-         <widget class="MyLabel" name="units">
-          <property name="text">
-           <string>units</string>
-          </property>
+         <widget class="QWidget" name="layoutWidget">
+             <property name="geometry">
+                 <rect>
+                     <x>0</x>
+                     <y>20</y>
+                     <width>601</width>
+                     <height>121</height>
+                 </rect>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_4">
+                 <item>
+                     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
+                         <item>
+                             <widget class="MyLabel" name="Move_label">
+                                 <property name="text">
+                                     <string>Move</string>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item>
+                             <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,1,1">
+                                 <property name="sizeConstraint">
+                                     <enum>QLayout::SetFixedSize</enum>
+                                 </property>
+                                 <property name="topMargin">
+                                     <number>10</number>
+                                 </property>
+                                 <property name="rightMargin">
+                                     <number>0</number>
+                                 </property>
+                                 <property name="bottomMargin">
+                                     <number>10</number>
+                                 </property>
+                                 <item>
+                                     <widget class="MyComboBox" name="motor_selector"/>
+                                 </item>
+                                 <item>
+                                     <widget class="MyTextEdit" name="distance"/>
+                                 </item>
+                                 <item>
+                                     <widget class="MyLabel" name="units">
+                                         <property name="text">
+                                             <string>units</string>
+                                         </property>
+                                         <property name="alignment">
+                                             <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+                                         </property>
+                                     </widget>
+                                 </item>
+                             </layout>
+                         </item>
+                         <item>
+                             <widget class="MyPushButton" name="pushButton_2">
+                                 <property name="sizePolicy">
+                                     <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                         <horstretch>0</horstretch>
+                                         <verstretch>0</verstretch>
+                                     </sizepolicy>
+                                 </property>
+                                 <property name="baseSize">
+                                     <size>
+                                         <width>160</width>
+                                         <height>30</height>
+                                     </size>
+                                 </property>
+                                 <property name="accessibleName">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="text">
+                                     <string>Move</string>
+                                 </property>
+                             </widget>
+                         </item>
+                     </layout>
+                 </item>
+                 <item>
+                     <layout class="QVBoxLayout" name="verticalLayout_3">
+                         <item>
+                             <widget class="QRadioButton" name="move_abs">
+                                 <property name="toolTip">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="accessibleName">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="text">
+                                     <string>Move Absolute</string>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item>
+                             <widget class="QRadioButton" name="move_rel">
+                                 <property name="toolTip">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="accessibleName">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="text">
+                                     <string>Move Relative</string>
+                                 </property>
+                             </widget>
+                         </item>
+                     </layout>
+                 </item>
+             </layout>
          </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </widget>
     <widget class="QWidget" name="utilitieswidget">
@@ -265,7 +358,7 @@
        <rect>
         <x>10</x>
         <y>0</y>
-        <width>611</width>
+           <width>591</width>
         <height>171</height>
        </rect>
       </property>
@@ -275,19 +368,6 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="MyPushButton" name="connect">
-       <property name="geometry">
-        <rect>
-         <x>470</x>
-         <y>130</y>
-         <width>113</width>
-         <height>32</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
@@ -352,82 +432,102 @@
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>100</y>
-         <width>471</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <property name="leftMargin">
-         <number>5</number>
-        </property>
-        <property name="topMargin">
-         <number>5</number>
-        </property>
-        <property name="rightMargin">
-         <number>5</number>
-        </property>
-        <property name="bottomMargin">
-         <number>5</number>
-        </property>
-        <property name="horizontalSpacing">
-         <number>50</number>
-        </property>
-        <property name="verticalSpacing">
-         <number>10</number>
-        </property>
-        <item row="0" column="0">
-         <widget class="MyLabel" name="IP_label">
-          <property name="text">
-           <string>PMAC IP:</string>
-          </property>
+         <widget class="QWidget" name="">
+             <property name="geometry">
+                 <rect>
+                     <x>0</x>
+                     <y>100</y>
+                     <width>591</width>
+                     <height>71</height>
+                 </rect>
+             </property>
+             <layout class="QHBoxLayout" name="horizontalLayout_5">
+                 <item>
+                     <layout class="QGridLayout" name="gridLayout">
+                         <property name="leftMargin">
+                             <number>5</number>
+                         </property>
+                         <property name="topMargin">
+                             <number>5</number>
+                         </property>
+                         <property name="rightMargin">
+                             <number>5</number>
+                         </property>
+                         <property name="bottomMargin">
+                             <number>5</number>
+                         </property>
+                         <property name="horizontalSpacing">
+                             <number>50</number>
+                         </property>
+                         <property name="verticalSpacing">
+                             <number>10</number>
+                         </property>
+                         <item row="0" column="0">
+                             <widget class="MyLabel" name="IP_label">
+                                 <property name="text">
+                                     <string>PMAC IP:</string>
+                                 </property>
+                                 <property name="alignment">
+                                     <set>Qt::AlignCenter</set>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item row="0" column="1">
+                             <widget class="MyLabel" name="uname_label">
+                                 <property name="text">
+                                     <string>Username:</string>
+                                 </property>
+                                 <property name="alignment">
+                                     <set>Qt::AlignCenter</set>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item row="0" column="2">
+                             <widget class="MyLabel" name="pword_label">
+                                 <property name="text">
+                                     <string>Password:</string>
+                                 </property>
+                                 <property name="alignment">
+                                     <set>Qt::AlignCenter</set>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item row="1" column="0">
+                             <widget class="MyTextEdit" name="IP_field">
+                                 <property name="toolTip">
+                                     <string notr="true"/>
+                                 </property>
+                                 <property name="inputMethodHints">
+                                     <set>Qt::ImhNone</set>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item row="1" column="1">
+                             <widget class="MyTextEdit" name="uname_field"/>
+                         </item>
+                         <item row="1" column="2">
+                             <widget class="MyTextEdit" name="pword_field"/>
+                         </item>
+                     </layout>
+                 </item>
+                 <item>
+                     <widget class="MyPushButton" name="connect">
+                         <property name="text">
+                             <string>Connect</string>
+                         </property>
+                     </widget>
+                 </item>
+             </layout>
          </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="MyLabel" name="uname_label">
-          <property name="text">
-           <string>Username:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="MyLabel" name="pword_label">
-          <property name="text">
-           <string>Password:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="MyTextEdit" name="IP_field">
-          <property name="toolTip">
-           <string notr="true"/>
-          </property>
-          <property name="inputMethodHints">
-           <set>Qt::ImhNone</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="MyTextEdit" name="uname_field"/>
-        </item>
-        <item row="1" column="2">
-         <widget class="MyTextEdit" name="pword_field"/>
-        </item>
-       </layout>
-      </widget>
      </widget>
      <widget class="QFrame" name="motor_utilities">
       <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>180</y>
-        <width>611</width>
-        <height>171</height>
-       </rect>
+          <rect>
+              <x>10</x>
+              <y>170</y>
+              <width>591</width>
+              <height>111</height>
+          </rect>
       </property>
       <property name="frameShape">
        <enum>QFrame::StyledPanel</enum>
@@ -435,214 +535,279 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QLabel" name="mutil_label">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>10</y>
-         <width>131</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Motor Utilities</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="mutil_label_2">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>40</y>
-         <width>131</width>
-         <height>16</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Jog Speed</string>
-       </property>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>4</x>
-         <y>72</y>
-         <width>601</width>
-         <height>51</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_3">
-        <item>
-         <widget class="MyComboBox" name="motor_selector_2"/>
-        </item>
-        <item>
-         <widget class="MyQLineEdit" name="set_display">
-          <property name="inputMask">
-           <string notr="true"/>
-          </property>
+         <widget class="QWidget" name="layoutWidget">
+             <property name="geometry">
+                 <rect>
+                     <x>0</x>
+                     <y>0</y>
+                     <width>591</width>
+                     <height>122</height>
+                 </rect>
+             </property>
+             <layout class="QVBoxLayout" name="verticalLayout_6">
+                 <property name="spacing">
+                     <number>15</number>
+                 </property>
+                 <property name="topMargin">
+                     <number>10</number>
+                 </property>
+                 <property name="bottomMargin">
+                     <number>10</number>
+                 </property>
+                 <item>
+                     <widget class="QLabel" name="mutil_label">
+                         <property name="text">
+                             <string>Motor Utilities</string>
+                         </property>
+                     </widget>
+                 </item>
+                 <item>
+                     <widget class="QLabel" name="mutil_label_2">
+                         <property name="text">
+                             <string>Jog Speed</string>
+                         </property>
+                     </widget>
+                 </item>
+                 <item>
+                     <layout class="QHBoxLayout" name="horizontalLayout_3">
+                         <item>
+                             <widget class="MyComboBox" name="motor_selector_2"/>
+                         </item>
+                         <item>
+                             <widget class="MyQLineEdit" name="set_display">
+                                 <property name="inputMask">
+                                     <string notr="true"/>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item>
+                             <widget class="MyLabel" name="label">
+                                 <property name="text">
+                                     <string>units</string>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item>
+                             <widget class="MyPushButton" name="getspeed">
+                                 <property name="text">
+                                     <string>Get Speed</string>
+                                 </property>
+                             </widget>
+                         </item>
+                         <item>
+                             <widget class="MyPushButton" name="setspeed">
+                                 <property name="text">
+                                     <string>Set Speed</string>
+                                 </property>
+                             </widget>
+                         </item>
+                     </layout>
+                 </item>
+             </layout>
          </widget>
-        </item>
-        <item>
-         <widget class="MyLabel" name="label">
-          <property name="text">
-           <string>units</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyPushButton" name="getspeed">
-          <property name="text">
-           <string>Get Speed</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyPushButton" name="setspeed">
-          <property name="text">
-           <string>Set Speed</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
      </widget>
     </widget>
    </widget>
-   <widget class="MyPushButton" name="pushButton">
-    <property name="geometry">
-     <rect>
-      <x>270</x>
-      <y>400</y>
-      <width>71</width>
-      <height>33</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>160</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>STOP</string>
-    </property>
-   </widget>
-   <widget class="MyIndicator" name="sh_display">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>50</x>
-      <y>390</y>
-      <width>16</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel {background-color: red;}</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
-   <widget class="MyLabel" name="sh_label">
-    <property name="geometry">
-     <rect>
-      <x>21</x>
-      <y>420</y>
-      <width>95</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>95</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>System homed     </string>
-    </property>
-   </widget>
-   <widget class="MyLabel" name="pmac_label">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>420</y>
-      <width>88</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>95</width>
-      <height>16777215</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Pmac comms</string>
-    </property>
-   </widget>
-   <widget class="MyIndicator" name="pmac_display">
-    <property name="geometry">
-     <rect>
-      <x>550</x>
-      <y>390</y>
-      <width>16</width>
-      <height>17</height>
-     </rect>
-    </property>
-    <property name="maximumSize">
-     <size>
-      <width>32</width>
-      <height>32</height>
-     </size>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>14</pointsize>
-     </font>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel {background-color: red;}</string>
-    </property>
-    <property name="text">
-     <string/>
-    </property>
-   </widget>
+      <widget class="QFrame" name="statusframe">
+          <property name="geometry">
+              <rect>
+                  <x>10</x>
+                  <y>320</y>
+                  <width>611</width>
+                  <height>51</height>
+              </rect>
+          </property>
+          <property name="frameShape">
+              <enum>QFrame::StyledPanel</enum>
+          </property>
+          <property name="frameShadow">
+              <enum>QFrame::Raised</enum>
+          </property>
+          <widget class="MyPushButton" name="pushButton">
+              <property name="geometry">
+                  <rect>
+                      <x>270</x>
+                      <y>10</y>
+                      <width>71</width>
+                      <height>33</height>
+                  </rect>
+              </property>
+              <property name="maximumSize">
+                  <size>
+                      <width>160</width>
+                      <height>16777215</height>
+                  </size>
+              </property>
+              <property name="font">
+                  <font>
+                      <pointsize>14</pointsize>
+                  </font>
+              </property>
+              <property name="text">
+                  <string>STOP</string>
+              </property>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+              <property name="geometry">
+                  <rect>
+                      <x>0</x>
+                      <y>0</y>
+                      <width>101</width>
+                      <height>46</height>
+                  </rect>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_4">
+                  <property name="spacing">
+                      <number>-1</number>
+                  </property>
+                  <item>
+                      <widget class="MyIndicator" name="sh_display">
+                          <property name="enabled">
+                              <bool>true</bool>
+                          </property>
+                          <property name="sizePolicy">
+                              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                  <horstretch>0</horstretch>
+                                  <verstretch>0</verstretch>
+                              </sizepolicy>
+                          </property>
+                          <property name="maximumSize">
+                              <size>
+                                  <width>32</width>
+                                  <height>32</height>
+                              </size>
+                          </property>
+                          <property name="font">
+                              <font>
+                                  <pointsize>14</pointsize>
+                              </font>
+                          </property>
+                          <property name="layoutDirection">
+                              <enum>Qt::LeftToRight</enum>
+                          </property>
+                          <property name="styleSheet">
+                              <string notr="true">QLabel {background-color: red;}</string>
+                          </property>
+                          <property name="text">
+                              <string/>
+                          </property>
+                          <property name="alignment">
+                              <set>Qt::AlignCenter</set>
+                          </property>
+                      </widget>
+                  </item>
+                  <item>
+                      <widget class="MyLabel" name="sh_label">
+                          <property name="maximumSize">
+                              <size>
+                                  <width>95</width>
+                                  <height>16777215</height>
+                              </size>
+                          </property>
+                          <property name="font">
+                              <font>
+                                  <pointsize>14</pointsize>
+                              </font>
+                          </property>
+                          <property name="text">
+                              <string>System homed</string>
+                          </property>
+                      </widget>
+                  </item>
+              </layout>
+          </widget>
+          <widget class="QWidget" name="layoutWidget">
+              <property name="geometry">
+                  <rect>
+                      <x>520</x>
+                      <y>0</y>
+                      <width>91</width>
+                      <height>46</height>
+                  </rect>
+              </property>
+              <layout class="QVBoxLayout" name="verticalLayout_5">
+                  <item>
+                      <widget class="MyIndicator" name="pmac_display">
+                          <property name="sizePolicy">
+                              <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                                  <horstretch>0</horstretch>
+                                  <verstretch>0</verstretch>
+                              </sizepolicy>
+                          </property>
+                          <property name="maximumSize">
+                              <size>
+                                  <width>32</width>
+                                  <height>32</height>
+                              </size>
+                          </property>
+                          <property name="font">
+                              <font>
+                                  <pointsize>14</pointsize>
+                              </font>
+                          </property>
+                          <property name="styleSheet">
+                              <string notr="true">QLabel {background-color: red;}</string>
+                          </property>
+                          <property name="text">
+                              <string/>
+                          </property>
+                          <property name="alignment">
+                              <set>Qt::AlignCenter</set>
+                          </property>
+                      </widget>
+                  </item>
+                  <item>
+                      <widget class="MyLabel" name="pmac_label">
+                          <property name="maximumSize">
+                              <size>
+                                  <width>95</width>
+                                  <height>16777215</height>
+                              </size>
+                          </property>
+                          <property name="font">
+                              <font>
+                                  <pointsize>14</pointsize>
+                              </font>
+                          </property>
+                          <property name="text">
+                              <string>Pmac comms</string>
+                          </property>
+                      </widget>
+                  </item>
+              </layout>
+          </widget>
+      </widget>
+      <widget class="QWidget" name="">
+          <property name="geometry">
+              <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>2</width>
+                  <height>2</height>
+              </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_7"/>
+      </widget>
+      <widget class="QWidget" name="">
+          <property name="geometry">
+              <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>2</width>
+                  <height>2</height>
+              </rect>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_8"/>
+      </widget>
+      <zorder>statusframe</zorder>
+      <zorder>MotorTabs</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>654</width>
+        <width>635</width>
      <height>24</height>
     </rect>
    </property>
@@ -653,33 +818,33 @@
   <customwidget>
    <class>MyLabel</class>
    <extends>QLabel</extends>
-   <header location="global">Graphics.BaseClasses</header>
+      <header location="global">BaseClasses.py</header>
   </customwidget>
-  <customwidget>
-   <class>MyTextBrowser</class>
-   <extends>QTextBrowser</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
+     <customwidget>
+         <class>MyQLineEdit</class>
+         <extends>QLineEdit</extends>
+         <header location="global">BaseClasses.py</header>
+     </customwidget>
   <customwidget>
    <class>MyPushButton</class>
    <extends>QPushButton</extends>
    <header location="global">Graphics.BaseClasses</header>
   </customwidget>
-  <customwidget>
-   <class>MyIndicator</class>
-   <extends>QLabel</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
+     <customwidget>
+         <class>MyTextBrowser</class>
+         <extends>QTextBrowser</extends>
+         <header location="global">Graphics.BaseClasses</header>
+     </customwidget>
   <customwidget>
    <class>MyTextEdit</class>
    <extends>QTextEdit</extends>
-   <header location="global">Graphics.BaseClasses</header>
+      <header>Graphics.BaseClasses</header>
   </customwidget>
-  <customwidget>
-   <class>MyQLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
+     <customwidget>
+         <class>MyIndicator</class>
+         <extends>QLabel</extends>
+         <header location="global">Graphics.BaseClasses</header>
+     </customwidget>
   <customwidget>
    <class>MyComboBox</class>
    <extends>QComboBox</extends>

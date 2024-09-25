@@ -1,16 +1,19 @@
 import sys
+
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
+from PyQt5.QtWidgets import QMainWindow
+
+from ControlCenter.Control_Utilities import Utilities as Uti
 from Graphics.Base_Classes_graphics import Motors_GUI
 from Hardware.Motors import MotorUtil
-from ControlCenter.Control_Utilities import Utilities as Uti
 
 
-class MotorControls(QtWidgets.QApplication)
+class MotorControls(QMainWindow):
     def __init__(self):
         super().__init__()
 
-        #Create an instanse of the Motors.GUI class:
+        # Create an instance of the Motors.GUI class:
 
         self.gui = Motors_GUI()
         self.gui.setupUi(self)

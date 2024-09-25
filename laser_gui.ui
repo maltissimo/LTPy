@@ -4,10 +4,10 @@
  <widget class="QMainWindow" name="LaserController">
   <property name="geometry">
    <rect>
-    <x>0</x>
-    <y>0</y>
-    <width>468</width>
-    <height>235</height>
+       <x>0</x>
+       <y>0</y>
+       <width>464</width>
+       <height>224</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -202,25 +202,25 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>MyLabel</class>
-   <extends>QLabel</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
-  <customwidget>
-   <class>MyTextBrowser</class>
-   <extends>QTextBrowser</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
-  <customwidget>
-   <class>MyPushButton</class>
-   <extends>QPushButton</extends>
-   <header location="global">Graphics.BaseClasses</header>
-  </customwidget>
-  <customwidget>
-   <class>MyIndicator</class>
-   <extends>QLabel</extends>
+    <customwidgets>
+        <customwidget>
+            <class>MyLabel</class>
+            <extends>QLabel</extends>
+            <header location="global">BaseClasses.py</header>
+        </customwidget>
+        <customwidget>
+            <class>MyPushButton</class>
+            <extends>QPushButton</extends>
+            <header location="global">Graphics.BaseClasses</header>
+        </customwidget>
+        <customwidget>
+            <class>MyTextBrowser</class>
+            <extends>QTextBrowser</extends>
+            <header location="global">Graphics.BaseClasses</header>
+        </customwidget>
+        <customwidget>
+            <class>MyIndicator</class>
+            <extends>QLabel</extends>
    <header location="global">Graphics.BaseClasses</header>
   </customwidget>
  </customwidgets>

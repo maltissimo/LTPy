@@ -1,7 +1,7 @@
+from PyQt5.QtCore import QSize, pyqtSignal
+from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox
 from PyQt5.QtWidgets import QVBoxLayout
-from PyQt5.QtGui import QFont
-from PyQt5.QtCore import QSize, pyqtSignal
 
 # General values:
 WIDTH = 80
@@ -57,6 +57,7 @@ class MyTextEdit(QTextEdit):
         self.setFixedSize(width, height)
         self.enter_pressed.connect(self.on_enter_pressed)
         self.initialize()
+        # self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
 
@@ -94,6 +95,7 @@ class MyLabel(QLabel):
         super().__init__(parent)
         self.setFixedSize(width, height)
         self.initialize()
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
         self.setMaximumSize(QSize(160, 20))
@@ -161,6 +163,7 @@ class MyPushButton(QPushButton):
     def __init__(self, parent = None, width =  1.5 * WIDTH, height = 1.6 * HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
         self.setMaximumSize(QSize(240, 40))
@@ -198,6 +201,7 @@ class MyTextBrowser(QTextBrowser):
     def __init__(self, parent = None, width = WIDTH, height = HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
@@ -227,6 +231,7 @@ class MyGroupBox(QGroupBox):
     def __init__(self, parent = None, width = QBOXWIDTH, height = QBOXHEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
         self.setMaximumSize(width, height)
@@ -252,6 +257,7 @@ class MyQLineEdit(QLineEdit):
     def __init__(self, parent = None, width = WIDTH, height = HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
@@ -277,6 +283,7 @@ class MyComboBox(QComboBox):
     def __init__(self, parent = None, width = 2 * WIDTH, height = HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
@@ -302,6 +309,7 @@ class MyIndicator(QLabel):
     def __init__(self, parent = None, width = 32, height = 32):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
@@ -337,6 +345,7 @@ class UnitsLabel(QLabel):
         super().__init__(parent)
         self.value_list = value_list
         self.setFixedSize(width, height)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):

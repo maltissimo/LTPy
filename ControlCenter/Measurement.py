@@ -1,8 +1,11 @@
 import datetime
-from Hardware import Source, Motors, Detector
-from Communication import MCG, MCL
-from ControlCenter import Control_Utilities as cu
+
+from PyQt5 import QtWidgets
 from scipy import ndimage
+
+from ControlCenter import Control_Utilities as cu
+from Graphics.Base_Classes_graphics import RT_Dataplot, Measurements_GUI,
+from Graphics.CameraViewer import *
 
 TODAY = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
@@ -10,7 +13,7 @@ TODAY = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
 
 # SSH shell to the PMAC
 factory = cu.Utilities()
-conn1 = factory.create("shell", pmac_ip= "192.168.0.200", username = "root", password = "deltatau")
+conn1 = factory.create("shell", pmac_ip="192.168.0.200", username="root", password="deltatau")
 conn1.openssh()
 
 #Laser:
@@ -25,15 +28,78 @@ motor1, motor2, motor3, yaw, X, Y, Z, pitch, roll, motordict = util.init_motors(
 
 yawmove, xmove, ymove, zmove, pitchmove, rollmove = factory.init_moves(motordict, conn1, util)
 
-#camera:
+# camera:
 camera = factory.create("camera")
 camera.opencam()
+
+
+class MeasurementControls(QtWidgets.QApplication):
+    """
+
+    this is largely for dealing with the graphics and connecting all the bits to the right places.
+
+    """
+
+    def __init__(self):
+        super().__init__()
+
+        # Create an instance of the Measurement_GUI class:
+        self.gui = Measurements_GUI()
+        self.gui.setupUI(self)
+
+        self.xStartPos = X.get_real_pos()
+
+        self.initHeightTab()
+        self.initSlopesTab()
+        self.initCameraTab() = CamViewer()
+
+        self.gui.connect.startButton(self.startMeasurement)
+        self.gui.connect.stopButton(self.stopMeasurement)
+
+        self.gui.connect.xStartPos(self.setXstartPos)
+
+    def startMeasurement(self):
+        pass
+
+    def stopMeasurement(self):
+        pass
+
+    def setXstartPos(self):
+        self.xStartPos = X.get_real_pos()
+
+    def initHeightTab(self):
+        self.gui.setTabText(0, "Height Measurements")
+
+        self.RTplot = RT_Dataplot(self)
+        self.RTplot.setLabels(left_label="Heights", left_units="µm")
+        self.RTplot.setLabels(bottom_label="X position", bottom_units="mm")
+        self.graphLayout.addWidget(self.RTplot)
+
+        self.HeightTabLayout = QtWidgets.QVBoxLayout(self.gui.height_tab)
+        self.HeightTabLayout.addWidget(self.RTplot)
+
+    def initSlopesTab(self):
+        self.gui.setTabText(1, "Slope Measurements")
+
+        self.RTplot = RT_Dataplot(self)
+        self.RTplot.setLabels(left_label="Slopes", left_units="µrad")
+        self.RTplot.setLabels(bottom_label="X position", bottom_units="mm")
+        self.graphLayout.addWidget(self.RTplot)
+
+        self.SlopesTabLayout = QtWidgets.QVBoxLayout(self.gui.slopes_tab)
+        self.SlopesTabLayout.addWidget(self.RTplot)
+
+    def initCameraTab(self):
+        self.gui.setTabText(2, "Camera")
+
+        self.CamTabLayout = QtWidgets.QVBoxLayout(self.gui.cam_tab)
+        self.CamTabLayout.addWidget(camera)
 
 
 # Now the fun begins:
 
 class Measurement():
-    def __init__(self, nr_of_points = 10, length = 1,
+    def __init__(self, nr_of_points=10, length=1,
                  xmotor, xmove,
                  ymotor, ymove,
                  zmotor, zmove,
@@ -44,12 +110,12 @@ class Measurement():
 
         self.nr_of_points = nr_of_points
         self.length = length  # length of measurement, units in m. Must be converted to µm, as that's the unit of X.
-        self.xmotor = xmotor
+        self.xmotor = X
         self.xmove = xmove
 
-        self.ymotor = ymotor
+        self.ymotor = Y
         self.ymove = ymove
-        self.zmotor = zmotor
+        self.zmotor = Z
         self.zmove = zmove
         self.pitch = pitch
         self.pitchmove = pitchmove
@@ -60,9 +126,9 @@ class Measurement():
 
         self.camera = camera
 
-        self.x_start_pos = self.xmotor.get_real_pos()
-        self.y_start_pos = self.ymotor.get_real_pos()
-        self.z_start_pos = self.zmotor.get_real_pos()
+        self.x_start_pos = self.X.get_real_pos()
+        self.y_start_pos = self.Y.get_real_pos()
+        self.z_start_pos = self.Z.get_real_pos()
         self.pitch_start_pos = self.pitch.get_real_pos()
         self.roll_start_post = self.roll.get_real_pos()
         self.yaw_start_pos = self.yaw.get_real_pos()

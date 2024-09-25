@@ -1,16 +1,17 @@
 import pyqtgraph as pg
-from ControlCenter import Timing
-from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
+from ControlCenter import Timing
+
+
 class RealTime_plotter(QWidget):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super(RealTime_plotter, self).__init(parent)
         self.layout = QVBoxLayout
         self.setLayout(self.layout)
 
-
         self.plotWidget = pg.PlotWidget()
+
         self.layout.addWidget(self.plotWidget)
 
         self.plotData = self.plotWidget.plot([],[], pen = pg.mkPend(color = 'b', width = 2))
@@ -38,12 +39,19 @@ class RealTime_plotter(QWidget):
         self.plotData.setData(self.xData, self.yData)"""
 
     def dummyUpdatePlot(self):
-
         """ this is for testing only"""
         import random
-        newX = random.uniform(0,100)
+        newX = random.uniform(0, 100)
         newY = random.uniform(0, 100)
         self.xData.append(newX)
         self.yData.append(newY)
 
         self.plotData.setdata(self.xData, self.yData)
+
+    def setLabels(self, left_label, left_units, bottom_label, bottom_units):
+        """
+        updates the axis labels according to the caller.
+        :return:
+        """
+        self.plotWidget.setLabel("left", left_label, left_units)
+        self.plotWidget.setLabel("bottom", bottom_label, bottom_units)
