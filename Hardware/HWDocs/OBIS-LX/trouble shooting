@@ -1,0 +1,10 @@
+If there is no power at the exit:
+checklist @ page 120 on Volume 1 of the OBIS manual.
+In particular, check:
+
+mylaser.serialmessage(isLASPOWLEVEL)
+
+if the response is 0:
+
+message = LASPOWLEVEL + "0.0500"
+mylaser.serialmessage(message)

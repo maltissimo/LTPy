@@ -19,28 +19,37 @@ class Camera:
 
     """
 
-    def __init__(self, MyExpTime = 6, minexptime = 0, maxexptime = 0,  grab_nr = 10, isopen = False, height = 1400, width = 1400, gain = 0.0):
+    def __init__(self): #,MyExpTime = 6, minexptime = 0, maxexptime = 0,  grab_nr = 10, isopen = False, height = 1400, width = 1400, gain = 0.0"""):
 
         self.camera= py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())
-
-        self.MyExpTime = MyExpTime # set to 6 µseconds
-        self.minexptime = minexptime
-        self.maxexptime = maxexptime
-        self.grab_nr = grab_nr
-        self.isopen = isopen
-        self.height = height
-        self.width = width
-        self.gain = gain
+        """if self.camera is not None: 
+            self.MyExpTime = self.camera.ExposureTime
+            self.minexptime = self.camera.ExposureTime.Min
+            self.maxexptime = self.camera.ExposureTime.Max
+            self.height = self.camera.Height.Value
+            self.width = self.camera.Width.Value
+            self.gain = self.camera.Gain
+        else:
+            self.MyExpTime = MyExpTime # set to 6 µseconds
+            self.minexptime = minexptime
+            self.maxexptime = maxexptime
+            self.grab_nr = grab_nr
+            self.height = height
+            self.width = width
+            self.gain = gain"""
+        """self.opencam"""
+        self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
+        self.frame = None
 
     def __str__(self):
-        return f"Basler camera: Exposure time = {self.MyExpTime}, default nr of frames to grab = {self.grab_nr}, \
-                Image Height = {self.height}, Image Widht = {self.width}"
+        return f"Basler camera: Exposure time = {self.camera.ExposureTime}, default nr of frames to grab = {self.grab_nr}, \
+                Image Height = {self.camera.Height.Value}, Image Width = {self.camera.Width.Valye}"
 
     def getHeight(self):
-        return(self.Height.Value)
+        return(self.camera.Height.Value)
 
     def getWidth(self):
-        return (self.Width.Value)
+        return (self.camera.Width.Value)
 
     def opencam(self):
         """
@@ -51,54 +60,49 @@ class Camera:
 
         :return:
         """
-        self.UserSetSelector ="Default"
-        self.UserSetLoad.Execute()
-        self.ExposureTime = self.ExposureTime.Min
-        self.open = self.Open()
-        self.isopen = self.IsOpen()
-        self.height = self.getHeight()
-        self.width = self.getWidth()
-        self.minexptime = self.ExposureTime.Min
-        self.maxexptime = self.ExposureTime.Max
+        self.camera.UserSetSelector = "Default"
+        self.camera.UserSetLoad.Execute()
+        self.camera.ExposureTime = 12
+        self.isopen = self.camera.IsOpen()
+        self.height = self.camera.getHeight()
+        self.width = self.camera.getWidth()
+        self.minexptime = self.camera.ExposureTime.Min
+        self.maxexptime = self.camera.ExposureTime.Max
 
     def closecam(self):
-        self.Close()
-        self.isopen = self.IsOpen()
+        self.camera.Close()
+        self.isopen = self.camra.IsOpen()
 
     def acquire_once(self):
-        res = self.GrabOne(1000)
+        res = self.camera.GrabOne(1000)
         myimage = res.GetArray() #this transforms res into and ndarray for further processing.
         return(myimage)
 
     def grabdata(self):
-        img_sum = np.zeros((self.height, self.width), dtype = np.uint16)
-        self.camera.StartGrabbingMax(100 * self.grab_nr)
-        self.camera.StopGrabbing()
-        while self.camera.IsGrabbing():
-            with self.camera.RetrieveResult(1000) as res: # the 1000 is the timeout in ms.
-                if res.camera.GrabSucceded():
-                    img = res.Array
-                    img_sum += img
-                else:
-                    raise RuntimeError("Grab Failed")
-        self.camera.StopGrabbing()
-
-        return(img_sum)
-
-    def set_exp_time(self, custom_time = 6 ):
+        if self.camera.IsGrabbing():
+            res = self.camera.RetrieveResult(5000, py.TimeoutHandling_ThrowException)
+            """ with camera.RetrieveResult(100) as res:"""
+            if res.GrabSucceeded():
+                self.frame = res.Array
+            res.Release()
+    def set_exp_time(self, custom_time):
         """
         Sets the Camera exposure time, units are in microseconds. Default is 6 µs, to be changed by user
 
         :param custom_time: Desired exposure time in microseconds
         :return:
         """
-        self.ExposureTime = custom_time
-        self.MyExpTime = self.ExposureTime()
+        if custom_time < 6:
+            custom_time = 6
+        elif custom_time > self.camera.ExposureTime.Max:
+            custom_time = self.camera.ExposureTime.Max
+        self.camera.ExposureTime = custom_time
+        #self.MyExpTime = self.camera.ExposureTime()
 
     def set_grab_nr(self, mynewgrabnumber = 10 ):
         self.grab_nr = mynewgrabnumber
 
     def set_gain(self, gain ):
-        self.Gain = gain
-        self.gain = self.Gain
+        self.camera.Gain = gain
+        #self.gain = self.camera.Gain
 

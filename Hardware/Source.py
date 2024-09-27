@@ -4,26 +4,24 @@ from Communication.MCL import *
 
 class Laser (SerialConn):
     def __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
+        super().__init__()
         self.comms_on = comms_on
-        self.is_on = is_on
+        self.is_on = self.serialmessage(isLASON)
         self.wlength = wlength
         self.pow_level = pow_level
         self.cur_level = cur_level
         self.p_low_lim = p_low_lim
         self.p_high_lim = p_high_lim
 
-        if self.serialmessage(isHSHAKE) == 'OFF':
-            self.serialsend(self.turnON(HSHAKE))
-            if self.serialmessage(isHSHAKE) == 'ON':
-                self.comms_on = 'ON'
+        if self.comms_on == "OFF":
+            response = self.serialmessage(isHSHAKE)
+            if response == 'OFF':
+                self.serialsend(self.turnON(HSHAKE))
         else:
+            self.comms_on = 'ON'
+        """else:
             self.comms = 'OFF'
-
-        if self.serialmessage(isLASON) == 'OFF':
-            self.serialsend(self.turnON(LASON))
-            self.is_on = "ON"
-            if self.serialmessage(isLASON) == 'ON':
-                self.is_on = "ON"
+"""
 
         if self.wlength == wlength:
             self.wlength = self.serialmessage(isWLENGTH)
@@ -51,10 +49,12 @@ class Laser (SerialConn):
         :param pycommand: a python-translated SCPI command
         :return:
         """
-        if pycommand[:2] == 'is':
-            return(pycommand)
+        if pycommand[-1] == '?':
+          command = (pycommand[:-1] + " ON")
         else:
-            return(pycommand + ' ON')
+            command = (pycommand + ' ON')
+        self.serialsend(command)
+
 
     def turnOFF(self, pycommand):
         """
@@ -63,10 +63,11 @@ class Laser (SerialConn):
         :param pycommand: a python-translated SCPI command
         :return:
         """
-        if pycommand[:2] == 'is':
-            return(pycommand)
+        if pycommand[-1] == '?':
+            command = (pycommand[:-1] + " OFF")
         else:
-            return(pycommand + ' OFF')
+            command = (pycommand + ' OFF')
+        self.serialsend(command)
 
     def set_power(self, power):
         """
@@ -86,11 +87,5 @@ class Laser (SerialConn):
 
         else:
             self.pow_level = original_power # better leave it unchanged
-
-    def isON(self):
-        if self.serialmessage(isLASON):
-            return True
-        else:
-            return False
 
 

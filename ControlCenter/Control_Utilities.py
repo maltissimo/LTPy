@@ -4,7 +4,7 @@ from Communication import MCG, MCL
 class Utilities():
 
 
-    def create(self, my_object, **kwargs):
+    def create( my_object, **kwargs):
         if my_object == "shell":
             shell = MCG.Gantry(
                 pmac_ip=kwargs.get("pmac_ip"),

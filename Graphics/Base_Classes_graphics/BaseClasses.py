@@ -320,7 +320,7 @@ class MyIndicator(QLabel):
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
-        self.setStyleSheet(("QLabel {bacground-color: red; color: white;"))
+        self.setStyleSheet("background-color: red; color: white;")
 
 
     def get_dimensions(self):
@@ -333,10 +333,10 @@ class MyIndicator(QLabel):
         super().setGeometry(rect)
 
     def turn_green(self):
-        self.setStyleSheet(("QLabel {bacground-color: green;"))
+        self.setStyleSheet("background-color: green")
 
     def turn_red(self):
-        self.setStyleSheet(("QLabel {bacground-color: red;"))
+        self.setStyleSheet("background-color: red")
 
 class UnitsLabel(QLabel):
     """ this is now showing only for µm and degrees. It can be expanded to add other units. """
