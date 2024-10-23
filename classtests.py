@@ -53,7 +53,7 @@ print("status of pmac initialization: ", shell.isinit)
 #input("...waiting...")
 
 
-#print(shell.textoutput)
+#print(shell.textoutput)s
 shell.set_echo()
 
 print("setting echo on Pmac: ", shell.echo)

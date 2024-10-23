@@ -1,41 +1,41 @@
-from PyQt5.QtCore import QSize, pyqtSignal
+from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox
+from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox, QSizePolicy
 from PyQt5.QtWidgets import QVBoxLayout
 
 # General values:
 WIDTH = 80
 HEIGHT = 20
-FONT = "Arial"
-FONTSIZE = 14
+FONT = "Avenir"
+FONTSIZE = 12
 QBOXWIDTH = 384
 QBOXHEIGHT = 216
 
 
 class MainWindow(object):
-    def setupUi(self, Motors):
-        Motors.setObjectName("CHANGE MY NAME")
-        Motors.resize(640, 480)
-        Motors.setWindowTitle("MainWindow")
-        Motors.setToolTip("")
-        Motors.setStatusTip("")
-        Motors.setWhatsThis("")
-        Motors.setAccessibleName("")
-        self.centralwidget = QtWidgets.QWidget(Motors)
+    def setupUi(self, MyMainWindow):
+        MyMainWindow.setObjectName("CHANGE MY NAME")
+        MyMainWindow.resize(640, 480)
+        MyMainWindow.setWindowTitle("MainWindow")
+        MyMainWindow.setToolTip("")
+        MyMainWindow.setStatusTip("")
+        MyMainWindow.setWhatsThis("")
+        MyMainWindow.setAccessibleName("")
+        self.centralwidget = QtWidgets.QWidget(MyMainWindow)
         self.centralwidget.setObjectName("centralwidget")
-        Motors.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(Motors)
+        MyMainWindow.setCentralWidget(self.centralwidget)
+        self.menubar = QtWidgets.QMenuBar(MyMainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 640, 24))
         self.menubar.setObjectName("menubar")
-        Motors.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(Motors)
+        MyMainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MyMainWindow)
         self.statusbar.setObjectName("statusbar")
-        Motors.setStatusBar(self.statusbar)
+        MyMainWindow.setStatusBar(self.statusbar)
 
-        self.retranslateUi(Motors)
-        QtCore.QMetaObject.connectSlotsByName(Motors)
+        self.retranslateUi(MyMainWindow)
+        QtCore.QMetaObject.connectSlotsByName(MyMainWindow)
 
-    def retranslateUi(self, Motors):
+    def retranslateUi(self, MyMainWindow):
         pass
 
 class MySubWindow(QWidget):
@@ -61,7 +61,7 @@ class MyTextEdit(QTextEdit):
 
     def initialize(self):
 
-        self.setMaximumSize(QSize(160, 20))
+        self.setMaximumSize(QSize(160, 32))
         self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
@@ -98,7 +98,7 @@ class MyLabel(QLabel):
         #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
-        self.setMaximumSize(QSize(160, 20))
+        self.setMaximumSize(QSize(160,32))
         self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
@@ -206,7 +206,7 @@ class MyTextBrowser(QTextBrowser):
 
     def initialize(self):
 
-        self.setMaximumSize(QSize(160, 20))
+        self.setMaximumSize(QSize(160, 32))
         self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
@@ -283,12 +283,13 @@ class MyComboBox(QComboBox):
     def __init__(self, parent = None, width = 2 * WIDTH, height = HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
+        self.setStyleSheet("QComboBox { qproperty-alignment: 'AlignCenter' }")
         #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
 
-        self.setMaximumSize(QSize(160, 20))
+        self.setMaximumSize(QSize(160, 32))
         self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
@@ -309,12 +310,13 @@ class MyIndicator(QLabel):
     def __init__(self, parent = None, width = 32, height = 32):
         super().__init__(parent)
         self.setFixedSize(width, height)
-        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
 
         self.setMaximumSize(QSize(32, 32))
+        self.setMinimumSize(QSize(32,32))
         self.setSizeIncrement(QSize(0, 0))
         font = QFont()
         font.setFamily(FONT)
@@ -349,7 +351,7 @@ class UnitsLabel(QLabel):
         self.initialize()
 
     def initialize(self):
-        self.setMaximumSize(QSize(160, 20))
+        self.setMaximumSize(QSize(160, 32))
         self.setSizeIncrement(QSize(0, 0))
         font = QFont()
         font.setFamily(FONT)

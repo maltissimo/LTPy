@@ -4,8 +4,10 @@ from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
+import Hardware.Motors
 from ControlCenter.Control_Utilities import Utilities as Uti
-from Graphics.Base_Classes_graphics import Motors_GUI
+from ControlCenter.Control_Utilities import Connection_initer as Conn_init
+from Graphics.Base_Classes_graphics.Motors_GUI import *
 from Hardware.Motors import MotorUtil
 
 
@@ -15,41 +17,92 @@ class MotorControls(QMainWindow):
 
         # Create an instance of the Motors.GUI class:
 
-        self.gui = Motors_GUI()
+        self.gui = Ui_Motors()
         self.gui.setupUi(self)
 
+        self.motor1 = None
+        self.motor2 = None
+        self.motor3 = None
+        self.X = None
+        self.Y = None
+        self.Z = None
+        self.pitch = None
+        self.roll = None
+        self.yaw = None
+
+        self.xmove = None
+        self.ymove = None
+        self.zmove = None
+        self.yawmove = None
+        self.pitchmove = None
+        self.rollmove = None
+
+        self.full_motorslist = []
+        self.motorname_list = []
         self.movesdict = {}
+        print(type(self.movesdict))
+        self.allMotors_inited = False
+        self.allMoves_inited = False
 
         self.username = None
         self.pmac_ip = "127.0.0.200" # adding a default for safety.
         self.password = None
-        self.shell = Uti.create(self, my_object="shell", pmac_ip=self.pmac_ip, username=self.username,
-                                      password=self.password)
-        self.util = Uti.create(self, my_object="util",
-                                     connection=self.shell)  # Instantiating an object of MotorUtil class
-        self.full_motorslist = []
-        self.user_motorslits = []
-        self.init_motors()
-        self.allMotors_inited = False
-        self.allMoves_inited = False
+        self.shell = Uti.create(my_object = "shell") # Instantiating an object of Shell class
+        print(self.shell.alive)
 
-        # Timer for updating:
-        self.timer = QTimer(self)
-        #self.timer.timeout.connect(self.update_positions) moved inside the update_all method
-        self.timer.start(50)  # updating every 200 ms
-        self.timer.timeout.connect(self.update_all) # connects to the update_all method
+        if self.shell.alive == False :
+            self.connecter = Conn_init()
+            self.connecter.get_credentials()
+            self.connecter.password_dialog()
+            self.pmac_ip = self.connecter.ip
+            self.shell.pmac_ip = self.pmac_ip
+            self.username = self.connecter.username
+            self.shell.username = self.username
+            self.password = self.connecter.password
+            self.shell.password =  self.password
+
+            # Initing shell and PMAC
+
+            print("Now connecting to PMAC...")
+
+            self.shell.openssh() # opening the channel to PMAC
+            print("Connected!")
+            print("Initing the PMAC input... ")
+            self.shell.pmac_init() # initing the PMAC
+            if not self.shell.isinit:
+                self.shell.pmac_init()
+
+            self.shell.set_echo()
+
+            # Finished setting the PMAC.
+            print(self.shell.status())
+            print("Done!")
+
+
+        self.util = Uti.create(my_object="util", connection = self.shell)  # Instantiating an object of MotorUtil class
+                                                        # self.shell and self.util have to be inited correctly.
+        # Assigning motors and moves:
+
+        self.init_motors()
+        self.set_motorname_list()
+        self.init_moves()
+
+        # since moves are all inited, calling the update_dict() method will simply update the self.movesict attribute:
+
+        self.update_dict()
+        #print(self.movesdict) this is for debugging
 
         #Connect the various bits in the UI:
 
-        self.gui.moveButton.clicked.connect(self.movemotor())
+        self.gui.pushButton_2.clicked.connect(self.movemotor)
         # This line here below connects to the PMAC.
-        self.gui.connect.clicked.connect(self.Connect2_Pmac())
+        self.gui.connect.clicked.connect(self.Connect2_Pmac)
 
         try:
             self.gui.ResetAll.clicked.connect(MotorUtil.resetGantry)
             if not self.shell.alive:
                 raise ConnectionError("No connection to PMAC")
-            QtWidgets.QMessageBox.warning("System reset!")
+            # QtWidgets.QMessageBox.warning("System reset!"   )
         except ConnectionError as e:
             QtWidgets.QMessageBox.warning(self, "Connection Error: ", str(e))
 
@@ -58,23 +111,33 @@ class MotorControls(QMainWindow):
             if not self.shell.alive:
                 raise ConnectionResetError("No connection to PMAC")
             self.gui.sh_display.turn_green()
-            QtWidgets.QMessageBox.warning("System homed!")
+            # QtWidgets.QMessageBox.warning("System homed!")
         except ConnectionError as e:
             QtWidgets.QMessageBox.warning(self, "Connection Error", str(e))
 
-        self.gui.stopButton.clicked.connect(self.stopall)
+        self.gui.pushButton.clicked.connect(self.stopall)
         self.gui.setspeed.clicked.connect(self.get_speed)
 
         self.gui.getspeed.clicked.connect(self.set_speed)
+
+        # Filling the data for comboboxes:
+
+        self.gui.motor_selector.addItems(self.movesdict.keys())
+        self.gui.motor_selector_2.addItems(self.motorname_list)
+
+        # Comboboxes behavior
 
         self.gui.motor_selector.currentIndexChanged.connect(self.update_units)
         self.gui.motor_selector_2.currentIndexChanged.connect(self.update_units)
         # Used twice, so that if a user changes in one tab, the other is automatically changed by the update_units method
 
-        self.gui.distance.returnPressed.connect(self.update_distance)
-        # TODO:
-        #       - update_all implementation
+        self.gui.units.setText("µm")
 
+        self.gui.distance.enter_pressed.connect(self.update_distance)
+        self.timer = QTimer(self)
+
+        self.timer.start(50)  # updating every 50 ms
+        self.timer.timeout.connect(self.update_all)  # connects to the update_all method
 
     def Connect2_Pmac(self):
         """
@@ -110,81 +173,97 @@ class MotorControls(QMainWindow):
             QtWidgets.QMessageBox.warning(self, "ERROR!", str(e))
 
     def init_motors(self):
-        try:
-            motor1 = Utilities.motors_init(connection = self.shell, motorID = 1, cs = 1)
-            motor2 = Utilities.motors_init(connection=self.shell, motorID=2, cs=1)
-            motor3 = Utilities.motors_init(connection=self.shell, motorID=3, cs=1)
-            yaw = Utilities.motors_init(connection= self.shell, motorID=4, cs=2)
-            X = Utilities.motors_init(connection= self.shell, motorID=5, cs=3)
-            Y = Utilities.motors_init(connection= self.shell, motorID=6, cs=3)
+        print("Initing Motor objects, standby...")
+        mylist = self.util.motors()
 
-            Z = Utilities.motors_init(connection = self.shell, pmac_name = "Z", cs = 1)
-            pitch = Utilities.motors_init(connection = self.shell, pmac_name = "B", cs = 1)
-            roll = Utilities.motors_init(connection = self.shell, pmacn_name = "A", cs = 1)
+        try:
+            self.motor1 = Uti.motors_init(connection = self.shell, motorID = mylist[0][1], cs= mylist[0][0])
+            self.motor2 = Uti.motors_init(connection=self.shell, motorID = mylist[1][1], cs = mylist[1][0])
+            self.motor3 = Uti.motors_init(connection=self.shell, motorID = mylist[2][1], cs = mylist[2][0])
+
+            self.yaw = Uti.motors_init(connection= self.shell, motorID = mylist[3][1], cs = mylist[3][0])
+            self.X = Uti.motors_init(connection= self.shell, motorID = mylist[4][1], cs=  mylist[4][0])
+            self.Y = Uti.motors_init(connection= self.shell, motorID = mylist[5][1], cs = mylist[5][0])
+
+            self.Z = Uti.motors_init(connection = self.shell, pmac_name = "Z", cs = 1)
+            self.pitch = Uti.motors_init(connection = self.shell, pmac_name = "B", cs = 1)
+            self.roll = Uti.motors_init(connection = self.shell, pmac_name = "A", cs = 1)
 
 
             if self.shell is None or self.shell.alive == False or self.shell.isinit == False:
-                raise ValueError ("Pmac not connected or not correctly inited!")
+
+                raise ValueError ("Trying to init motor, but Pmac not connected or not correctly inited!")
 
             self.allMotors_inited = True
             self.full_motorslist = [
-                motor1,
-                motor2,
-                motor3,
-                yaw,
-                X,
-                Y,
-                Z,
-                pitch,
-                roll
+                self.motor1,
+                self.motor2,
+                self.motor3,
+                self.yaw,
+                self.X,
+                self.Y,
+                self.Z,
+                self.pitch,
+                self.roll
             ]
 
-            self.user_motorslits = [
-                X,
-                Y,
-                Z,
-                pitch,
-                roll,
-                yaw
+            self.user_motorlist = [
+                self.X,
+                self.Y,
+                self.Z,
+                self.pitch,
+                self.roll,
+                self.yaw
             ]
-            self.init_moves()
 
-            QtWidgets.QMessageBox.warning(self, "All motors correctly initialized!")
+            #QtWidgets.QMessageBox.warning(self, "All motors correctly initialized!")
 
             #Filling the data for comboboxes:
 
-            for motor in self.user_motorslits:
-                self.motor_selector_2.addItem((str(motor)))
-                self.motor_selector.addItem(str(motor))
+            """for motor in self.user_motorlist:
+                self.gui.motor_selector_2.addItem((str(motor)))
+                self.gui.motor_selector.addItem(str(motor))"""
+
+            self.allMotors_inited = True
+            print("Motor objects succsesfully inited.")
 
         except ValueError as e:
             QtWidgets.QMessageBox.warning(self, "ERROR!", str(e))
-        return(X, Y, Z, pitch, roll, yaw, motor1, motor2, motor3)
 
     def init_moves(self):
+        print("initing move objects, standby...")
+        """ debugging lines: 
+        
+            for motor in self.user_motorlist:
+            print(type(motor))
+            if hasattr(motor, "motorID"):
+                print("Motor ID and type MotorID: ", motor.motorID, type(motor.motorID))
+
+            print("Motor's pmac name: ", motor.pmac_name)"""
         try:
-            xmove = Utilities.init_moves(connection = self.shell, motor = X)
-            ymove = Utilities.init_moves(connection=self.shell,  motor = Y)
-            zmove = Utilities.init_moves(connection = self.shell, motor = Z)
-            pitchmove = Utilities.init_moves(connection = self.shell, motor = pitch)
-            rollmove = Utilities.init_moves(connection = self.shell, motor = roll)
-            yawmove = Utilities.init_moves(connection = self.shell, motor = yaw)
+            self.xmove = Uti.init_moves(connection = self.shell, motor = self.X, util = self.util)
+            self.ymove = Uti.init_moves(connection=self.shell,  motor = self.Y, util = self.util)
+            self.zmove = Uti.init_moves(connection = self.shell, motor = self.Z, util = self.util)
+            self.pitchmove = Uti.init_moves(connection = self.shell, motor = self.pitch, util = self.util)
+            self.rollmove = Uti.init_moves(connection = self.shell, motor = self.roll, util = self.util)
+            self.yawmove = Uti.init_moves(connection = self.shell, motor = self.yaw, util = self.util)
+
             if self.shell is None or self.shell.alive == False or self.shell.isinit == False:
-                raise ValueError("Pmac not connected or not correctly inited!")
+                raise ValueError("Trying to init moves, but Pmac not connected or not correctly inited!")
             self.allMoves_inited = True
-            self.movesdict = self.update_dict()
+            print("Move objects successfully inited.")
         except ValueError as e:
             QtWidgets.QMessageBox(self, "Error!", str(e))
 
-        QtWidgets.QMessageBox.warning(self, "Moves correctly initialized!")
+        print( "At the end of the rainbow, moves correctly initialized!")
 
     def update_dict(self):
-        self.movesdict = {"X": xmove,
-                          "Y": ymove,
-                          "Z": zmove,
-                          "pitch": pitchmove,
-                          "roll": rollmove,
-                          "yaw": yawmove
+        self.movesdict = {"X": self.xmove,
+                          "Y": self.ymove,
+                          "Z": self.zmove,
+                          "pitch": self.pitchmove,
+                          "roll": self.rollmove,
+                          "yaw": self.yawmove
                           }
 
     def update_units(self):
@@ -192,7 +271,7 @@ class MotorControls(QMainWindow):
         this methods is used to change the labels displaying the units of measurement in the Motors and the Utilities tab
         :return:
         """
-        index = self.gui.motor_selector.currentIndex
+        index = self.gui.motor_selector.currentIndex()
         if index <= 2:
             self.gui.units.setText("µm") # units is the name of the label in  the Motors tab
             self.gui.label.setText("µm") # label is the name of the label in the Utilities tab
@@ -200,14 +279,14 @@ class MotorControls(QMainWindow):
             self.gui.label.setText("degrees") # label is the name of the label in the Utilities tab
             self.gui.units.setText("degrees") # units is the name of the label in  the Motors tab
 
-    def set_motorlist(self):
-        self.user_motorslits = [
-            X.motorname,
-            Y.motorname,
-            Z.pmac_name,
+    def set_motorname_list(self):
+        self.motorname_list = [
+            self.X.motorname,
+            self.Y.motorname,
+            self.Z.pmac_name,
             "pitch",
             "roll",
-            yaw.motorname
+            "yaw"
         ]
 
     def update_distance (self):
@@ -218,13 +297,25 @@ class MotorControls(QMainWindow):
            self.gui.label.setText ("degrees")
 
     def update_positions(self):
-        for motor in self.user_motorslits:
-            motor.real_pos = self.motor.get_real_pos()
+        i = 0
+        for self.motor in self.user_motorlist:
+            self.motor.real_pos = self.motor.get_real_pos()
+            name = str(self.motorname_list[i])
+            display = name.lower() + "_display"
+            line_edit = getattr(self.gui, display, None)
+            if line_edit:
+                number = round(float(self.motor.real_pos),6)
+                line_edit.setText(str(number))
+            else:
+                print(display, " not found in the class or its parents")
+            i = i + 1
+
 
     def movemotor(self):
         motorkey = self.gui.motor_selector.currentText()
-        mot2move = self.movesdict.get(motorkey) # This should be xmove, ymove, ..., yawmove
-        distance = float(self.gui.distance.returnPressed())
+        # print(type(self.movesdict))
+        mot2move = self.movesdict.get(motorkey) # This should be a Move object, i.e. xmove, ymove, ..., yawmove
+        distance = float(self.gui.distance.on_enter_pressed())
 
         if not self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
             try:
@@ -233,23 +324,29 @@ class MotorControls(QMainWindow):
                 QtWidgets.QMessageBox.warning(self, "Error!", str(e))
 
         elif self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
-            mot2move.gui.move_rel(distance = distance )
+            mot2move.move_rel(distance = distance )
 
         elif not self.gui.move_rel.isChecked() and self.move_abs.isChecked():
-           mot2move.gui.move_abs(distance = distance)
+           mot2move.move_abs(distance = distance)
 
     def get_speed(self):
         index = self.gui.motor_selector_2.currentIndex()
-        motor = self.gui.motor_selector_2.itemText(index)
-        act_speed = motor.getjogspeed()
+        # Motors in motor_selector_2 are from user_motorlist, so:
+
+        self.motor = self.user_motorlist[index]
+        act_speed = self.motor.getjogspeed()
         act_speed = round(act_speed, 6)
         self.gui.set_display.setText(str(act_speed))
 
     def set_speed(self):
         index = self.gui.motor_selector_2.currentIndex()
-        motor = self.gui.motor_selector_2.itemText(index)
-        speed = self.gui.distance.text()
-        motor.setjogspeed()
+        # Motors in motor_selector_2 are from user_motorlist, so:
+        self.motor= self.user_motorlist[index]
+
+        #motor = self.gui.motor_selector_2.itemText(index)
+
+        speed = self.gui.set_display.text()
+        self.motor.setjogspeed(speed)
         self.get_speed() # this is just a sanity check...
 
     def stopall(self):
@@ -261,6 +358,8 @@ class MotorControls(QMainWindow):
         self.update_positions()
         if not self.shell.alive:
             self.gui.pmac_display.turn_red()
+        elif self.shell.alive:
+            self.gui.pmac_display.turn_green()
 
 
 if __name__ == "__main__":

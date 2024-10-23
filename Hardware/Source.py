@@ -54,7 +54,8 @@ class Laser (SerialConn):
         else:
             command = (pycommand + ' ON')
         self.serialsend(command)
-
+        #self.serialread() # added this otherwise the next .serialmessage will return a bit of garbage (specifically 'OK\r\n)
+        self.is_on = "ON"
 
     def turnOFF(self, pycommand):
         """
@@ -68,6 +69,8 @@ class Laser (SerialConn):
         else:
             command = (pycommand + ' OFF')
         self.serialsend(command)
+        #self.serialread()
+        self.is_on = "OFF"
 
     def set_power(self, power):
         """
@@ -76,14 +79,14 @@ class Laser (SerialConn):
         :param power: preset value of laser power,
         :return:
         """
-        original_power = self.serialmessage(isLASPOWLEVEL) # just checking...
+        original_power = self.serialmessage(isLASPOWLEVEL) # just checking the presets.
         pow = ' ' + str(power) # makes a string with a space for setting the power
         message = LASPOWLEVEL + pow # this is the complete message to be sent to the laser
-        self.serialsend(message) # nessage sent
-        system_ouput = self.serialmessage(isOUTPOWLEVEL)
+        self.serialmessage(message) # message sent
+        system_output = self.serialmessage(isOUTPOWLEVEL)
         if abs(float(system_output) - float(self.pow_level)) < 3e-5:
-            self.pow_level = system_ouput
-            self.cur_level = self.serialmessage(OUTCURLEVEL)
+            self.pow_level = system_output
+            self.cur_level = self.serialmessage(isOUTCURLEVEL)
 
         else:
             self.pow_level = original_power # better leave it unchanged

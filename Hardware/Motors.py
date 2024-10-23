@@ -134,7 +134,7 @@ class Motor():
         self.cs = cs  # this is the Coordinate System for each motor
         # refer to page 983 Motor[x].HomeComplete of PMAC Software reference Manual. Set to False for safety
         if self.motorID is None:
-            self.motorname = motorname
+            self.motorname = None
             self.pmac_name = pmac_name
             self.atc_pos = act_pos
             self.jogspeed = jogspeed
@@ -174,8 +174,10 @@ class Motor():
         :return: ActPos, in motor units
         """
         message = self.pmac_name + ".ActPos"+ "\n"
+        #print(message)
         alan = float(self.connection.send_receive(message))
         self.act_pos = alan
+        #print(alan)
         return(alan)
 
     def get_real_pos(self):
@@ -262,7 +264,7 @@ class CompMotor():
         :param ishomed: from Coord[1].HomeComplete
         """
         self.connection = connection
-        if connection.alive == False:
+        if self.connection.alive == False:
             raise ValueError("Connection to PMAC not active, inizialization impossible")
         self.pmac_name = pmac_name # must be inited by user, either A, B or Z.
         if pmac_name.lower() not in ["a", "b", "z"]:
@@ -307,7 +309,7 @@ class MotorUtil():
 
     def __init__(self, connection, stillhoming = 1, motor = None):
         self.connection = connection # an active PMAC shell.
-        if connection.alive == False:
+        if self.connection.alive == False:
             warnings.warn("Connection to PMAC not active, inizialization impossible")
         self.stillhoming = stillhoming
         self.motor = motor

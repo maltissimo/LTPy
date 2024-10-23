@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>LaserController</class>
+ <widget class="QMainWindow" name="LaserController">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>464</width>
+    <height>206</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string notr="true">Obis Laser Controller</string>
+  </property>
+  <property name="toolTip">
+   <string notr="true"/>
+  </property>
+  <property name="dockNestingEnabled">
+   <bool>true</bool>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <widget class="QFrame" name="frame">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>461</width>
+      <height>201</height>
+     </rect>
+    </property>
+    <property name="frameShape">
+     <enum>QFrame::StyledPanel</enum>
+    </property>
+    <property name="frameShadow">
+     <enum>QFrame::Raised</enum>
+    </property>
+    <widget class="QFrame" name="frame_3">
+     <property name="geometry">
+      <rect>
+       <x>0</x>
+       <y>0</y>
+       <width>211</width>
+       <height>201</height>
+      </rect>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
+      <item>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+        <property name="spacing">
+         <number>60</number>
+        </property>
+        <property name="sizeConstraint">
+         <enum>QLayout::SetFixedSize</enum>
+        </property>
+        <property name="topMargin">
+         <number>19</number>
+        </property>
+        <property name="bottomMargin">
+         <number>0</number>
+        </property>
+        <item>
+         <widget class="MyPushButton" name="pushButton">
+          <property name="text">
+           <string>Laser ON/OFF</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QSlider" name="horizontalSlider">
+          <property name="toolTip">
+           <string notr="true"/>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QGroupBox" name="groupBox">
+     <property name="geometry">
+      <rect>
+       <x>210</x>
+       <y>0</y>
+       <width>251</width>
+       <height>201</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Status Indicators</string>
+     </property>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>20</y>
+        <width>241</width>
+        <height>71</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <item>
+          <widget class="MyLabel" name="comms_label">
+           <property name="text">
+            <string>Comms:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MyIndicator" name="comms_onoff">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QLabel{background-color: red;}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_2">
+         <item>
+          <widget class="MyLabel" name="laser_label">
+           <property name="text">
+            <string>Laser:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="MyIndicator" name="laser_onoff">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="styleSheet">
+            <string notr="true">QLabel{background-color: red;}</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="layoutWidget">
+      <property name="geometry">
+       <rect>
+        <x>3</x>
+        <y>107</y>
+        <width>243</width>
+        <height>91</height>
+       </rect>
+      </property>
+      <layout class="QGridLayout" name="gridLayout" columnstretch="2,0">
+       <property name="horizontalSpacing">
+        <number>55</number>
+       </property>
+       <item row="0" column="0">
+        <widget class="MyLabel" name="wavelength_label">
+         <property name="text">
+          <string>Wavelength (nm)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="MyTextBrowser" name="wlength_display"/>
+       </item>
+       <item row="1" column="0">
+        <widget class="MyLabel" name="int_display_2">
+         <property name="text">
+          <string>Intensity (W)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="MyTextBrowser" name="int_display"/>
+       </item>
+       <item row="2" column="0">
+        <widget class="MyLabel" name="cur_label">
+         <property name="text">
+          <string>Current (A)</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="MyTextBrowser" name="cur_display"/>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </widget>
+  </widget>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>MyLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">BaseClasses.py</header>
+  </customwidget>
+  <customwidget>
+   <class>MyPushButton</class>
+   <extends>QPushButton</extends>
+   <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+  <customwidget>
+   <class>MyTextBrowser</class>
+   <extends>QTextBrowser</extends>
+   <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+  <customwidget>
+   <class>MyIndicator</class>
+   <extends>QLabel</extends>
+   <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>

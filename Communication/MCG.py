@@ -211,6 +211,17 @@ class Gantry(Pmac_Shell):
         else:
             self.echo = str(0)
 
+    def status(self):
+        """
+        A controller method to check for shell status from other classes..
+        :return:
+        """
+        message = ("Shell status: ", self.alive,
+              "\nShell init status: ", self.isinit)
+
+        return(message)
+
+
 """
 if __name__ == "__main__":
     main()
