@@ -6,6 +6,10 @@ The Coherent Vendor ID of the USB laser is
 the ProductId is
 59
 
+the corresponding HEX values are:
+
+0d4d:003b
+
 This can be checked with:
 
 import usb.core
@@ -28,8 +32,13 @@ answers comes back either empty or garbled.
 import serial, serial.tools.list_ports
 
 import time
+import os
+import glob
 
-PORT = "/dev/ttyACM1" # /dev/ttyACM0 port over which the OBIS is connnected to MC
+from IPython.utils.capture import capture_output
+
+OBIS = "0d4d:003b"
+#PORT = "/dev/ttyACM1" # /dev/ttyACM0 port over which the OBIS is connnected to MC
 ENDL = "\r\n"   # end of communication , carriage return + new line
 BAUD = 9600 # Baudrate for the communication
 
@@ -39,6 +48,7 @@ class SerialConn(serial.Serial):
     Models a connection through the pyserial interface from the MC to the OBIS remote.
     """
     def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
+        PORT = self.find_port(OBIS)
         super().__init__(port = PORT, baudrate = BAUD,
                          bytesize = serial.EIGHTBITS,
                          parity = serial.PARITY_NONE,
@@ -96,6 +106,16 @@ class SerialConn(serial.Serial):
         time.sleep(0.07)
 
         return(self.serialread())
+
+    def find_port (self):
+        result = subprocess.run (' dir /dev/ttyACM*', capture_output = True, text = True, shell = True)
+        PORT = (result.stdout).strip()
+
+
+
+
+
+
 
 
 

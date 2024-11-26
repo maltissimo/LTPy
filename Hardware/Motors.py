@@ -175,7 +175,8 @@ class Motor():
         """
         message = self.pmac_name + ".ActPos"+ "\n"
         #print(message)
-        alan = float(self.connection.send_receive(message))
+        pos = self.connection.send_receive(message)
+        alan = float(pos)
         self.act_pos = alan
         #print(alan)
         return(alan)
@@ -353,9 +354,10 @@ class MotorUtil():
         print("system homed!")"""
 
     def resetGantry(self):
-        selectAxes = "selectAxes = SelectAll"
-        reset = "requestHost = RequestReset"
+        selectAxes = "selectAxes=SelectAll"
+        reset = "requestHost=RequestReset"
         self.connection.send_message(selectAxes)
+        time.sleep(0.015)
         self.connection.send_message(reset)
 
     def motors(self):

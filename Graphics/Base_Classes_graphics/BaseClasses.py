@@ -369,7 +369,7 @@ class UnitsLabel(QLabel):
 
 
 class myWarningBox(QMessageBox):
-    def __init__(self, title="Warning", message="", parent=None)
+    def __init__(self, title="Warning", message="", parent=None):
         super().__init__(parent)
         self.setIcon(QMessageBox.Warning)
         self.setWindowTitle(title)

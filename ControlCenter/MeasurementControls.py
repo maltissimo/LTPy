@@ -1,12 +1,11 @@
 import datetime
 
-from Graphics.BaseClasses import myWarningBox
-
 from ControlCenter import Control_Utilities as cu
 from ControlCenter.Laser import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls import *
 from Graphics.Base_Classes_graphics.Measurements_GUI import *
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Graphics.Base_Classes_graphics.RT_Dataplot import *
 from Graphics.CameraViewer import *
 
@@ -228,6 +227,9 @@ class MeasurementControls(QMainWindow):
         CamTabLayout.addWidget(self.camViewer)
 
         self.gui.cam_tab.setLayout(CamTabLayout)
+
+    def show(self):
+        self.show()
 
 
 if __name__ == "__main__":

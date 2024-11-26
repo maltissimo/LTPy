@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 
 from Graphics.Base_Classes_graphics.CameraViewer_GUI import Ui_PylonCamViewer
-from Hardware.Detector import *
+from Hardware.Detector import Camera
 
 
 class CamViewer(QMainWindow):

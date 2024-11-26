@@ -103,6 +103,9 @@ class LaserControl(QtWidgets.QMainWindow):
         self.update_comms_label()  # updating comms label
         self.update_laser_label()  # updating laser label
 
+    def show(self):
+        self.show()
+
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = LaserControl()

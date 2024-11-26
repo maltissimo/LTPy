@@ -132,7 +132,7 @@ class MotorControls(QMainWindow):
         self.gui.distance.enter_pressed.connect(self.update_distance)
         self.timer = QTimer(self)
 
-        self.timer.start(50)  # updating every 50 ms
+        self.timer.start(100)  # updating every 50 ms
         self.timer.timeout.connect(self.update_all)  # connects to the update_all method
 
     def Connect2_Pmac(self):
@@ -295,7 +295,9 @@ class MotorControls(QMainWindow):
     def update_positions(self):
         i = 0
         for self.motor in self.user_motorlist:
+            #print(self.motor.pmac_name)
             self.motor.real_pos = self.motor.get_real_pos()
+            #print(self.motor.real_pos)
             name = str(self.motorname_list[i])
             display = name.lower() + "_display"
             line_edit = getattr(self.gui, display, None)
@@ -323,8 +325,8 @@ class MotorControls(QMainWindow):
         elif self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
             mot2move.move_rel(distance = distance )
 
-        elif not self.gui.move_rel.isChecked() and self.move_abs.isChecked():
-           mot2move.move_abs(distance = distance)
+        elif not self.gui.move_rel.isChecked() and self.gui.move_abs.isChecked():
+           mot2move.move_abs(coord = distance)
 
     def get_speed(self):
         index = self.gui.motor_selector_2.currentIndex()
@@ -363,6 +365,9 @@ class MotorControls(QMainWindow):
 
     def restartTimer(self):
         self.timer.start()
+
+    def show(self):
+        self.show()
 
 
 if __name__ == "__main__":

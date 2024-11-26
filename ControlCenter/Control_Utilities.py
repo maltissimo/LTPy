@@ -3,28 +3,29 @@ from PyQt5.QtWidgets import QWidget, QInputDialog, QLineEdit, QDialog, QVBoxLayo
 from Communication import MCG
 from Hardware import Source, Motors  # , Detector
 
+class Utilities():
 
-def create(my_object, **kwargs):
-    if my_object == "shell":
-        shell = MCG.Gantry(
-            pmac_ip=kwargs.get("pmac_ip"),
-            username=kwargs.get("username"),
-            password=kwargs.get("password"),
-            alive=kwargs.get("alive", False),
-            nbytes=kwargs.get("nbytes", 1024),
-            echo=kwargs.get("echo", None),
-            isinit=kwargs.get("isinit", False)
-        )
-        return shell
+    def create(my_object, **kwargs):
+        if my_object == "shell":
+            shell = MCG.Gantry(
+                pmac_ip=kwargs.get("pmac_ip"),
+                username=kwargs.get("username"),
+                password=kwargs.get("password"),
+                alive=kwargs.get("alive", False),
+                nbytes=kwargs.get("nbytes", 1024),
+                echo=kwargs.get("echo", None),
+                isinit=kwargs.get("isinit", False)
+            )
+            return shell
 
-    elif my_object == "util":
-        util = Motors.MotorUtil(
-            connection=kwargs.get("connection")
-        )
-        return util
+        elif my_object == "util":
+            util = Motors.MotorUtil(
+                connection=kwargs.get("connection")
+            )
+            return util
 
-    elif my_object == "laser":
-        laser = Source.Laser()
+        elif my_object == "laser":
+            laser = Source.Laser()
             return(laser)
 
         elif my_object == "camera":

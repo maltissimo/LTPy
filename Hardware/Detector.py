@@ -23,33 +23,33 @@ class Camera:
 
         self.camera= py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())
         if self.camera is not None:
+            self.opencam()
             self.MyExpTime = self.camera.ExposureTime
-            self.minexptime = self.camera.ExposureTime.Min
-            self.maxexptime = self.camera.ExposureTime.Max
-            self.height = self.camera.Height.Value
-            self.width = self.camera.Width.Value
-            self.gain = self.camera.Gain
+            """self.minexptime = self.camera.ExposureTime.Min
+            self.maxexptime = self.camera.ExposureTime.Max"""
+            self.height = self.camera.Height()
+            self.width = self.camera.Width()
+            self.gain = self.camera.Gain()
         else:
-            self.MyExpTime = MyExpTime  # set to 6 µseconds
-            self.minexptime = minexptime
-            self.maxexptime = maxexptime
+            self.MyExpTime = 6.0  # set to 6 µseconds
+            self.minexptime = 0.0
+            self.maxexptime = 50.0
             self.grab_nr = 1
             self.height = height
             self.width = width
             self.gain = gain
-        self.opencam
         self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
         self.frame = None
 
     def __str__(self):
-        return f"Basler camera: Exposure time = {self.camera.ExposureTime}, default nr of frames to grab = {self.grab_nr}, \
-                Image Height = {self.camera.Height.Value}, Image Width = {self.camera.Width.Value}"
+        return f"Basler camera: Exposure time = {self.camera.ExposureTime()}, default nr of frames to grab = {self.grab_nr}, \
+                Image Height = {self.camera.Height()}, Image Width = {self.camera.Width()}"
 
     def getHeight(self):
-        return(self.camera.Height.Value)
+        return(self.camera.Height())
 
     def getWidth(self):
-        return (self.camera.Width.Value)
+        return (self.camera.Width())
 
     def opencam(self):
         """
@@ -60,6 +60,7 @@ class Camera:
 
         :return:
         """
+        self.camera.Open()
         self.camera.UserSetSelector = "Default"
         self.camera.UserSetLoad.Execute()
         self.camera.ExposureTime = 12
@@ -71,7 +72,7 @@ class Camera:
 
     def closecam(self):
         self.camera.Close()
-        self.isopen = self.camra.IsOpen()
+        self.isopen = self.camera.IsOpen()
 
     def acquire_once(self):
         res = self.camera.GrabOne(1000)

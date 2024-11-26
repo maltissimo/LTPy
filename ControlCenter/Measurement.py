@@ -111,6 +111,6 @@ class Measurement():
         :return: an array, heights.
         """
 
-        heights[]
+        heights = []
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
         return (heights)
