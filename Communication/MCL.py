@@ -108,8 +108,14 @@ class SerialConn(serial.Serial):
         return(self.serialread())
 
     def find_port (self):
-        result = subprocess.run (' dir /dev/ttyACM*', capture_output = True, text = True, shell = True)
-        PORT = (result.stdout).strip()
+
+        ports = serial.tools.list_ports.comports()
+        for port in ports:
+            if port.vid == 3405:
+                return(port.device)
+            else:
+                return None
+
 
 
 
