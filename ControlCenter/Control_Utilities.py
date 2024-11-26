@@ -1,29 +1,30 @@
-from Hardware import Source, Motors #, Detector
-from Communication import MCG, MCL
-from PyQt5.QtWidgets import QApplication, QWidget, QInputDialog, QLineEdit, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
+from PyQt5.QtWidgets import QWidget, QInputDialog, QLineEdit, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 
-class Utilities():
-    def create( my_object, **kwargs):
-        if my_object == "shell":
-            shell = MCG.Gantry(
-                pmac_ip=kwargs.get("pmac_ip"),
-                username=kwargs.get("username"),
-                password=kwargs.get("password"),
-                alive=kwargs.get("alive", False),
-                nbytes=kwargs.get("nbytes", 1024),
-                echo=kwargs.get("echo", None),
-                isinit=kwargs.get("isinit", False)
-            )
-            return shell
+from Communication import MCG
+from Hardware import Source, Motors  # , Detector
 
-        elif my_object == "util":
-            util = Motors.MotorUtil(
-                connection = kwargs.get("connection")
-            )
-            return util
 
-        elif my_object == "laser":
-            laser = Source.Laser()
+def create(my_object, **kwargs):
+    if my_object == "shell":
+        shell = MCG.Gantry(
+            pmac_ip=kwargs.get("pmac_ip"),
+            username=kwargs.get("username"),
+            password=kwargs.get("password"),
+            alive=kwargs.get("alive", False),
+            nbytes=kwargs.get("nbytes", 1024),
+            echo=kwargs.get("echo", None),
+            isinit=kwargs.get("isinit", False)
+        )
+        return shell
+
+    elif my_object == "util":
+        util = Motors.MotorUtil(
+            connection=kwargs.get("connection")
+        )
+        return util
+
+    elif my_object == "laser":
+        laser = Source.Laser()
             return(laser)
 
         elif my_object == "camera":
@@ -100,10 +101,19 @@ class Connection_initer(QWidget):
 
         dialog.setLayout(layout)
 
-
         if dialog.exec_() == QInputDialog.Accepted:
             self.password = password_input.text()
             return True
         else:
             return None, False
 
+
+class MathUtils():
+
+    def um2mm(self, umvalue):
+        # converts microns to mm
+        return (umvalue / 1000)
+
+    def mm2um(self, mmvalue):
+        # converts mm to microns
+        return (mmvalue * 1000)

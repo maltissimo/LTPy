@@ -1,5 +1,5 @@
 import pypylon.pylon as py
-import numpy as np
+
 """
 Contains all the info necessary for the communication between Mainc Computer (MC) and CMOS detector (Det)
 
@@ -22,7 +22,7 @@ class Camera:
     def __init__(self): #,MyExpTime = 6, minexptime = 0, maxexptime = 0,  grab_nr = 10, isopen = False, height = 1400, width = 1400, gain = 0.0"""):
 
         self.camera= py.InstantCamera(py.TlFactory.GetInstance().CreateFirstDevice())
-        """if self.camera is not None: 
+        if self.camera is not None:
             self.MyExpTime = self.camera.ExposureTime
             self.minexptime = self.camera.ExposureTime.Min
             self.maxexptime = self.camera.ExposureTime.Max
@@ -30,20 +30,20 @@ class Camera:
             self.width = self.camera.Width.Value
             self.gain = self.camera.Gain
         else:
-            self.MyExpTime = MyExpTime # set to 6 µseconds
+            self.MyExpTime = MyExpTime  # set to 6 µseconds
             self.minexptime = minexptime
             self.maxexptime = maxexptime
-            self.grab_nr = grab_nr
+            self.grab_nr = 1
             self.height = height
             self.width = width
-            self.gain = gain"""
-        """self.opencam"""
+            self.gain = gain
+        self.opencam
         self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
         self.frame = None
 
     def __str__(self):
         return f"Basler camera: Exposure time = {self.camera.ExposureTime}, default nr of frames to grab = {self.grab_nr}, \
-                Image Height = {self.camera.Height.Value}, Image Width = {self.camera.Width.Valye}"
+                Image Height = {self.camera.Height.Value}, Image Width = {self.camera.Width.Value}"
 
     def getHeight(self):
         return(self.camera.Height.Value)
@@ -64,8 +64,8 @@ class Camera:
         self.camera.UserSetLoad.Execute()
         self.camera.ExposureTime = 12
         self.isopen = self.camera.IsOpen()
-        self.height = self.camera.getHeight()
-        self.width = self.camera.getWidth()
+        self.height = self.camera.Height()  # 4600 pixels
+        self.width = self.camera.Width()  # 5280 pixels
         self.minexptime = self.camera.ExposureTime.Min
         self.maxexptime = self.camera.ExposureTime.Max
 
@@ -85,6 +85,7 @@ class Camera:
             if res.GrabSucceeded():
                 self.frame = res.Array
             res.Release()
+
     def set_exp_time(self, custom_time):
         """
         Sets the Camera exposure time, units are in microseconds. Default is 6 µs, to be changed by user
@@ -99,7 +100,7 @@ class Camera:
         self.camera.ExposureTime = custom_time
         #self.MyExpTime = self.camera.ExposureTime()
 
-    def set_grab_nr(self, mynewgrabnumber = 10 ):
+    def set_grab_nr(self, mynewgrabnumber=5):
         self.grab_nr = mynewgrabnumber
 
     def set_gain(self, gain ):

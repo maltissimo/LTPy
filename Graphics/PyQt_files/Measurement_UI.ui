@@ -142,48 +142,86 @@
       <item>
        <widget class="MyQLineEdit" name="length_input"/>
       </item>
-      <item>
-       <widget class="MyLabel" name="length_label">
-        <property name="text">
-         <string>Length (mm)</string>
-        </property>
-       </widget>
-      </item>
+         <item>
+             <widget class="MyLabel" name="length_label">
+                 <property name="text">
+                     <string>Length (mm)</string>
+                 </property>
+             </widget>
+         </item>
      </layout>
     </widget>
-    <widget class="QWidget" name="layoutWidget">
-     <property name="geometry">
-      <rect>
-       <x>410</x>
-       <y>50</y>
-       <width>261</width>
-       <height>32</height>
-      </rect>
-     </property>
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="MyPushButton" name="xStartPos">
-        <property name="text">
-         <string>Start X</string>
-        </property>
+       <widget class="QWidget" name="layoutWidget">
+           <property name="geometry">
+               <rect>
+                   <x>540</x>
+                   <y>50</y>
+                   <width>501</width>
+                   <height>32</height>
+               </rect>
+           </property>
+           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
+               <property name="spacing">
+                   <number>6</number>
+               </property>
+               <property name="leftMargin">
+                   <number>15</number>
+               </property>
+               <property name="rightMargin">
+                   <number>15</number>
+               </property>
+               <item>
+                   <widget class="MyPushButton" name="xStartPos">
+                       <property name="text">
+                           <string>Start X</string>
+                       </property>
+                   </widget>
+               </item>
+               <item>
+                   <widget class="MyPushButton" name="startButton">
+                       <property name="text">
+                           <string>Start</string>
+                       </property>
+                   </widget>
+               </item>
+               <item>
+                   <widget class="MyPushButton" name="stopButton">
+                       <property name="text">
+                           <string>Stop</string>
+                       </property>
+                   </widget>
+               </item>
+               <item>
+                   <widget class="QCheckBox" name="savelldata">
+                       <property name="text">
+                           <string>Save all Data</string>
+                       </property>
+                   </widget>
+               </item>
+           </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="MyPushButton" name="startButton">
-        <property name="text">
-         <string>Start</string>
-        </property>
+       <widget class="QWidget" name="layoutWidget_3">
+           <property name="geometry">
+               <rect>
+                   <x>400</x>
+                   <y>40</y>
+                   <width>127</width>
+                   <height>49</height>
+               </rect>
+           </property>
+           <layout class="QVBoxLayout" name="verticalLayout_4">
+               <item>
+                   <widget class="MyQLineEdit" name="nrofgrabs_input"/>
+               </item>
+               <item>
+                   <widget class="MyLabel" name="nrofgrabs_label">
+                       <property name="text">
+                           <string>Number of grabs</string>
+                       </property>
+                   </widget>
+               </item>
+           </layout>
        </widget>
-      </item>
-      <item>
-       <widget class="MyPushButton" name="stopButton">
-        <property name="text">
-         <string>Stop</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

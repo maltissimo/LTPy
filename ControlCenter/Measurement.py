@@ -1,115 +1,31 @@
-import datetime
-
-from PyQt5 import QtWidgets
-from scipy import ndimage
-
-from ControlCenter import Control_Utilities as cu
-from Graphics.Base_Classes_graphics import RT_Dataplot, Measurements_GUI,
-from Graphics.CameraViewer import *
-
-TODAY = datetime.datetime.now().strftime("%d/%m/%Y %H:%M:%S")
-
-# Initing the objects for measurements:
-
-# SSH shell to the PMAC
-factory = cu.Utilities()
-conn1 = factory.create("shell", pmac_ip="192.168.0.200", username="root", password="deltatau")
-conn1.openssh()
-
-#Laser:
-laser = factory.create("laser")
-
-#motor utilities, instantiating all the motors and move objects
-
-util = factory.create("util", connection = conn1)
-motorlist = util.motors()
-
-motor1, motor2, motor3, yaw, X, Y, Z, pitch, roll, motordict = util.init_motors(motorlist, conn1)
-
-yawmove, xmove, ymove, zmove, pitchmove, rollmove = factory.init_moves(motordict, conn1, util)
-
-# camera:
-camera = factory.create("camera")
-camera.opencam()
-
-
-class MeasurementControls(QtWidgets.QApplication):
-    """
-
-    this is largely for dealing with the graphics and connecting all the bits to the right places.
-
-    """
-
-    def __init__(self):
-        super().__init__()
-
-        # Create an instance of the Measurement_GUI class:
-        self.gui = Measurements_GUI()
-        self.gui.setupUI(self)
-
-        self.xStartPos = X.get_real_pos()
-
-        self.initHeightTab()
-        self.initSlopesTab()
-        self.initCameraTab() = CamViewer()
-
-        self.gui.connect.startButton(self.startMeasurement)
-        self.gui.connect.stopButton(self.stopMeasurement)
-
-        self.gui.connect.xStartPos(self.setXstartPos)
-
-    def startMeasurement(self):
-        pass
-
-    def stopMeasurement(self):
-        pass
-
-    def setXstartPos(self):
-        self.xStartPos = X.get_real_pos()
-
-    def initHeightTab(self):
-        self.gui.setTabText(0, "Height Measurements")
-
-        self.RTplot = RT_Dataplot(self)
-        self.RTplot.setLabels(left_label="Heights", left_units="µm")
-        self.RTplot.setLabels(bottom_label="X position", bottom_units="mm")
-        self.graphLayout.addWidget(self.RTplot)
-
-        self.HeightTabLayout = QtWidgets.QVBoxLayout(self.gui.height_tab)
-        self.HeightTabLayout.addWidget(self.RTplot)
-
-    def initSlopesTab(self):
-        self.gui.setTabText(1, "Slope Measurements")
-
-        self.RTplot = RT_Dataplot(self)
-        self.RTplot.setLabels(left_label="Slopes", left_units="µrad")
-        self.RTplot.setLabels(bottom_label="X position", bottom_units="mm")
-        self.graphLayout.addWidget(self.RTplot)
-
-        self.SlopesTabLayout = QtWidgets.QVBoxLayout(self.gui.slopes_tab)
-        self.SlopesTabLayout.addWidget(self.RTplot)
-
-    def initCameraTab(self):
-        self.gui.setTabText(2, "Camera")
-
-        self.CamTabLayout = QtWidgets.QVBoxLayout(self.gui.cam_tab)
-        self.CamTabLayout.addWidget(camera)
-
-
 # Now the fun begins:
+import math
+
+import numpy as np
+from scipy.ndimage import center_of_mass
+
+LENSFOCAL = 500  # this is the nominal focal length in mm of our lens
+ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
+ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height()
+
 
 class Measurement():
-    def __init__(self, nr_of_points=10, length=1,
-                 xmotor, xmove,
-                 ymotor, ymove,
-                 zmotor, zmove,
-                 pitch, pitchmove,
-                 roll, rollmove,
-                 yaw, yawmove,
-                 camera):
+    f = LENSFOCAL
+    X0 = ZERO_X
+    Y0 = ZERO_Y
 
+    def __init__(self,
+
+                 nr_of_points=10,  # adding a default seems sane
+                 length=1,  # adding a default seems sane
+                 nr_of_grabs=5  # adding a default seems sane
+                 ):
         self.nr_of_points = nr_of_points
-        self.length = length  # length of measurement, units in m. Must be converted to µm, as that's the unit of X.
+        self.length = length  # length of measurement, units in mm. Must be converted to µm, as that's the unit of X.
+        """
+        self.motor1 = motor1
+        self.motor2 = motor2
+        self.motor3 = motor3
         self.xmotor = X
         self.xmove = xmove
 
@@ -122,68 +38,79 @@ class Measurement():
         self.roll = roll
         self.rollmove = rollmove
         self.yaw = yaw
-        self.yawmove = yawmove
+        self.yawmove = yawmove"""
 
+        self.images = []
+        self.stepsize = self.length / self.nr_of_points
+        self.results = ""
+
+        """
         self.camera = camera
+        self.nr_of_grabs = nr_of_grabs
+        """
 
-        self.x_start_pos = self.X.get_real_pos()
+        """ self.x_start_pos = self.X.get_real_pos()
         self.y_start_pos = self.Y.get_real_pos()
         self.z_start_pos = self.Z.get_real_pos()
         self.pitch_start_pos = self.pitch.get_real_pos()
         self.roll_start_post = self.roll.get_real_pos()
-        self.yaw_start_pos = self.yaw.get_real_pos()
-        self.images = []
-        self.step = self.length / self.nr_of_points
-        self.results = ""
+        self.yaw_start_pos = self.yaw.get_real_pos()"""
 
-    def measure(self):
-        """
-        this assumes the X stage is already in its correct starting position
-        :return:
-        """
-        # preparing the results header
-
-        self.results += "date of measurement: " + TODAY + "\n"
-        self.results += "\t" + "X" + "\t" + "Y" + "\t" + "Z" + "\t" + "P" + "\t" + "R" + "\t" + "Y"+ "\t" + "Centroid" + "\n"
-        self.results += "\n"
-
-        for i in range(self.nr_of_points):
-            image = self.camera.grabdata()  # already grabbing 10 images by default
-            step_result = self.centroid(image) #this is an array, with 2 coordinates of the centroid.
-            #Result for this position:
-            self.results += self.get_all_motor_pos()
-            self.results += step_result
-            self.xmove.move_rel(distance = self.step)
     def centroid(self, ndarray):
-        centroid = ndimage.center_of_mass(ndarray)
-        return(centroid)
+        return center_of_mass(ndarray)
 
-    def get_all_motor_pos(self):
+    def save_data(self, filename, text):
+        # filename = "data of " + TODAY + ".txt"
+        with open(filename, "w", encoding="ASCII") as f:
+            f.write(text)
+        # print("Data saved into: " + filename )
+
+    def slope_calc(self, Y, Y0, f):
+        # this is the core of the measurement
+        slope_error = 0.5 * (math.atan(Y - Y0)) / f * 1000
+        return (slope_error)
+
+    def pretty_printing(self, array1, array2):
         """
-        This spits out a formatted text. I think it's better creating a method rather than using inside the measure for cycle.
-        :return: all_motor_pos.
+        Printing data in a decent format for saving.
+        :param array1: a 1D np array, size N
+        :param array2: a 1D np array, size N
+        :return: a tab formatted text, ready to be saved
         """
-        pos_all = ""
-        pos_all += str(self.xmotor.get_real_pos) + "\t"
-        pos_all += str(self.ymotor.get_real_pos) + "\t"
-        pos_all += str(self.zmotor.get_real_pos) + "\t"
-        pos_all += str(self.pitch.get_real_pos) + "\t"
-        pos_all += str(self.roll.get_real_pos) + "\t"
-        pos_all += str(self.yaw.get_real_pos) + + "\t"
-        return(pos_all)
+        text = ""
+        for i in range(len(array1)):
+            text += array1[i] + "\t" + array2[i] + "\n"
+        return (text)
 
-    def save_data(self):
-        filename = "data of " + TODAY ".txt"
-        with open (filename, "w", encoding = "ASCII") as f:
-            f.write(self.results)
+    def height_calc(self):
+        pass
 
-        print("Data saved into: " + filename )
+    def sphere_fit(self, arrayX, arrayY):
+        coeff = np.polyfit(arrayX, arrayY, 1)
+        p = np.poly1d(coeff)
+        fit = np.polyval(p, arrayX)
+        radius = 1 / coeff[0]
+        return (radius)
 
+    def RMS(self, array):
+        """
+        calculates the root mean square value of any array
+        :param array: input array for which the RMS calculation is needed
+        :return: an RMS value, same units as array.
+        """
+        mysum = np.sum(array)
+        nr_of_points = len(array)
+        RMS = np.sqrt(mysum * mysum) / nr_of_points
+        return (RMS)
 
+    def figure_error(self, arrayX, arrayY):
+        """
+        Calculates the figure error given and array of positions/slopes
+        :param arrayX: y-position of the centroid? or X-position of the head?
+        :param arrayY: slopes
+        :return: an array, heights.
+        """
 
-#TODO: start working on a GUI. See Dynamic Graph in the Gantrycomms directory for starters
-#TODO: implement a checking method in Control Utilities that works before each measurement is performed
-# and checks whether all the subsystems are operational.
-
-
-
+        heights[]
+        heights = np.cumtrapz(arrayX, arrayY, initial=0)
+        return (heights)

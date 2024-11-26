@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>DockWidget</class>
+    <widget class="QDockWidget" name="DockWidget">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1022</width>
+                <height>790</height>
+            </rect>
+        </property>
+        <property name="windowTitle">
+            <string>DockWidget</string>
+        </property>
+        <widget class="QWidget" name="dockWidgetContents">
+            <widget class="QWidget" name="gridLayoutWidget">
+                <property name="geometry">
+                    <rect>
+                        <x>-1</x>
+                        <y>-1</y>
+                        <width>1011</width>
+                        <height>761</height>
+                    </rect>
+                </property>
+                <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0" columnstretch="0,0">
+                    <property name="horizontalSpacing">
+                        <number>1</number>
+                    </property>
+                    <property name="verticalSpacing">
+                        <number>11</number>
+                    </property>
+                    <item row="0" column="0">
+                        <widget class="QGraphicsView" name="centroidX"/>
+                    </item>
+                    <item row="0" column="1">
+                        <widget class="QGraphicsView" name="CentroidY"/>
+                    </item>
+                    <item row="1" column="0">
+                        <widget class="QGraphicsView" name="slopes"/>
+                    </item>
+                    <item row="1" column="1">
+                        <widget class="QGraphicsView" name="heights"/>
+                    </item>
+                </layout>
+            </widget>
+        </widget>
+    </widget>
+    <resources/>
+    <connections/>
+</ui>

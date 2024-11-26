@@ -547,7 +547,7 @@
          <x>0</x>
          <y>100</y>
          <width>591</width>
-         <height>71</height>
+         <height>114</height>
         </rect>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -757,7 +757,7 @@
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_7">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,1,0">
+      <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,0">
        <property name="spacing">
         <number>20</number>
        </property>
@@ -959,7 +959,7 @@
      <x>0</x>
      <y>0</y>
      <width>622</width>
-     <height>22</height>
+     <height>24</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMotors_and_utilities">

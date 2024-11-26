@@ -1,57 +1,88 @@
 import pyqtgraph as pg
+from PyQt5 import QtWidgets
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QWidget, QVBoxLayout
-
-from ControlCenter import Timing
 
 
 class RealTime_plotter(QWidget):
     def __init__(self, parent=None):
-        super(RealTime_plotter, self).__init(parent)
-        self.layout = QVBoxLayout
+        super().__init__(parent)
+        self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
         self.plotWidget = pg.PlotWidget()
-
+        self.layout.addWidget(self.plotWidget)
         self.layout.addWidget(self.plotWidget)
 
-        self.plotData = self.plotWidget.plot([],[], pen = pg.mkPend(color = 'b', width = 2))
+        self.plotData = self.plotWidget.plot([], [],
+                                             pen=pg.mkPen(color='b', width=2),
+                                             symbol='d',
+                                             symbolpen='b',
+                                             symbolSize=8)
+        mypen = pg.mkPen('k', width=2)
+        self.plotWidget.setBackground('w')
+        self.plotWidget.getAxis('left').setPen(mypen)
+        self.plotWidget.getAxis('bottom').setPen(mypen)
+        self.plotWidget.getAxis('left').setTickPen(mypen)  # Set left axis ticks color to black
+        self.plotWidget.getAxis('bottom').setTickPen(mypen)
+        self.plotWidget.getAxis('left').setTextPen(mypen)
+        self.plotWidget.getAxis('bottom').setTextPen(mypen)
 
         self.xData = []
-        self.yData =[]
+        self.yData = []
 
-        self.timer = Timing.myTimer(interval= 50) # set the interval here.
+        self.timer = QTimer(self)
+        self.timer.start(100)
+        self.timer.timeout.connect(self.dummyUpdatePlot)
+        # in production : self.timer.timeout.connect(self.updatePlot)
 
-        self.timer.connect_callback(self.updatePlot)
-        self.timer.start() # timeout is every 50 ms, see line 21
-
-    def updatePlot(self):
+    def updatePlot(self, dataX, dataY):
         """
         this is the real deal. Must be connected to Gantry Motor(X) and the math from the camera.
         :return:
+        """
 
+        self.xData.append(dataX)
+        self.yData.append(dataY)
 
-        newX = motorpos(X)
-        newY = height(fromCamera)
-
-        self.xData.append(newX)
-        self.yData.append(newY)
-
-        self.plotData.setData(self.xData, self.yData)"""
+        self.plotData.setData(self.xData, self.yData)
 
     def dummyUpdatePlot(self):
-        """ this is for testing only"""
+        """ this is for testing only
         import random
         newX = random.uniform(0, 100)
         newY = random.uniform(0, 100)
         self.xData.append(newX)
         self.yData.append(newY)
 
-        self.plotData.setdata(self.xData, self.yData)
-
-    def setLabels(self, left_label, left_units, bottom_label, bottom_units):
+        self.plotData.setData(self.xData, self.yData)
         """
-        updates the axis labels according to the caller.
+
+    def setLabels(self, bottom_label, bottom_units, left_label, left_units):
+        """
+        updates the axis labels according to the caller. Remember:
+        x label, x units,
+        y label, y units.
         :return:
         """
-        self.plotWidget.setLabel("left", left_label, left_units)
-        self.plotWidget.setLabel("bottom", bottom_label, bottom_units)
+        self.plotWidget.setLabel("left", left_label, left_units, color='k',
+                                 **{'font-size': '14pt', 'font-weight': 'bold'})
+        self.plotWidget.setLabel("bottom", bottom_label, bottom_units, color='k',
+                                 **{'font-size': '14pt', 'font-weight': 'bold'})
+
+    def stopTimer(self):
+        self.timer.stop()
+
+
+if __name__ == "__main__":
+    import sys
+
+    app = QtWidgets.QApplication(sys.argv)
+    mainWin = QtWidgets.QMainWindow()
+    plotterWidget = RealTime_plotter()
+
+    # Set the plotter widget as the central widget of the main window
+    mainWin.setCentralWidget(plotterWidget)
+    mainWin.show()
+
+    sys.exit(app.exec_())

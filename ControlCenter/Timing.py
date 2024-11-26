@@ -1,15 +1,16 @@
 from PyQt5.QtCore import QObject, QTimer
 
 class myTimer(QObject):
-    def __init__(self, interval = 50, callback, single_shot = False, parent = None, name = "Unnamed timer"):
-
-        super(myTimer, self).__init__(parent)
+    def __init__(self, interval=50, single_shot=False, name="Unnamed timer", callback=None):
+        super().__init__()
         self.timer = QTimer(self)
         self.interval = interval
-        self.timer.setInterval(interval) # set at 50 ms by default must be overridden in case.
+        self.timer.setInterval(interval)  # set at 50 ms by default must be overridden in case.
         self.timer.setSingleShot(single_shot)
-        self.timer.timeout.connect(callback)
+        if callback:
+            self.timer.timeout.connect(callback)
         self.name = name
+        # self.callback
 
     def start(self):
         self.timer.start()
@@ -22,13 +23,12 @@ class myTimer(QObject):
 
     def setInterval(self, interval):
         self.timer.setInterval(interval)
-        sek
 
     def set_single_shot(self, single_shot):
         self.timer.setSingleShot(single_shot)
 
-    def connect_callback(self, callback)
+    def connect_callback(self, callback):
         self.timer.timeout.connect(callback)
 
-    def disconnect_callback(selfself,callback):
+    def disconnect_callback(self, callback):
         self.timer.timeout.disconnect(callback)

@@ -1,12 +1,8 @@
-import sys
-
-from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
 
-import Hardware.Motors
-from ControlCenter.Control_Utilities import Utilities as Uti
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
+from ControlCenter.Control_Utilities import Utilities as Uti
 from Graphics.Base_Classes_graphics.Motors_GUI import *
 from Hardware.Motors import MotorUtil
 
@@ -304,11 +300,12 @@ class MotorControls(QMainWindow):
             display = name.lower() + "_display"
             line_edit = getattr(self.gui, display, None)
             if line_edit:
-                number = round(float(self.motor.real_pos),6)
+                number = round(float(self.motor.real_pos), 6)
                 line_edit.setText(str(number))
             else:
                 print(display, " not found in the class or its parents")
             i = i + 1
+
 
 
     def movemotor(self):
@@ -361,10 +358,15 @@ class MotorControls(QMainWindow):
         elif self.shell.alive:
             self.gui.pmac_display.turn_green()
 
+    def pause_timer(self):
+        self.timer.stop()
+
+    def restartTimer(self):
+        self.timer.start()
+
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MotorControls()
     window.show()
     sys.exit(app.exec_())
-

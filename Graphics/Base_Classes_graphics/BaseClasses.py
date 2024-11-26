@@ -1,7 +1,8 @@
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox, QSizePolicy
-from PyQt5.QtWidgets import QVBoxLayout
+from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox, \
+    QSizePolicy
+from PyQt5.QtWidgets import QVBoxLayout, QMessageBox
 
 # General values:
 WIDTH = 80
@@ -359,9 +360,21 @@ class UnitsLabel(QLabel):
         self.setFont(font)
 
     def update_value(self, index):
-        if 0 <= index <=2:
+        if 0 <= index <= 2:
             self.setText("µm")
-        elif 2 < index <=5:
+        elif 2 < index <= 5:
             self.setText("degrees")
         else:
             self.setText("")
+
+
+class myWarningBox(QMessageBox):
+    def __init__(self, title="Warning", message="", parent=None)
+        super().__init__(parent)
+        self.setIcon(QMessageBox.Warning)
+        self.setWindowTitle(title)
+        self.setWindowMessage(message)
+        self.setStandardButtons(QMessageBox.Ok)
+
+    def show_warning(self):
+        self.exec()
