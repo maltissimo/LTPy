@@ -4,6 +4,7 @@ from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from ControlCenter.Control_Utilities import Connection_initer
 from ControlCenter.MeasurementControls import *
 from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer
 
 
 class MainLTPApp:
@@ -15,10 +16,32 @@ class MainLTPApp:
             return
 
         # first init motor controls to connect to Pmac, init motors, laser and Camera, loading also the graphics.
-        self.motor_controls = MotorControls(self.PMAC_credentials)
-        self.laser = LaserControl()
+        self.motor_timer = QTimer()
+        self.motor_timer.setInterval(100)
+        self.camera_timer = QTimer()
+        self.camera_timer.setInterval(100)
+        self.laser_timer = QTimer()
+        self.laser_timer.setInterval(200)
+
+        self.startAllTimers()
+
+        self.motor_controls = MotorControls(self.PMAC_credentials, self.motor_timer)
+        self.laser = LaserControl(self.laser_timer)
         # self.camera = Camera()
-        self.controls = MeasurementControls(self.PMAC_credentials)
+        self.controls = MeasurementControls(self.PMAC_credentials, self.motor_timer, self.camera_timer)
+
+    def startAllTimers(self):
+        for element in self.__dict__.values():
+            if isinstance(element, QTimer):
+                element.start()
+
+    def stopAllTimers(self):
+        for element in self.__dict__.values():
+            if isinstance(element, QTimer):
+                element.stop()
+
+    def stopTimer(self, QTimerObject):
+        QTimerObject.stop()
 
     def PMAC_connector(self):
         conn_initer = Connection_initer()

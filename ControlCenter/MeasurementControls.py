@@ -21,7 +21,7 @@ class MeasurementControls(QMainWindow):
     X0 = ZERO_X
     Y0 = ZERO_Y
 
-    def __init__(self, PMAC_credentials):
+    def __init__(self, PMAC_credentials, motor_timer : QTimer, camera_timer : QTimer):
         if not PMAC_credentials:
             connector = cu.Connection_initer()
             PMAC_credentials = connector.get_credentials()
@@ -34,8 +34,10 @@ class MeasurementControls(QMainWindow):
         # print(self.pmac_password)
 
         # Initing objects for the measurements:
+        self.motor_timer = motor_timer
+        self.camera_timer = camera_timer
 
-        self.motors = MotorControls(PMAC_credentials)
+        self.motors = MotorControls(PMAC_credentials, self.motor_timer)
         #self.camera = Camera() commented out as this is called by CamViewer in the initCameraTab method
         self.laser = Laser()
         self.measurement = Measurement()
@@ -52,6 +54,7 @@ class MeasurementControls(QMainWindow):
 
         self.gui = Ui_MeasurementGUI()
         self.gui.setupUi(self)
+
 
         # Dealing with the GUI:
 
@@ -212,7 +215,7 @@ class MeasurementControls(QMainWindow):
         self.xStartPos = self.motors.X.get_real_pos()
 
     def initHeightTab(self):
-        self.height_plot = RealTime_plotter()
+        self.height_plot = RealTime_plotter(self.camera_timer)
 
         self.height_plot.setLabels("X position", "mm", "Heights", "µm")
 
@@ -222,7 +225,7 @@ class MeasurementControls(QMainWindow):
         self.gui.height_tab.setLayout(height_layout)
 
     def initSlopesTab(self):
-        self.slopes_plot = RealTime_plotter()
+        self.slopes_plot = RealTime_plotter(self.camera_timer)
         self.slopes_plot.setLabels("X position", "mm", "Slopes", "µrad")
 
         slopes_layout = QtWidgets.QVBoxLayout()
@@ -232,7 +235,7 @@ class MeasurementControls(QMainWindow):
 
     def initCameraTab(self):
 
-        self.camViewer = CamViewer()
+        self.camViewer = CamViewer(self.camera_timer)
 
         CamTabLayout = QtWidgets.QVBoxLayout(self.gui.cam_tab)
         CamTabLayout.addWidget(self.camViewer)

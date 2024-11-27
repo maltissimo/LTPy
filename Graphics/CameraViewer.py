@@ -10,13 +10,13 @@ from Hardware.Detector import Camera
 
 
 class CamViewer(QMainWindow):
-    def __init__(self):
+    def __init__(self, camera_timer: QTimer):
         super().__init__()
 
         self.gui = Ui_PylonCamViewer()
         self.gui.setupUi(self)
 
-        self.timer = QTimer(self)
+        self.timer = camera_timer
         """self.timer.timeout.connect(self.update_plot)
         self.timer.start(50)"""
 
@@ -37,7 +37,7 @@ class CamViewer(QMainWindow):
 
 
     def start_grab(self):
-        self.timer.start(100) # update every 100 ms
+        #self.timer.start(100) # update every 100 ms
         self.timer.timeout.connect(self.grab_data)
 
 

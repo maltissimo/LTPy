@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QWidget, QVBoxLayout
 
 
 class RealTime_plotter(QWidget):
-    def __init__(self, parent=None):
+    def __init__(self, custom_timer : QTimer, parent=None):
         super().__init__(parent)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
@@ -31,10 +31,10 @@ class RealTime_plotter(QWidget):
         self.xData = []
         self.yData = []
 
-        self.timer = QTimer(self)
-        self.timer.start(100)
-        self.timer.timeout.connect(self.dummyUpdatePlot)
-        # in production : self.timer.timeout.connect(self.updatePlot)
+        self.timer = custom_timer
+        #self.timer.start(100)
+        # in debugging :self.timer.timeout.connect(self.dummyUpdatePlot)
+        self.timer.timeout.connect(self.updatePlot)
 
     def updatePlot(self, dataX, dataY):
         """
