@@ -21,13 +21,22 @@ class MeasurementControls(QMainWindow):
     X0 = ZERO_X
     Y0 = ZERO_Y
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self, PMAC_credentials):
+        if not PMAC_credentials:
+            connector = cu.Connection_initer()
+            PMAC_credentials = connector.get_credentials()
+
+        self.pmac_ip = PMAC_credentials["ip"]
+        # print(self.pmac_ip)
+        self.pmac_username = PMAC_credentials["username"]
+        # print(self.pmac_username)
+        self.pmac_password = PMAC_credentials["password"]
+        # print(self.pmac_password)
 
         # Initing objects for the measurements:
 
-        self.motors = MotorControls()
-        self.camera = Camera()
+        self.motors = MotorControls(PMAC_credentials)
+        #self.camera = Camera() commented out as this is called by CamViewer in the initCameraTab method
         self.laser = Laser()
         self.measurement = Measurement()
 
@@ -39,6 +48,8 @@ class MeasurementControls(QMainWindow):
         self.nrofgrabs = 5  # default nr of camera grabs per measurement point
 
         # Create an instance of the Measurement_GUI class:
+        super().__init__()
+
         self.gui = Ui_MeasurementGUI()
         self.gui.setupUi(self)
 
@@ -48,10 +59,10 @@ class MeasurementControls(QMainWindow):
         self.initSlopesTab()
         self.initCameraTab()
 
-        self.gui.points_input.returnPressed(self.get_points)
-        self.gui.length_input.returnPressed(self.get_length)
-        self.gui.stepsize_input.returnPressed(self.get_stepsize)
-        self.gui.nrofgrabs_input.returnPressed(self.get_nrofgrabs)
+        self.gui.points_input.returnPressed.connect(self.get_points)
+        self.gui.length_input.returnPressed.connect(self.get_length)
+        self.gui.stepsize_input.returnPressed.connect(self.get_stepsize)
+        self.gui.nrofgrabs_input.returnPressed.connect(self.get_nrofgrabs)
 
         self.gui.startButton.clicked.connect(self.startMeasurement)
         self.gui.stopButton.clicked.connect(self.stopMeasurement)
@@ -228,12 +239,10 @@ class MeasurementControls(QMainWindow):
 
         self.gui.cam_tab.setLayout(CamTabLayout)
 
-    def show(self):
-        self.show()
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = MeasurementControls()
+    window = MeasurementControls(None)
     window.show()
     sys.exit(app.exec_())

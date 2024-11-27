@@ -69,16 +69,24 @@ class Connection_initer(QWidget):
         self.ip = None
         self.password = None
         self.username = None
+
     def get_credentials(self):
         ip, ok = QInputDialog.getText(self, "PMAC Credentials", "Enter PMAC IP address: ")
-        if ok:
-            self.ip = ip
+        if not ok or not ip.strip():
+            return None
+        self.ip = ip.strip()
 
         username, ok = QInputDialog.getText(self, "PMAC Credentials", "Enter PMAC Username: ")
-        if ok:
-            self.username = username
+        if not ok or not username.strip():
+            return None
+        self.username = username.strip()
 
-        #self.password, ok = self.password_dialog(self)
+        password= self.password_dialog()
+        if password is None:
+            return None
+        self.password = password
+
+        return {"ip": self.ip, "username": self.username, "password": self.password}
 
     def password_dialog(self):
 
@@ -102,9 +110,8 @@ class Connection_initer(QWidget):
 
         dialog.setLayout(layout)
 
-        if dialog.exec_() == QInputDialog.Accepted:
-            self.password = password_input.text()
-            return True
+        if dialog.exec_() == QDialog.Accepted:
+            return password_input.text()
         else:
             return None, False
 

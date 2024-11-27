@@ -1,5 +1,6 @@
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QMainWindow
+import sys
 
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
 from ControlCenter.Control_Utilities import Utilities as Uti
@@ -8,7 +9,18 @@ from Hardware.Motors import MotorUtil
 
 
 class MotorControls(QMainWindow):
-    def __init__(self):
+    def __init__(self, PMAC_credentials):
+        if not PMAC_credentials:
+            connector = Conn_init()
+            PMAC_credentials = connector.get_credentials()
+
+        self.pmac_ip = PMAC_credentials["ip"]
+        #print(self.pmac_ip)
+        self.pmac_username = PMAC_credentials["username"]
+        #print(self.pmac_username)
+        self.pmac_password = PMAC_credentials["password"]
+        #print(self.pmac_password)
+
         super().__init__()
 
         # Create an instance of the Motors.GUI class:
@@ -36,26 +48,25 @@ class MotorControls(QMainWindow):
         self.full_motorslist = []
         self.motorname_list = []
         self.movesdict = {}
-        print(type(self.movesdict))
+        #print(type(self.movesdict))
         self.allMotors_inited = False
         self.allMoves_inited = False
 
         self.username = None
-        self.pmac_ip = "127.0.0.200" # adding a default for safety.
+        if self.pmac_ip is None:
+            self.pmac_ip = "127.0.0.200" # adding a default for safety.
         self.password = None
         self.shell = Uti.create(my_object = "shell") # Instantiating an object of Shell class
-        print(self.shell.alive)
+        print("Shell is live: ", self.shell.alive)
 
         if self.shell.alive == False :
-            self.connecter = Conn_init()
-            self.connecter.get_credentials()
-            self.connecter.password_dialog()
-            self.pmac_ip = self.connecter.ip
+
             self.shell.pmac_ip = self.pmac_ip
-            self.username = self.connecter.username
-            self.shell.username = self.username
-            self.password = self.connecter.password
-            self.shell.password =  self.password
+            #print("Shell ip: ", self.shell.pmac_ip)
+            self.shell.username = self.pmac_username
+            #print("Shell username: ", self.shell.username)
+            self.shell.password =  self.pmac_password
+            #print("Sell pwd: ", self.shell.password)
 
             # Initing shell and PMAC
 
@@ -366,12 +377,12 @@ class MotorControls(QMainWindow):
     def restartTimer(self):
         self.timer.start()
 
-    def show(self):
-        self.show()
+    """def show(self):
+        self.show()"""
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
-    window = MotorControls()
+    window = MotorControls(None)#20241127 MA: Added None as the class requires the PMAC credentials as parameter.
     window.show()
     sys.exit(app.exec_())

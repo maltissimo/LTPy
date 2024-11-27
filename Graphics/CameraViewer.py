@@ -24,7 +24,7 @@ class CamViewer(QMainWindow):
 
         self.gui.StopGrab.clicked.connect(self.stop_grab)
 
-        self.gui.SetAcqTime.clicked.connect(self.SetAcqTime)  # Acquisition Time button
+        self.gui.SetAcqTime.clicked.connect(self.setAcqTime)  # Acquisition Time button
         self.camera = Camera()  # Switch to None for debugging
         self.canvas = FigureCanvas(plt.figure())
         self.ax = self.canvas.figure.add_subplot(111)
@@ -59,7 +59,7 @@ class CamViewer(QMainWindow):
             self.ax.grid(True)
             self.canvas.draw()
 
-    def SetAcqTime(self):
+    def setAcqTime(self):
         newtime = float(self.gui.AcqTLineEdit.text())
         self.camera.set_exp_time(newtime)
 

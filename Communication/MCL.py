@@ -37,7 +37,7 @@ import glob
 
 from IPython.utils.capture import capture_output
 
-OBIS = "0d4d:003b"
+OBIS = "3405"
 #PORT = "/dev/ttyACM1" # /dev/ttyACM0 port over which the OBIS is connnected to MC
 ENDL = "\r\n"   # end of communication , carriage return + new line
 BAUD = 9600 # Baudrate for the communication
@@ -48,7 +48,8 @@ class SerialConn(serial.Serial):
     Models a connection through the pyserial interface from the MC to the OBIS remote.
     """
     def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
-        PORT = self.find_port(OBIS)
+        PORT = self.find_port()
+        print(PORT)
         super().__init__(port = PORT, baudrate = BAUD,
                          bytesize = serial.EIGHTBITS,
                          parity = serial.PARITY_NONE,
@@ -111,7 +112,7 @@ class SerialConn(serial.Serial):
 
         ports = serial.tools.list_ports.comports()
         for port in ports:
-            if port.vid == 3405:
+            if str(port.vid) == OBIS:
                 return(port.device)
             else:
                 return None

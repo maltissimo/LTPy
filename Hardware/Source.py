@@ -91,4 +91,7 @@ class Laser (SerialConn):
         else:
             self.pow_level = original_power # better leave it unchanged
 
+    def show(self):
+        self.show()
+
 

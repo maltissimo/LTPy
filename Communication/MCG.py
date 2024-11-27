@@ -34,8 +34,11 @@ class Pmac_Shell():
         self.ssh = ssh if ssh else paramiko.SSHClient() # an object accessing the SSHClient methods
         self.pmac_shell = pmac_shell  # initialized as none
         self.pmac_ip = pmac_ip  # the loopback interface
+        print("Inside PMAC shell,IP: ", self.pmac_ip)
         self.username = username
+        print("Inside PMAC shell, username: ", self.username)
         self.password = password
+        print("Inside PMAC shell, password: ", self.password)
         self.alive = alive #setting the connection status as False
         self.nbytes = nbytes # nr of bites for the receiver function
         self.rawoutput = rawoutput # Initialize the output bytes buffer string as None
