@@ -5,7 +5,7 @@ import sys
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
 from ControlCenter.Control_Utilities import Utilities as Uti
 from Graphics.Base_Classes_graphics.Motors_GUI import *
-from Hardware.Motors import MotorUtil
+from Hardware.Motors import MotorUtil, CompMotor
 
 
 class MotorControls(QMainWindow):
@@ -303,11 +303,38 @@ class MotorControls(QMainWindow):
         elif index >2:
            self.gui.label.setText ("degrees")
 
-    def update_positions(self):
+    def update_all_positions(self):
+        """02 December 2024: This will now change, as there is a quicker way to update motor:
+        &1,2,3p
+        this will report on ACTUAL position, which is what is needed.
+        the output is stored in shell.textoutput, as an array:
+        By setting:
+        alan = shell.textoutput
+        alan can then be called, very convieniently!!, as
+        alan[n] reporting all the actual positions of motors in CSn
+        Splitting then allows for actual number reading.
+
+        """
+
+        self.shell.send_receive("&1,2,3p")
+        all_pos_array = self.shell.textoutput
+        CS1 = all_pos_array[1].split() # this is for A, B and Z, i.e. roll, pitch and Z
+        CS2 = all_pos_array[2].split() # this is for C, i.e. yaw
+        CS3 = all_pos_array[3].split() # this is for X and Y.
+        try:
+            self.pitch.real_pos = float(CS1[1][1:]) # this is B i.e. pitch
+            self.roll.real_pos = float(CS1 [0][1:]) # this is A, i.e. roll
+            self.Z.real_pos = float(CS1 [0][1:])
+            self.yaw.real_pos = float(CS2[0][1:])
+            self.X.real_pos = float(CS3[0][1:])
+            self.Y.real_pos = float(CS3[1][1:])
+        except ValueError:
+            print("MotorName not initialized correctly!! ")
         i = 0
+
         for self.motor in self.user_motorlist:
             #print(self.motor.pmac_name)
-            self.motor.real_pos = self.motor.get_real_pos()
+            #self.motor.real_pos = self.motor.get_real_pos()
             #print(self.motor.real_pos)
             name = str(self.motorname_list[i])
             display = name.lower() + "_display"
@@ -365,7 +392,7 @@ class MotorControls(QMainWindow):
         QtWidgets.QMessageBox.warning("All motors killed")
 
     def update_all(self):
-        self.update_positions()
+        self.update_all_positions()
         if not self.shell.alive:
             self.gui.pmac_display.turn_red()
         elif self.shell.alive:
