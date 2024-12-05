@@ -21,7 +21,7 @@ class MeasurementControls(QMainWindow):
     X0 = ZERO_X
     Y0 = ZERO_Y
 
-    def __init__(self, PMAC_credentials, motor_timer : QTimer, camera_timer : QTimer):
+    def __init__(self, PMAC_credentials): #, motor_timer : QTimer, camera_timer : QTimer):
         if not PMAC_credentials:
             connector = cu.Connection_initer()
             PMAC_credentials = connector.get_credentials()
@@ -34,10 +34,10 @@ class MeasurementControls(QMainWindow):
         # print(self.pmac_password)
 
         # Initing objects for the measurements:
-        self.motor_timer = motor_timer
-        self.camera_timer = camera_timer
+        self.motor_timer = QTimer()
+        self.camera_timer = QTimer()
 
-        self.motors = MotorControls(PMAC_credentials, self.motor_timer)
+        self.motors = MotorControls(PMAC_credentials)
         #self.camera = Camera() commented out as this is called by CamViewer in the initCameraTab method
         self.laser = Laser()
         self.measurement = Measurement()

@@ -1,9 +1,10 @@
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QApplication
-
+from ControlCenter.Laser_MT import LaserControl
+from ControlCenter.MotorControls_MT import MotorControls
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from ControlCenter.Control_Utilities import Connection_initer
-from ControlCenter.MeasurementControls import *
-
+from ControlCenter.MeasurementControls_MT import *
+from PyQt5.QtWidgets import QApplication
+from PyQt5.QtCore import QTimer
 
 class MainLTPApp:
     def __init__(self):

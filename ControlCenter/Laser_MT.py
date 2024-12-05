@@ -8,7 +8,7 @@ from Hardware.Source import *
 
 class LaserControl(QtWidgets.QMainWindow):
 
-    def __init__(self, custom_timer : QTimer):
+    def __init__(self):
         super().__init__()
 
         #Create an instance of the Laser_GUI class:
@@ -19,8 +19,8 @@ class LaserControl(QtWidgets.QMainWindow):
         self.source = Uti.create(my_object= "laser")
         self.laserON = self.source.is_on
 
-        self.timer = custom_timer
-        #self.timer.start(100)  Updating every 100 ms.
+        self.timer = QTimer()
+        self.timer.start(100)  #Updating every 100 ms.
         self.timer.timeout.connect(self.update_all) # connects to the update_all method
 
         #Connect the various bits in the UI:
