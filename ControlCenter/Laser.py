@@ -6,9 +6,9 @@ from PyQt5.QtCore import QTimer
 from Hardware.Source import *
 
 
-class LaserControl(QtWidgets.QMainWindow):
+class __LaserControl(QtWidgets.QMainWindow):
 
-    def __init__(self):
+    def __init__(self): """, laser_timer: QTimer"""
         super().__init__()
 
         #Create an instance of the Laser_GUI class:
@@ -19,8 +19,8 @@ class LaserControl(QtWidgets.QMainWindow):
         self.source = Uti.create(my_object= "laser")
         self.laserON = self.source.is_on
 
-        self.timer = QTimer()
-        self.timer.start(100)  #Updating every 100 ms.
+        self.timer = laser_timer
+        #self.timer.start(100)  #Updating every 100 ms.
         self.timer.timeout.connect(self.update_all) # connects to the update_all method
 
         #Connect the various bits in the UI:

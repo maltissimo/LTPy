@@ -1,0 +1,14 @@
+20241205
+
+Add FWHM calculations in Camera Viewer to spot dimensions of focus
+
+Add greying of buttons waiting for commands to end (i.e. Move...)
+
+Set 0 in mechanical coordinates, i.e. when aligned mirror.
+
+Add values below labels in MeasurmentControls so as the user sees what's what
+
+Add defaults of length, # of steps, nr of grabs
+
+Add EXIT procedure to clean up everything
+

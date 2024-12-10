@@ -343,10 +343,11 @@ class MotorUtil():
         return (ret)
 
     def homeGantry(self):
-        selectAxes = "selectAxes=SelectAll"
-        gohome = "requestHost=RequestHome"
-        self.connection.send_message(selectAxes)
-        self.connection.send_message(gohome)
+        selectAxes = "selectAxes=selectAll"
+        gohome = "requestHost=requestHome"
+        self.connection.send_receive(selectAxes)
+        time.sleep(0.07)
+        self.connection.send_receive(gohome)
 
         """while not self.gantryHomed():
             print("still homing...")
@@ -354,11 +355,11 @@ class MotorUtil():
         print("system homed!")"""
 
     def resetGantry(self):
-        selectAxes = "selectAxes=SelectAll"
-        reset = "requestHost=RequestReset"
-        self.connection.send_message(selectAxes)
-        time.sleep(0.015)
-        self.connection.send_message(reset)
+        selectAxes = "selectAxes=selectAll"
+        reset = "requestHost=requestReset"
+        self.connection.send_receive(selectAxes)
+        time.sleep(0.07)
+        self.connection.send_receive(reset)
 
     def motors(self):
         """
@@ -406,17 +407,23 @@ class Move():
             self.name = self.motor.pmac_name
 
     def move_rel(self, speed = "rapid", distance = 0.0):
-        #Composing the message  to be sent:
-        move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
-        #print(move)
-        original_pos = self.motor.real_pos
-        self.connection.send_message(move)
         self.movecomplete = False
-        #print("moving")
-        while not self.movecomplete:
-            time.sleep(0.005)
+        if isinstance(self.motor, Motor):
+            movetime = abs(distance) / self.motor.getjogspeed() # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
+            # Composing the message  to be sent:
+            move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
+            self.connection.send_receive(move)
+            time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
+            print("move command issued: ", move)
             self.movecomplete = self.check_in_pos()
-        #print("move complete")
+        else:
+            # Composing the message  to be sent:
+            move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
+            self.connection.send_receive(move)
+            time.sleep(0.5)  #half a second wait time for rotational moves, seems ok.
+            print("move command issued: ", move)
+            self.movecomplete = self.check_in_pos()
+
 
         #Updating values in the objects:
         if hasattr(self.motor, "motorID"):
@@ -425,6 +432,7 @@ class Move():
             self.motor.real_pos = self.motor.get_real_pos()
         else:
             self.motor.real_pos = self.motor.get_real_pos()
+
 
     def move_abs(self, speed = "rapid", coord =0.0):
         # Composing the message  to be sent:

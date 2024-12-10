@@ -1,6 +1,6 @@
-from ControlCenter.Laser_MT import LaserControl
-from ControlCenter.MotorControls_MT import MotorControls
-from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
+from ControlCenter.Laser_MT import *
+from ControlCenter.MotorControls_MT import *
+from Graphics.Base_Classes_graphics.BaseClasses import *
 from ControlCenter.Control_Utilities import Connection_initer
 from ControlCenter.MeasurementControls_MT import *
 from PyQt5.QtWidgets import QApplication
@@ -10,6 +10,10 @@ class MainLTPApp:
     def __init__(self):
 
         self.PMAC_credentials = self.PMAC_connector()
+        print(self.PMAC_credentials["ip"])
+        print(self.PMAC_credentials["username"])
+        print(self.PMAC_credentials["password"])
+
         if not self.PMAC_credentials:
             self.show_warning("Connection issues", "Connection initialization Cancelled")
             return

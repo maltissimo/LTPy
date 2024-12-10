@@ -9,10 +9,15 @@ from Hardware.Motors import MotorUtil, CompMotor
 
 
 class MotorControls(QMainWindow):
-    def __init__(self, PMAC_credentials, custom_timer: QTimer):
+    def __init__(self, PMAC_credentials):
         if not PMAC_credentials:
             connector = Conn_init()
             PMAC_credentials = connector.get_credentials()
+
+        print("inside MotorControls: ")
+        print(PMAC_credentials["ip"])
+        print(PMAC_credentials["username"])
+        print(PMAC_credentials["password"])
 
         self.pmac_ip = PMAC_credentials["ip"]
         #print(self.pmac_ip)
@@ -141,9 +146,9 @@ class MotorControls(QMainWindow):
         self.gui.units.setText("µm")
 
         self.gui.distance.enter_pressed.connect(self.update_distance)
-        self.timer = custom_timer
+        self.timer = QTimer()
 
-        #self.timer.start(100)   updating every 100 ms
+        self.timer.start(100)   #updating every 100 ms
         self.timer.timeout.connect(self.update_all)  # connects to the update_all method
 
     def Connect2_Pmac(self):

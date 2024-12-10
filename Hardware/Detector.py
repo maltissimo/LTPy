@@ -38,7 +38,7 @@ class Camera:
             self.height = height
             self.width = width
             self.gain = gain
-        self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
+
         self.frame = None
 
     def __str__(self):
@@ -63,12 +63,14 @@ class Camera:
         self.camera.Open()
         self.camera.UserSetSelector = "Default"
         self.camera.UserSetLoad.Execute()
+        self.camera.PixelFormat = "Mono10"
         self.camera.ExposureTime = 12
         self.isopen = self.camera.IsOpen()
         self.height = self.camera.Height()  # 4600 pixels
         self.width = self.camera.Width()  # 5280 pixels
         self.minexptime = self.camera.ExposureTime.Min
         self.maxexptime = self.camera.ExposureTime.Max
+        self.isopen = self.camera.IsOpen()
 
     def closecam(self):
         self.camera.Close()
@@ -76,16 +78,20 @@ class Camera:
 
     def acquire_once(self):
         res = self.camera.GrabOne(1000)
-        myimage = res.GetArray() #this transforms res into and ndarray for further processing.
+        myimage = res.Array #this transforms res into and ndarray for further processing.
+        res.Release()
         return(myimage)
 
     def grabdata(self):
+        self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
+
         if self.camera.IsGrabbing():
             res = self.camera.RetrieveResult(5000, py.TimeoutHandling_ThrowException)
-            """ with camera.RetrieveResult(100) as res:"""
             if res.GrabSucceeded():
                 self.frame = res.Array
+            """ with camera.RetrieveResult(100) as res:"""
             res.Release()
+        self.camera.StopGrabbing()
 
     def set_exp_time(self, custom_time):
         """

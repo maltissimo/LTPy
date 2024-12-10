@@ -1,6 +1,6 @@
 # Now the fun begins:
 import math
-
+import os
 import numpy as np
 from scipy.ndimage import center_of_mass
 
@@ -60,6 +60,9 @@ class Measurement():
         return center_of_mass(ndarray)
 
     def save_data(self, filename, text):
+        """directory = os.path.dirname(filename)
+        if directory and not os.path.exists(filename):
+            os.makedirs(directory)"""
         # filename = "data of " + TODAY + ".txt"
         with open(filename, "w", encoding="ASCII") as f:
             f.write(text)
@@ -79,7 +82,7 @@ class Measurement():
         """
         text = ""
         for i in range(len(array1)):
-            text += array1[i] + "\t" + array2[i] + "\n"
+            text += str(array1[i]) + "\t" + str(array2[i]) + "\n"
         return (text)
 
     def height_calc(self):

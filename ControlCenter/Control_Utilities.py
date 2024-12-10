@@ -118,10 +118,10 @@ class Connection_initer(QWidget):
 
 class MathUtils():
 
-    def um2mm(self, umvalue):
+    def um2mm( umvalue):
         # converts microns to mm
         return (umvalue / 1000)
 
-    def mm2um(self, mmvalue):
+    def mm2um(mmvalue):
         # converts mm to microns
         return (mmvalue * 1000)

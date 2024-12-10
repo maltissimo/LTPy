@@ -1,0 +1,31 @@
+20241205
+
+LaserControl: cannot see the data label correctly.
+
+LaseControl: add fan operations (on when laser on, off when laser off).
+
+Close objects when quitting (looks like camera hangs)
+
+20241206
+
+find out why 3 open SSH..
+
+20241209
+
+resetGantry and HomeGantry do not work:
+Traceback (most recent call last):
+  File "/home/matteo/LTPy/Hardware/Motors.py", line 360, in resetGantry
+    self.connection.send_receive(selectAxes)
+    consider moving the reset method into the MotorControls_MT class
+
+- make RT_dataplot update only when it has a new set of data inserted.
+- Check why RT_dataplot does not print slopes!!!
+
+
+20241210
+
+clear slopes graph upon Start measurement
+if not measurement parameters, do not acquire.
+after first measurement, lenght, step and nr of steps are ???
+
+

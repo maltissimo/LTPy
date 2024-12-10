@@ -373,7 +373,7 @@ class myWarningBox(QMessageBox):
         super().__init__(parent)
         self.setIcon(QMessageBox.Warning)
         self.setWindowTitle(title)
-        self.setWindowMessage(message)
+        self.setText(message)
         self.setStandardButtons(QMessageBox.Ok)
 
     def show_warning(self):

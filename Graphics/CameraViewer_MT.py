@@ -36,7 +36,7 @@ class CamViewer(QMainWindow):
 
 
     def start_grab(self):
-        #self.timer.start(100) # update every 100 ms
+        self.timer.start(100) # update every 100 ms
         self.timer.timeout.connect(self.grab_data)
 
 
