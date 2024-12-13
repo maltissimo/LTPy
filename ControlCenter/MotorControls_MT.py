@@ -128,9 +128,9 @@ class MotorControls(QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Connection Error", str(e))
 
         self.gui.pushButton.clicked.connect(self.stopall)
-        self.gui.setspeed.clicked.connect(self.get_speed)
+        self.gui.setspeed.clicked.connect(self.set_speed)
 
-        self.gui.getspeed.clicked.connect(self.set_speed)
+        self.gui.getspeed.clicked.connect(self.get_speed)
 
         # Filling the data for comboboxes:
 
@@ -388,7 +388,8 @@ class MotorControls(QMainWindow):
         #motor = self.gui.motor_selector_2.itemText(index)
 
         speed = self.gui.set_display.text()
-        self.motor.setjogspeed(speed)
+        #print(speed, type(speed))
+        self.motor.setjogspeed(float(speed))
         self.get_speed() # this is just a sanity check...
 
     def stopall(self):

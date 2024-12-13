@@ -41,9 +41,9 @@
     <property name="currentIndex">
      <number>0</number>
     </property>
-    <widget class="QWidget" name="height_tab">
+    <widget class="QWidget" name="cam_tab">
      <attribute name="title">
-      <string>Height</string>
+      <string>Camera</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="Slopes_tab">
@@ -51,9 +51,9 @@
       <string>Slopes</string>
      </attribute>
     </widget>
-    <widget class="QWidget" name="cam_tab">
+    <widget class="QWidget" name="height_tab">
      <attribute name="title">
-      <string>Camera</string>
+      <string>Height</string>
      </attribute>
     </widget>
    </widget>
@@ -72,26 +72,13 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="MyLabel" name="label">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>10</y>
-       <width>161</width>
-       <height>16</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Measurement setup</string>
-     </property>
-    </widget>
     <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
        <x>140</x>
        <y>40</y>
        <width>127</width>
-       <height>49</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_2">
@@ -105,6 +92,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="MyLabel" name="points_display">
+        <property name="text">
+         <string>Setting: </string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QWidget" name="layoutWidget_2">
@@ -113,7 +107,7 @@
        <x>270</x>
        <y>40</y>
        <width>127</width>
-       <height>49</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -127,6 +121,13 @@
         </property>
        </widget>
       </item>
+      <item>
+       <widget class="MyLabel" name="stepsize_display">
+        <property name="text">
+         <string>Setting: </string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
     <widget class="QWidget" name="layoutWidget">
@@ -135,93 +136,136 @@
        <x>10</x>
        <y>40</y>
        <width>127</width>
-       <height>49</height>
+       <height>73</height>
       </rect>
      </property>
      <layout class="QVBoxLayout" name="verticalLayout">
       <item>
        <widget class="MyQLineEdit" name="length_input"/>
       </item>
-         <item>
-             <widget class="MyLabel" name="length_label">
-                 <property name="text">
-                     <string>Length (mm)</string>
-                 </property>
-             </widget>
-         </item>
+      <item>
+       <widget class="MyLabel" name="length_label">
+        <property name="text">
+         <string>Length (mm)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="MyLabel" name="length_display">
+        <property name="text">
+         <string>Setting: </string>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
-       <widget class="QWidget" name="layoutWidget">
-           <property name="geometry">
-               <rect>
-                   <x>540</x>
-                   <y>50</y>
-                   <width>501</width>
-                   <height>32</height>
-               </rect>
-           </property>
-           <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
-               <property name="spacing">
-                   <number>6</number>
-               </property>
-               <property name="leftMargin">
-                   <number>15</number>
-               </property>
-               <property name="rightMargin">
-                   <number>15</number>
-               </property>
-               <item>
-                   <widget class="MyPushButton" name="xStartPos">
-                       <property name="text">
-                           <string>Start X</string>
-                       </property>
-                   </widget>
-               </item>
-               <item>
-                   <widget class="MyPushButton" name="startButton">
-                       <property name="text">
-                           <string>Start</string>
-                       </property>
-                   </widget>
-               </item>
-               <item>
-                   <widget class="MyPushButton" name="stopButton">
-                       <property name="text">
-                           <string>Stop</string>
-                       </property>
-                   </widget>
-               </item>
-               <item>
-                   <widget class="QCheckBox" name="savelldata">
-                       <property name="text">
-                           <string>Save all Data</string>
-                       </property>
-                   </widget>
-               </item>
-           </layout>
+    <widget class="QWidget" name="layoutWidget">
+     <property name="geometry">
+      <rect>
+       <x>540</x>
+       <y>50</y>
+       <width>501</width>
+       <height>32</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0,0,0">
+      <property name="spacing">
+       <number>6</number>
+      </property>
+      <property name="leftMargin">
+       <number>15</number>
+      </property>
+      <property name="rightMargin">
+       <number>15</number>
+      </property>
+      <item>
+       <widget class="MyPushButton" name="xStartPos">
+        <property name="text">
+         <string>X Start Pos</string>
+        </property>
        </widget>
-       <widget class="QWidget" name="layoutWidget_3">
-           <property name="geometry">
-               <rect>
-                   <x>400</x>
-                   <y>40</y>
-                   <width>127</width>
-                   <height>49</height>
-               </rect>
-           </property>
-           <layout class="QVBoxLayout" name="verticalLayout_4">
-               <item>
-                   <widget class="MyQLineEdit" name="nrofgrabs_input"/>
-               </item>
-               <item>
-                   <widget class="MyLabel" name="nrofgrabs_label">
-                       <property name="text">
-                           <string>Number of grabs</string>
-                       </property>
-                   </widget>
-               </item>
-           </layout>
+      </item>
+      <item>
+       <widget class="MyPushButton" name="startButton">
+        <property name="text">
+         <string>Start</string>
+        </property>
        </widget>
+      </item>
+      <item>
+       <widget class="MyPushButton" name="stopButton">
+        <property name="text">
+         <string>Stop</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="savelldata">
+        <property name="text">
+         <string>Save all Data</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="layoutWidget_3">
+     <property name="geometry">
+      <rect>
+       <x>400</x>
+       <y>40</y>
+       <width>127</width>
+       <height>73</height>
+      </rect>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_4">
+      <item>
+       <widget class="MyQLineEdit" name="nrofgrabs_input"/>
+      </item>
+      <item>
+       <widget class="MyLabel" name="nrofgrabs_label">
+        <property name="text">
+         <string>Number of grabs</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="MyLabel" name="nrofgrabs_label_2">
+        <property name="text">
+         <string>Setting: </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+    <widget class="QWidget" name="">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>372</width>
+       <height>19</height>
+      </rect>
+     </property>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>80</number>
+      </property>
+      <item>
+       <widget class="MyLabel" name="label">
+        <property name="text">
+         <string>Measurement setup</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="MyLabel" name="meas_step_label">
+        <property name="text">
+         <string>Measurement step:      </string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -230,7 +274,7 @@
      <x>0</x>
      <y>0</y>
      <width>1370</width>
-     <height>24</height>
+     <height>22</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

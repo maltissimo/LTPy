@@ -19,13 +19,16 @@ Traceback (most recent call last):
     consider moving the reset method into the MotorControls_MT class
 
 - make RT_dataplot update only when it has a new set of data inserted.
-- Check why RT_dataplot does not print slopes!!!
+- Check why RT_dataplot does not print slopes!!! -> Solved 20241210
 
 
 20241210
 
-clear slopes graph upon Start measurement
-if not measurement parameters, do not acquire.
-after first measurement, lenght, step and nr of steps are ???
+Clear slopes graph upon Start measurement -> Solved 20241210
+if not measurement parameters, do not acquire -> Solved 20241210
+after first measurement, lenght, step and nr of steps are ??? -> Solved 20241210
 
+20241213
 
+GUI does not set jogspeed!- > Solved 202141213
+After first measurement, cannot change length, step and steps... ???

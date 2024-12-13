@@ -30,11 +30,11 @@ class RealTime_plotter(QWidget):
         self.xData = []
         self.yData = []
 
-        """self.timer = QTimer()
-        self.timer.start(100)
-        # in debugging :self.timer.timeout.connect(self.dummyUpdatePlot)
-        self.timer.timeout.connect(self.updatePlot)"""
         self.plotWidget.enableAutoRange('xy')
+
+        self.customLabel = pg.TextItem("Custom Label", color = 'black', anchor = (0,1))
+        self.plotWidget.addItem(self.customLabel)
+        self.plotWidget.getViewBox().sigRangeChanged.connect(self.updateLabelPosition)
 
     def updatePlot(self, dataX, dataY):
         """
@@ -70,8 +70,42 @@ class RealTime_plotter(QWidget):
         self.plotWidget.setLabel("bottom", bottom_label, bottom_units, color='k',
                                  **{'font-size': '14pt', 'font-weight': 'bold'})
 
+    def updateLabelPosition(self):
+        viewRange = self.plotWidget.getViewBox().viewRange()
+        x_min, x_max = viewRange[0]
+        y_min, y_max = viewRange[1]
+
+        self.customLabel.setPos(x_min + 0.1*(x_max - x_min), y_min + 0.1*(y_max - y_min))
+
+    def setCustomLabel(self, text):
+        """
+        Update the label
+        :param text: text for the update.
+        :return:
+        """
+        self.customLabel.setText(text)
+
+    def writeLabel(self, type = None, value = None, units = None):
+        """
+        writing a custom label for the graph. Example:
+        self.warning.writelabel(type = "RMS slope", value = "1.44", unit = "urad")
+
+        :param type: RMS slope or height, for example
+        :param value: value of the RMS calculations, for example
+        :param units: units needed for the label, i.e. urad for the slope.
+        :return:
+        """
+        mylabel =  str(type) +  " : " + str(value) + "[" + str (units) + "]"
+        return mylabel
+
     def stopTimer(self):
         self.timer.stop()
+
+    def clearPlot(self):
+        self.xData = []
+        self.yData = []
+        self.plotData.setData([], [])
+
 
 
 if __name__ == "__main__":

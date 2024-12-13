@@ -414,7 +414,7 @@ class Move():
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
             self.connection.send_receive(move)
             time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
-            print("move command issued: ", move)
+            #print("move command issued: ", move)
             self.movecomplete = self.check_in_pos()
         else:
             # Composing the message  to be sent:

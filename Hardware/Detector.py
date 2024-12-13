@@ -17,6 +17,12 @@ class Camera:
 
     03/07/2024
 
+    Pixel size is:
+
+    2.74um x 2.74 um
+
+    12/10/2024
+
     """
 
     def __init__(self): #,MyExpTime = 6, minexptime = 0, maxexptime = 0,  grab_nr = 10, isopen = False, height = 1400, width = 1400, gain = 0.0"""):
@@ -68,6 +74,8 @@ class Camera:
         self.isopen = self.camera.IsOpen()
         self.height = self.camera.Height()  # 4600 pixels
         self.width = self.camera.Width()  # 5280 pixels
+        self.x_pixel_size = 2.74 # this is in microns
+        self.y_pixel_size = 2.74 # this is in microns
         self.minexptime = self.camera.ExposureTime.Min
         self.maxexptime = self.camera.ExposureTime.Max
         self.isopen = self.camera.IsOpen()

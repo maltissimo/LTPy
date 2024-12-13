@@ -280,6 +280,9 @@ class MyQLineEdit(QLineEdit):
         rect.setHeight(max(rect.height(), self.height()))
         super().setGeometry(rect)
 
+    def changeText(self, text):
+        text = self.text()
+
 class MyComboBox(QComboBox):
     def __init__(self, parent = None, width = 2 * WIDTH, height = HEIGHT):
         super().__init__(parent)
