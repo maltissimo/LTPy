@@ -1,9 +1,12 @@
 # Now the fun begins:
 import math
 import os
+
+import numpy
 import numpy as np
 from scipy.ndimage import center_of_mass
 from scipy import integrate
+from Control_Utilities import MathUtils
 
 LENSFOCAL = 500  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
@@ -134,4 +137,7 @@ class Measurement():
         heights = np.array([])
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
         return (heights)"""
+
+
+
 
