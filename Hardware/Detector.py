@@ -69,7 +69,7 @@ class Camera:
         self.camera.Open()
         self.camera.UserSetSelector = "Default"
         self.camera.UserSetLoad.Execute()
-        self.camera.PixelFormat = "Mono10"
+        self.camera.PixelFormat = "Mono12"
         self.camera.ExposureTime = 12
         self.isopen = self.camera.IsOpen()
         self.height = self.camera.Height()  # 4600 pixels

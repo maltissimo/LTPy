@@ -8,7 +8,7 @@ from PyQt5.QtWidgets import QVBoxLayout, QMessageBox
 WIDTH = 80
 HEIGHT = 20
 FONT = "Avenir"
-FONTSIZE = 12
+FONTSIZE = 10
 QBOXWIDTH = 384
 QBOXHEIGHT = 216
 

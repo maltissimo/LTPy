@@ -1,12 +1,9 @@
 # Now the fun begins:
 import math
 import os
-
-import numpy
 import numpy as np
 from scipy.ndimage import center_of_mass
 from scipy import integrate
-from Control_Utilities import MathUtils
 
 LENSFOCAL = 500  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
@@ -49,8 +46,7 @@ class Measurement():
         self.slopes_rms = 0.0
         self.heights_rms = 0.0
 
-    def centroid(self, ndarray):
-        return center_of_mass(ndarray)
+
 
     def save_data(self, filename, text):
         """directory = os.path.dirname(filename)
@@ -100,31 +96,7 @@ class Measurement():
         heights = integrate.cumtrapz(arrayY, arrayX, initial=0)
         return (heights)
 
-    def my_fit(self, arrayX, arrayY, order):
-        """
 
-        :param arrayX: typically, an array with the step positions of the measurement
-        :param arrayY: array of values to be fit
-        :param order: order of the polynomila fit
-        :return: an array of fitted data.
-        """
-
-        coeff = np.polyfit(arrayX, arrayY, order)
-        p = np.poly1d(coeff)
-        fit = np.polyval(p, arrayX)
-        #radius = 1 / coeff[0]
-        return (fit)
-
-    def RMS(self, array):
-        """
-        calculates the root mean square value of any array
-        :param array: input array for which the RMS calculation is needed
-        :return: an RMS value, same units as array.
-        """
-        """mysum = np.sum(array)
-        nr_of_points = len(array)"""
-        RMS = np.sqrt(np.mean(array**2))
-        return (RMS)
 
     def figure_error(self, arrayX, arrayY):
         """
@@ -137,7 +109,4 @@ class Measurement():
         heights = np.array([])
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
         return (heights)"""
-
-
-
 
