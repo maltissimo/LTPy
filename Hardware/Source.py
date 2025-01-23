@@ -84,7 +84,10 @@ class Laser (SerialConn):
         message = LASPOWLEVEL + pow # this is the complete message to be sent to the laser
         self.serialmessage(message) # message sent
         system_output = self.serialmessage(isOUTPOWLEVEL)
-        if abs(float(system_output) - float(self.pow_level)) < 3e-5:
+        #print(f"system_output: {system_output}")  # Debugging
+        #print(f"power level: {self.pow_level}")
+        #print("difference output - pow_level: ", float(system_output.strip()) - float(self.pow_level.strip()))
+        if abs(float(system_output.strip()) - float(self.pow_level.strip())) <3e-6:
             self.pow_level = system_output
             self.cur_level = self.serialmessage(isOUTCURLEVEL)
 

@@ -15,10 +15,6 @@ class CamViewer(QMainWindow):
         self.gui = Ui_PylonCamViewer()
         self.gui.setupUi(self)
 
-        #self.timer = QTimer()
-        #self.timer.timeout.connect(self.update_plot)
-        #self.timer.start(50)
-
         #Button Connection
         self.gui.StartGrab.clicked.connect(self.start_grab)
         self.gui.StopGrab.clicked.connect(self.stop_grab)
@@ -60,6 +56,7 @@ class CamViewer(QMainWindow):
     def handle_worker_error(self, message):
         self.show_warning(title="Error!", message=message)
 
+    @synchronized_method
     def grab_data(self):
         """
         switch to Pass for debugging

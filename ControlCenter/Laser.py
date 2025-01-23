@@ -56,7 +56,7 @@ class __LaserControl(QtWidgets.QMainWindow):
             self.source.is_on = "OFF"
             self.gui.int_display.updateValue("0.000")
         elif self.source.is_on == "OFF":
-            pow = 0.8 * float(self.source.p_high_lim)
+            pow = 0.1 * float(self.source.p_high_lim)
             self.source.set_power(pow) # sets the POWer Level preset to 80% of max power
             self.source.turnON(LASON)
             self.source.is_on = "ON"

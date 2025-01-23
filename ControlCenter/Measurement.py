@@ -5,7 +5,7 @@ import numpy as np
 from scipy.ndimage import center_of_mass
 from scipy import integrate
 
-LENSFOCAL = 500  # this is the nominal focal length in mm of our lens
+LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
 ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height()
 
@@ -59,7 +59,7 @@ class Measurement():
 
     def slope_calc(self, Y):
         # this is the core of the measurement
-        slope_error = 0.5 * (math.atan(2.74 * (Y - ZERO_Y) / (LENSFOCAL * 1000)))
+        slope_error = 0.5 * (math.atan((2.74 * ( ZERO_Y - Y)) / (LENSFOCAL * 1000)))
 
         """print("Inside the slope_calc loop Y: ", Y)
         print("Inside the slope_calc loop ZERO_Y ", ZERO_Y)

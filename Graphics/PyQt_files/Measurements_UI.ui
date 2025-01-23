@@ -45,7 +45,7 @@
      <attribute name="title">
       <string>Camera</string>
      </attribute>
-     <widget class="QWidget" name="">
+     <widget class="QWidget" name="layoutWidget">
       <property name="geometry">
        <rect>
         <x>10</x>
@@ -98,30 +98,18 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QWidget" name="">
+    <widget class="QWidget" name="layoutWidget">
      <property name="geometry">
       <rect>
-       <x>10</x>
-       <y>2</y>
-       <width>901</width>
-       <height>141</height>
+       <x>20</x>
+       <y>3</y>
+       <width>981</width>
+       <height>131</height>
       </rect>
      </property>
-     <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
       <property name="spacing">
-       <number>20</number>
-      </property>
-      <property name="leftMargin">
-       <number>10</number>
-      </property>
-      <property name="topMargin">
-       <number>10</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>15</number>
+       <number>30</number>
       </property>
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_5">
@@ -159,6 +147,9 @@
         </item>
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout_3">
+          <property name="spacing">
+           <number>0</number>
+          </property>
           <item>
            <layout class="QVBoxLayout" name="verticalLayout">
             <item>
@@ -250,9 +241,18 @@
       <item>
        <layout class="QVBoxLayout" name="verticalLayout_6">
         <property name="spacing">
-         <number>60</number>
+         <number>10</number>
+        </property>
+        <property name="leftMargin">
+         <number>15</number>
+        </property>
+        <property name="topMargin">
+         <number>10</number>
         </property>
         <property name="rightMargin">
+         <number>15</number>
+        </property>
+        <property name="bottomMargin">
          <number>30</number>
         </property>
         <item>
@@ -263,9 +263,15 @@
          </widget>
         </item>
         <item>
-         <widget class="MyLabel" name="label">
+         <widget class="MyLabel" name="step_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
           <property name="text">
-           <string> </string>
+           <string/>
           </property>
          </widget>
         </item>

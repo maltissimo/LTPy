@@ -4,21 +4,20 @@ import matplotlib.pyplot as plt
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
-
+from ControlCenter import Control_Utilities as cu
 from Graphics.Base_Classes_graphics.CameraViewer_GUI import Ui_PylonCamViewer
 from Hardware.Detector import Camera
 
 
 class CamViewer(QMainWindow):
-    def __init__(self, camera_timer: QTimer):
+    def __init__(self):
         super().__init__()
-
         self.gui = Ui_PylonCamViewer()
         self.gui.setupUi(self)
 
-        self.timer = camera_timer
-        """self.timer.timeout.connect(self.update_plot)
-        self.timer.start(50)"""
+        self.timer = QTimer()
+        #self.timer.timeout.connect(self.update_plot)
+        self.timer.start(50)
 
         self.gui.StartGrab.clicked.connect(self.start_grab)
 
@@ -37,7 +36,7 @@ class CamViewer(QMainWindow):
 
 
     def start_grab(self):
-        #self.timer.start(100) # update every 100 ms
+        self.timer.start(100) # update every 100 ms
         self.timer.timeout.connect(self.grab_data)
 
 
@@ -55,6 +54,11 @@ class CamViewer(QMainWindow):
             print(f"frame shape: {self.camera.frame.shape}")"""
             self.ax.clear()
             self.ax.imshow(self.camera.frame)
+            if self.gui.checkBox.isChecked():
+
+                image = self.camera.frame
+                self.display_fwhm(image)
+
             self.plot_center_mark()
             self.ax.grid(True)
             self.canvas.draw()
@@ -71,6 +75,12 @@ class CamViewer(QMainWindow):
         y_center = (y_lim[0] + y_lim[1])/2
 
         self.ax.scatter(x_center, y_center, color ='red', marker ="+", s = 100)
+
+    def display_fwhm(self, nparray2D):
+        fwhm_X, fwhm_Y = cu.MathUtils.calc_2D_fwhm(nparray2D)
+        self.gui.FWHMX_label.setText(str(2.74* fwhm_X))
+        self.gui.FWHMY_label.setText(str(2.74 * fwhm_Y))
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

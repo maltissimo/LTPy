@@ -3,6 +3,7 @@ from Communication.MCG import Gantry as gc
 import numpy as np
 import time
 import warnings
+
 """
 These are some global definitions that may be useful during measurements. The values are taken 
 directly from the config file of the Gantry PMac. It can be found inside the 
@@ -166,7 +167,7 @@ class Motor():
         index = self.motorname[-1]
         return (self.motorname[:len(self.motorname) - 2] + "[" + index + "]")
 
-    def get_pos(self):
+    def get_pos(self, max_tries=5):
         """
         enquiry about the position of a motor Sends the following command to the gantry, and returns the answer:
         Motor[i].ActPos
@@ -176,10 +177,22 @@ class Motor():
         message = self.pmac_name + ".ActPos"+ "\n"
         #print(message)
         pos = self.connection.send_receive(message)
-        alan = float(pos)
-        self.act_pos = alan
-        #print(alan)
-        return(alan)
+        attempts = 0
+        while attempts < max_tries:
+            try:
+                alan = float(pos)
+                self.act_pos = alan
+                return alan
+            except ValueError:
+                attempts += 1
+                print(f"Error: Unable to convert '{pos}' to float. Attempt {attempts} of {max_tries}. Retrying...")
+                if attempts < max_tries:
+                    pos = self.connection.send_receive(message)  # Retry fetching the position
+                else:
+                    raise ValueError(f"Failed to convert position '{pos}' to float after {max_tries} attempts.")
+
+        # If this point is reached, it means max tries were exceeded, so raise an error.
+        raise ValueError(f"Failed to retrieve a valid float position after {max_tries} attempts.")
 
     def get_real_pos(self):
         """
@@ -412,17 +425,23 @@ class Move():
             movetime = abs(distance) / self.motor.getjogspeed() # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
-            self.connection.send_receive(move)
-            time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
             #print("move command issued: ", move)
-            self.movecomplete = self.check_in_pos()
+            self.connection.send_receive(move)
+            #time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
+            while not self.movecomplete:
+                time.sleep(0.005)
+                self.movecomplete = self.check_in_pos()
+
         else:
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
             self.connection.send_receive(move)
             time.sleep(0.5)  #half a second wait time for rotational moves, seems ok.
-            print("move command issued: ", move)
-            self.movecomplete = self.check_in_pos()
+            #print("move command issued: ", move)
+            while not self.movecomplete:
+                time.sleep(0.005)
+                self.movecomplete = self.check_in_pos()
+            #self.movecomplete = self.check_in_pos()
 
 
         #Updating values in the objects:
@@ -437,8 +456,8 @@ class Move():
     def move_abs(self, speed = "rapid", coord =0.0):
         # Composing the message  to be sent:
         move = f'&{str(self.cs)} cpx {(speed)} abs {self.name} {coord}\n'
-        print(move)
-        original_pos = self.motor.real_pos
+        #print(move)
+        #original_pos = self.motor.real_pos
         self.connection.send_message(move)
         self.movecomplete = False
         while not self.movecomplete:

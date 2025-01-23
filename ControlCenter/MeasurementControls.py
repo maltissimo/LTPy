@@ -165,7 +165,7 @@ class MeasurementControls(QMainWindow):
             averageCentroidX = averageX / self.nrofgrabs
             averageCentroidY = averageY / self.nrofgrabs
 
-            slope = self.measurement.slope_calc(averageCentroidY, Y0, f)
+            slope = self.measurement.slope_calc(averageCentroidY)
             height = self.measurement.height_calc()
             self.results += str(mypos) + "\t" + str(self.motors.Y.get_real_pos()) + "\t" + str(
                 averageCentroidX) + "\t" + str(averageCentroidY) + "\n"

@@ -2,6 +2,7 @@ import datetime
 from itertools import filterfalse
 
 from ControlCenter import Control_Utilities as cu
+from ControlCenter.Control_Utilities import MathUtils
 from ControlCenter.Laser_MT import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls_MT import *
@@ -10,12 +11,9 @@ from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Graphics.Base_Classes_graphics.RT_Dataplot import *
 from Graphics.CameraViewer_MT import *
 
-LENSFOCAL = 500  # this is the nominal focal length in mm of our lens
+LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
 ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height()
-
-TODAY = datetime.datetime.now().strftime("%H-%M-%S_%Y%m%d")
-
 
 class MeasurementControls(QMainWindow):
     f = LENSFOCAL  # this is now in mm
@@ -54,6 +52,7 @@ class MeasurementControls(QMainWindow):
         self.stepsize = 0.0  # this is the stepsize ( in mm) of the measurement
         self.nrofgrabs = 5  # default nr of camera grabs per measurement point
         self.xStartPos = self.motors.X.get_real_pos()
+        self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
 
         # Create an instance of the Measurement_GUI class:
         super().__init__()
@@ -68,9 +67,9 @@ class MeasurementControls(QMainWindow):
         self.initSlopesTab()
         self.initCameraTab()
 
-        print("Nr of measurement points: ", self.points)
+        """print("Nr of measurement points: ", self.points)
         print("Measurement lenght: ", self.length)
-        print("Measurement stepsize: ", self.stepsize)
+        print("Measurement stepsize: ", self.stepsize)"""
 
         self.gui.points_input.returnPressed.connect(self.get_points)
         self.gui.length_input.returnPressed.connect(self.get_length)
@@ -82,26 +81,36 @@ class MeasurementControls(QMainWindow):
         self.gui.xStartPos.clicked.connect(self.setXstartPos)
 
 
+
     def get_points(self):
         self.points = int(self.gui.points_input.text())
         self.gui.points_input.clear()
+        points_message = str(self.points)
+        self.gui.points_display.setText(points_message)
 
     def get_length(self):
         my_mm_length = float(self.gui.length_input.text())
         self.length = cu.MathUtils.mm2um(my_mm_length)
         self.gui.length_input.clear()
+        length_message = str(my_mm_length)
+        self.gui.length_display.setText(length_message)
 
     def get_stepsize(self):
-        self.stepsize = float(self.gui.stepsize_input.text())
-        self.stepsize = cu.MathUtils.mm2um(self.stepsize)
+        stepsize = float(self.gui.stepsize_input.text())
+        self.stepsize = cu.MathUtils.mm2um(stepsize)
         self.gui.stepsize_input.clear()
+        stepsize_message = str(stepsize)
+        self.gui.stepsize_display.setText(stepsize_message)
 
     def get_nrofgrabs(self):
         self.nrofgrabs = int(self.gui.nrofgrabs_input.text())
         self.gui.nrofgrabs_input.clear()
+        grabs_message =str(self.nrofgrabs)
+        self.gui.nrofgrabs_label_2.setText(grabs_message)
 
     def conditions_check(self):
         # Check if laser is on:
+        #print(f"Checking conditions: Points={self.points}, Length={self.length}, Step Size={self.stepsize}")
 
         if self.laser.is_on != 'ON':
             self.show_warning(title = "Laser Warning!", message = "Laser is currently off, turning it on")
@@ -110,35 +119,47 @@ class MeasurementControls(QMainWindow):
 
         if self.points != 0 and self.stepsize != 0.0 and self.length == 0.0:
             self.length = self.points * self.stepsize
-            print("Nr of measurement points: ", self.points)
-            print("Measurement lenght: ", self.length)
-            print("Measurement stepsize: ", self.stepsize)
+            #self.print_attributes()
+
             return True
             # this is um, as the values are set in micron straight after user input
 
         elif self.stepsize != 0.0 and self.length != 0.0 and self.points == 0:
             self.points = int(self.length / self.stepsize)
-            print("Nr of measurement points: ", self.points)
-            print("Measurement lenght: ", self.length)
-            print("Measurement stepsize: ", self.stepsize)
+            #self.print_attributes()
             return True
 
         elif self.length != 0.0 and self.points != 0 and self.stepsize == 0.0:
             self.stepsize = self.length / self.points
-            print("Nr of measurement points: ", self.points)
-            print("Measurement lenght: ", self.length)
-            print("Measurement stepsize: ", self.stepsize)
+            #self.print_attributes()
+            return True
+
+        elif self.length!= 0 and self.points!= 0 and self.stepsize !=0:
+            self.stepsize = self.length / self.points
+            stepsize_message = str(MathUtils.um2mm(self.stepsize))
+            self.gui.stepsize_display.setText(stepsize_message)
+            #self.print_attributes()
             return True
 
         else:
             self.show_warning(title = "Missing Values!",
-                              message = "At least two between Length, Step Size and Number of points are required")
-        return False
+                              message = "NEIN! At least two between Length, Step Size and Number of points are required")
+            return False
+        #self.print_attributes()
+
+        return True
+
+    def print_attributes(self):
+        print("Nr of measurement points: ", self.points + 1) # this is because one is measuring from position 0 up to X, so this is the number of intervals.
+        print("Measurement length: ", self.length)
+        print("Measurement stepsize: ", self.stepsize)
 
     def setXstartPos(self):
-        self.warning.show_warning(title = "Setting measurement start position!", message = "Set the X stage at the desired starting position!")
+
         self.xStartPos = self.motors.X.get_real_pos()
-        print(" X start position: ", self.xStartPos)
+        mymessage = f"Set the measurement starting position @ {MathUtils.um2mm(self.XStartPos)}"
+        self.warning.show_warning(title="Setting measurement start position!",
+                                  message= mymessage)
 
     def get_all_motor_pos(self):
         """
@@ -155,47 +176,65 @@ class MeasurementControls(QMainWindow):
         return (pos_all)
 
     def writeheader(self):
+        if datetime.datetime.now().strftime("%H-%M_%Y%m%d") != self.today:
+            self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
+        else:
+            self.today = self.today
         header = ""
-        header += "date of measurement: " + TODAY + "\n"
+        header += "date of measurement: " + self.today + "\n"
         header += "Nr of camera grabs per point: " + str(self.nrofgrabs) + "\n"
-        header += "Length of measurement (mm): " + str(self.length) +"\n"
-        header += "Nr of measurement points: " +  str(self.points) + "\n"
-        header += "Stepsize of measurement: " + str(self.stepsize) + "\n"
-        header += "\t" + "X" + "\t\t" + "Y" + "\t\t" + "Centroid" + "\n"
+        header += "Length of measurement (mm): " + str(MathUtils.um2mm(self.length)) +"\n"
+        header += "Nr of measurement points + 1: " +  str(self.points + 1 ) + "\n"
+        header += "Stepsize of measurement (mm): " + str(MathUtils.um2mm(self.stepsize)) + "\n"
+        header += "\t" + "X" + "\t\t" + "Y" + "\t\t" + "Centroid X" + "\t\t" + "Centroid Y"+ "\n"
         header += "\n"
         return header
 
 
     def startMeasurement(self):
 
-        self.slopes_plot.clearPlot() # Clear plot at the beginning of the measurement.
+        self.slopes_plot.clearPlot()# Clear plot at the beginning of the measurement.
+        self.height_plot.clearPlot() # Clear plot at the beginning of the measurement
 
         self.camViewer.camera.set_grab_nr(1)
+        self.camViewer.camera.set_exp_time(8)
+        self.camViewer.stop_grab()
 
         if not self.conditions_check():
             return
+        #print("Inside the StartMeasurement method: ")
+        self.print_attributes()
+
+        # Ensure points, length, and stepsize are set
+        if self.points == 0 or self.length == 0.0 or self.stepsize == 0.0:
+            self.show_warning("Missing Values!", "Please provide valid inputs for points, length, and stepsize.")
+            return
+
 
         self.results = self.writeheader()
-        print(self.results)
+        #print(self.results)
         #Instantiating the arrays for storing the results
         myposarray = np.array([])
         mystepposarray = np.array([])
         slopesarray = np.array([])
         heightsarray = np.array([])
 
-        if self.motors.X.get_real_pos()- self.xStartPos > 1.0: # difference bigger than 1 micron
+        if not self.motors.X.get_real_pos()- self.xStartPos > 1.0: # difference bigger than 1 micron
+            print("Stage at starting position!")
+            print("Stepsize set at: ", self.stepsize)
+        else:
             self.show_warning("Head moving", "Moving X Stage to starting position")
             self.motors.xmove.move_abs(speed = "rapid", coord = self.xStartPos)
 
         # This below is the main measurement loop
-        for i in range(self.points):
+        for i in range(self.points + 1):
             mypos = self.motors.X.get_real_pos()  # this is in microns
             mysteppos = i * self.stepsize # this is in microns, a lot better for graphical representation.
             print("\n")
-            print("Moved to position ", i + 1, f" of {self.points}")
+            print("Position ", i + 1, f" of {self.points + 1}")
             label_message = "Measurement step: " + str(i + 1) + f" of {self.points}"
-            self.gui.meas_step_label.setText(label_message)
-            print("X coord: ", mypos, "\n")
+            self.gui.step_label.setText(label_message)
+            print("Measuring @ X coord: ", mypos, "\n")
 
             averageX= 0.0  # resetting back to 0 after each round of the loop below.
             averageY = 0.0
@@ -205,7 +244,7 @@ class MeasurementControls(QMainWindow):
                 self.camViewer.camera.frame = image
                 #print(type(image))
                 centroid = cu.MathUtils.centroid( image)
-                averageX += centroid[1] # this is the HOR vector @ Y = centroid[0], i.e. parallel to HOR axis
+                averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
                 #print("Current meas centroid X: ", centroid[0])
                 averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
                 #print("Current meas centroid Y: ", centroid[1])
@@ -213,29 +252,38 @@ class MeasurementControls(QMainWindow):
 
             averageCentroidX = averageX / self.nrofgrabs
             averageCentroidY = averageY / self.nrofgrabs
-            #print("Current averaged centroid Y: ", averageCentroidY, "\n")
+            #print("Current averaged centroid X: ", averageCentroidX, "\n")
+            #print("Current averaged centroid Y: ", averageCentroi1dY, "\n")
 
-            slope = self.measurement.slope_calc(averageCentroidY)
+            slope = self.measurement.slope_calc(averageCentroidY) #changed for trial on 2024 12 20 MA, gave 14 urad with 100 grabs
+            #slope = self.measurement.slope_calc(averageCentroidX) gave 2 urad, but radius way off.
 
             slopesarray = np.append(slopesarray, slope)
             #print(slopesarray)
 
-            self.results += (str(mypos) + "\t" + str(self.motors.Y.get_real_pos()) +
-                             "\t" + str(averageCentroidX) + "\t" + str(averageCentroidY) + "\n")
+            self.results += (str(mypos) + "\t\t" + str(self.motors.Y.get_real_pos()) +
+                             "\t\t" + str(averageCentroidX) + "\t\t" + str(averageCentroidY) + "\n")
 
             myposarray = np.append(myposarray, mypos - self.xStartPos)
 
             mystepposarray = np.append(mystepposarray, mysteppos)
+            nextpos = mypos + self.stepsize # all should be in microns
+            if i != self.points:
+                self.motors.xmove.move_rel(speed = "linear", distance = self.stepsize)
+                while True:
+                    if abs(nextpos - self.motors.X.get_real_pos())<0.05:
+                        break
+                    time.sleep(0.075)
 
-            #self.height_plot.updatePlot(mystepposarray[-1] * 1000, heightsarray[-1])
-            #self.slopes_plot.updatePlot(mystepposarray[-1] / 1000, slopesarray[-1])
-            #print(self.motors.X.get_real_pos())
-            self.motors.xmove.move_rel(speed = "rapid", distance= self.stepsize)
-            i += 1
+                #self.motors.xmove.move_rel(speed = "rapid", distance= self.stepsize)
+                i += 1
+                averageCentroidX  = 0.0
+                averageCentroidY = 0.0
 
         # Calculating heights:
 
-        fit = cu.MathUtils.my_fit(arrayX = myposarray, arrayY = slopesarray, order = 0)
+        fit, radius = cu.MathUtils.my_fit(arrayX = myposarray, arrayY = slopesarray, order = 1)
+        print("Radius as coeff[0], in m: ", radius / 1000000)
         to_be_plotted = slopesarray - fit # this is the REAL measurement value
        # print(type(to_be_plotted))
 
@@ -266,7 +314,7 @@ class MeasurementControls(QMainWindow):
     def save_data(self, myposarray, slopesarray, heightsarray):
 
         if self.gui.savelldata.isChecked():
-            filename = "FullData" + TODAY + ".txt"
+            filename = "FullData" + self.today + ".txt"
             self.measurement.save_data(filename, self.results)
             #self.show_warning( "Full Data saved", f"Data saved into {filename}")
 
@@ -275,8 +323,8 @@ class MeasurementControls(QMainWindow):
         slopestobesaved += self.measurement.pretty_printing(myposarray, slopesarray)
         heightstobesaved += self.measurement.pretty_printing(myposarray, heightsarray)
 
-        filename2 = "Xpos_slopes" + TODAY + ".txt"
-        filename3 = "Xpos_heights" + TODAY + ".txt"
+        filename2 = "Xpos_slopes" + self.today + ".txt"
+        filename3 = "Xpos_heights" + self.today + ".txt"
 
         self.measurement.save_data(filename2, slopestobesaved)
         self.measurement.save_data(filename3, heightstobesaved)
@@ -295,8 +343,23 @@ class MeasurementControls(QMainWindow):
         self.nrograbs = 5
         self.setpsize = 0.0
         self.length = 0.0"""
+
+        # Clear input fields
+        self.gui.points_input.clear()
+        self.gui.length_input.clear()
+        self.gui.stepsize_input.clear()
+        self.gui.nrofgrabs_input.clear()
+
+        act_speed = self.motors.X.getjogspeed()
+        self.motors.X.setjogspeed(20)
         self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
-        self.show_warning("End of Measurement!", "Stage at the original position.")
+        self.show_warning("End of Measurement!", f"Stage at the original position. Jog speed set at {self.motors.X.getjogspeed()}")
+        while True:
+            if abs(self.xStartPos - self.motors.X.get_real_pos()) < 0.05:
+                break
+            time.sleep(0.075)
+        self.motors.X.setjogspeed(act_speed)
+
 
     def stopMeasurement(self):
         # TODO: dump all the motors positions into a file. Then set the positions after homing to those values

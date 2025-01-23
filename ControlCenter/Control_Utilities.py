@@ -140,7 +140,6 @@ class MathUtils():
         """
 
         halfmax = np.max(nparray) / 2  # this finds the halfmax  of the array
-        # takes the 'derivative' of signum(halfmax - array[])
         above_half = nparray >= halfmax
         indexes = np.where(above_half)[0]
         FWHM = indexes[-1] - indexes[0]
@@ -154,7 +153,25 @@ class MathUtils():
 
     @staticmethod
     def centroid( ndarray):
-        return center_of_mass(ndarray)
+        """
+        this had to be modified from a simple scipy.center_of_mass, as it doesn't track correctly the spot center.
+
+        :param ndarray:
+        :return:
+        """
+        max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
+        back_sub = ndarray - np.min(ndarray)
+        #ROI definition around the max:
+        x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
+        y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
+        roi = back_sub[x_min:x_max, y_min:y_max]
+        com_roi = (center_of_mass(roi))
+        #print("this is the Center of Mas ROI: ", com_roi)
+
+        com_global = (int(com_roi[0]) + x_min, int(com_roi[1]) + y_min)
+        #print(com_global[0], com_global[1])
+
+        return (com_global)
 
     @staticmethod
     def splitimage( nparray2D):
@@ -167,9 +184,10 @@ class MathUtils():
         """
         center = MathUtils.centroid(nparray2D)
         centerX, centerY = np.round(center).astype(int)
+        #print(centerX, centerY)
 
-        Y_vector = nparray2D[centerY, :]
-        X_vector = nparray2D[:, centerX]
+        X_vector = nparray2D[centerX, :]
+        Y_vector = nparray2D[:, centerY]
 
         return (X_vector, Y_vector)
 
@@ -191,14 +209,15 @@ class MathUtils():
         :param arrayX: typically, an array with the step positions of the measurement
         :param arrayY: array of values to be fit
         :param order: order of the polynomial fit
-        :return: an array of fitted data.
+        :return: an array of fitted data and the radius of the sphere as the 0-th order coefficient of the fit
         """
 
         coeff = np.polyfit(arrayX, arrayY, order)
         p = np.poly1d(coeff)
-        fit = np.polyval(p, arrayX)
-        #radius = 1 / coeff[0]
-        return (fit)
+        fit = p(arrayX)
+        radius = 1 / coeff[0]
+        #print("Radius as coeff[0], in m: ", radius/1000000)
+        return (fit, radius)
 
     @staticmethod
     def RMS(array):
@@ -211,3 +230,11 @@ class MathUtils():
         nr_of_points = len(array)"""
         RMS = np.sqrt(np.mean(array**2))
         return (RMS)
+
+    @staticmethod
+    def is_float(string):
+        try:
+            float(value)
+            return True
+        except ValueError:
+            return False

@@ -10,13 +10,15 @@ class MainLTPApp:
     def __init__(self):
 
         self.PMAC_credentials = self.PMAC_connector()
-        print(self.PMAC_credentials["ip"])
+        """print(self.PMAC_credentials["ip"])
         print(self.PMAC_credentials["username"])
-        print(self.PMAC_credentials["password"])
+        print(self.PMAC_credentials["password"])"""
 
         if not self.PMAC_credentials:
             self.show_warning("Connection issues", "Connection initialization Cancelled")
             return
+
+        print(self.PMAC_credentials)
 
         # first init motor controls to connect to Pmac, init motors, laser and Camera, loading also the graphics.
         """

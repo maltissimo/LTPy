@@ -73,6 +73,7 @@ class SerialConn(serial.Serial):
         :return:
         """
         # self.reset_input_buffer()
+        self.reset_input_buffer()
         command = str(data) + ENDL
         self.write(command.encode('ascii'))
         self.lastcommand = command
@@ -95,16 +96,24 @@ class SerialConn(serial.Serial):
         :return: output, a string for usage
         """
         self.lastoutput = None
+        #print("full output: ", self.readall().decode('ascii'))
         out = self.read_all().decode('ascii').strip()
-        output = out[:-3]
-        self.lastoutput = output.strip()
+        #print("out is: ", out)
+        cleaned_once = out.replace("OK", "").strip()
+        #cleaned_once = out.strip()
+        #print("cleaned once: ", cleaned_once)
+        line = cleaned_once.replace(f"ENDL", "").strip()
+        #print("cleaned line: ", line)
+        #print("splitted: ", line)
+        self.lastoutput = line
 
-        return(output.strip())
+        #output = out[:-3]
+        return(line)
 
     def serialmessage(self, data):
 
         self.serialsend(data)
-        time.sleep(0.07)
+        time.sleep(0.13)
 
         return(self.serialread())
 
