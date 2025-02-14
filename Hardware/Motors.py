@@ -167,7 +167,7 @@ class Motor():
         index = self.motorname[-1]
         return (self.motorname[:len(self.motorname) - 2] + "[" + index + "]")
 
-    def get_pos(self, max_tries=5):
+    def get_pos(self, max_tries=20):
         """
         enquiry about the position of a motor Sends the following command to the gantry, and returns the answer:
         Motor[i].ActPos
@@ -355,6 +355,7 @@ class MotorUtil():
         ret = all(el == out[0] for el in out)
         return (ret)
 
+
     def homeGantry(self):
         selectAxes = "selectAxes=selectAll"
         gohome = "requestHost=requestHome"
@@ -366,6 +367,7 @@ class MotorUtil():
             print("still homing...")
             time.sleep(1)
         print("system homed!")"""
+
 
     def resetGantry(self):
         selectAxes = "selectAxes=selectAll"

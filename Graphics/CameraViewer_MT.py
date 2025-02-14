@@ -28,7 +28,7 @@ class CamViewer(QMainWindow):
         self.worker_thread = None
 
 
-        self.plot_layout = QVBoxLayout(self.gui.CamViewer)
+        self.plot_layout = QVBoxLayout(self.gui.CamFrame)
         self.plot_layout.addWidget(self.canvas)
         # self.initUI()
 
@@ -68,10 +68,13 @@ class CamViewer(QMainWindow):
             print(f"frame shape: {self.camera.frame.shape}")"""
             self.ax.clear()
             self.ax.imshow(self.camera.frame)
-            if self.gui.checkBox.isChecked():
-
-                image = self.camera.frame
+            image = self.camera.frame
+            if self.gui.FWHM_checkBox.isChecked():
                 self.display_fwhm(image)
+
+            if self.gui.centroid_checkBox.isChecked():
+                self.display_centroid(image)
+
 
             self.plot_center_mark()
             self.ax.grid(True)
@@ -93,8 +96,17 @@ class CamViewer(QMainWindow):
     @synchronized_method
     def display_fwhm(self, nparray2D):
         fwhm_X, fwhm_Y = cu.MathUtils.calc_2D_fwhm(nparray2D)
-        self.gui.FWHMX_label.setText(str(2.74* fwhm_X))
-        self.gui.FWHMY_label.setText(str(2.74 * fwhm_Y))
+        fwhm_X = round((2.74 * fwhm_X), 2)
+        fwhm_Y = round((2.74 * fwhm_Y), 2)
+        self.gui.FWHMX_label.setText(str(fwhm_X))
+        self.gui.FWHMY_label.setText(str(fwhm_Y))
+
+    @synchronized_method
+    def display_centroid(self, nparray2D):
+        centroid = cu.MathUtils.centroid(nparray2D)
+        #centroidX = centroid[1], centroidY = centroid[0]
+        self.gui.centroidX_label.setText(str(centroid[1]))
+        self.gui.centroidY_label.setText(str(centroid[0]))
 
     def on_grab_finished(self):
         self.gui.StopGrab.setEnabled(False)

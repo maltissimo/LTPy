@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1018</width>
-    <height>811</height>
+    <width>1019</width>
+    <height>724</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,10 +39,16 @@
        <property name="geometry">
         <rect>
          <x>0</x>
-         <y>640</y>
+         <y>600</y>
          <width>1000</width>
          <height>106</height>
         </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
        <property name="frameShape">
         <enum>QFrame::StyledPanel</enum>
@@ -55,7 +61,7 @@
          <rect>
           <x>-10</x>
           <y>0</y>
-          <width>411</width>
+          <width>391</width>
           <height>111</height>
          </rect>
         </property>
@@ -118,9 +124,9 @@
        <widget class="QFrame" name="frame_2">
         <property name="geometry">
          <rect>
-          <x>400</x>
+          <x>380</x>
           <y>0</y>
-          <width>601</width>
+          <width>621</width>
           <height>111</height>
          </rect>
         </property>
@@ -130,51 +136,46 @@
         <property name="frameShadow">
          <enum>QFrame::Raised</enum>
         </property>
-        <widget class="QWidget" name="">
+        <widget class="QWidget" name="layoutWidget">
          <property name="geometry">
           <rect>
-           <x>1</x>
+           <x>0</x>
            <y>0</y>
-           <width>591</width>
+           <width>621</width>
            <height>111</height>
           </rect>
          </property>
          <layout class="QHBoxLayout" name="horizontalLayout">
+          <property name="sizeConstraint">
+           <enum>QLayout::SetNoConstraint</enum>
+          </property>
           <item>
-           <layout class="QHBoxLayout" name="FWHM_horizontalLayout" stretch="1,0">
+           <layout class="QHBoxLayout" name="FWHM_horizontalLayout" stretch="0,0">
             <property name="spacing">
              <number>10</number>
             </property>
             <property name="leftMargin">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="topMargin">
              <number>10</number>
             </property>
             <property name="rightMargin">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="bottomMargin">
              <number>10</number>
             </property>
             <item>
-             <layout class="QGridLayout" name="FWHM_gridLayout">
-              <item row="3" column="1">
-               <widget class="MyLabel" name="FWHMY_display">
-                <property name="text">
-                 <string>FWHM Y (um)</string>
-                </property>
-               </widget>
-              </item>
-              <item row="1" column="1">
-               <widget class="MyLabel" name="FWHMX_display">
-                <property name="text">
-                 <string>FWHM X (um)</string>
-                </property>
-               </widget>
-              </item>
+             <layout class="QGridLayout" name="FWHM_gridLayout" rowstretch="0,0,0,0">
               <item row="3" column="2">
                <widget class="MyLabel" name="FWHMY_label">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
                 <property name="text">
                  <string/>
                 </property>
@@ -184,6 +185,32 @@
                <widget class="MyLabel" name="FWHMX_label">
                 <property name="text">
                  <string/>
+                </property>
+               </widget>
+              </item>
+              <item row="1" column="1">
+               <widget class="MyLabel" name="FWHMX_display">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>FWHM X (um)</string>
+                </property>
+               </widget>
+              </item>
+              <item row="3" column="1">
+               <widget class="MyLabel" name="FWHMY_display">
+                <property name="sizePolicy">
+                 <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                  <horstretch>0</horstretch>
+                  <verstretch>0</verstretch>
+                 </sizepolicy>
+                </property>
+                <property name="text">
+                 <string>FWHM Y (um)</string>
                 </property>
                </widget>
               </item>
@@ -204,13 +231,13 @@
              <number>10</number>
             </property>
             <property name="leftMargin">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="topMargin">
              <number>10</number>
             </property>
             <property name="rightMargin">
-             <number>10</number>
+             <number>5</number>
             </property>
             <property name="bottomMargin">
              <number>10</number>
@@ -260,21 +287,26 @@
         </widget>
        </widget>
       </widget>
+      <widget class="QFrame" name="CamFrame">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>1001</width>
+         <height>601</height>
+        </rect>
+       </property>
+       <property name="frameShape">
+        <enum>QFrame::StyledPanel</enum>
+       </property>
+       <property name="frameShadow">
+        <enum>QFrame::Raised</enum>
+       </property>
+      </widget>
      </widget>
     </item>
    </layout>
   </widget>
-  <widget class="QMenuBar" name="menubar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>1018</width>
-     <height>22</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <customwidgets>
   <customwidget>

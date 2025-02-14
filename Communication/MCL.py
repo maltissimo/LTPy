@@ -113,7 +113,7 @@ class SerialConn(serial.Serial):
     def serialmessage(self, data):
 
         self.serialsend(data)
-        time.sleep(0.13)
+        time.sleep(0.14)
 
         return(self.serialread())
 

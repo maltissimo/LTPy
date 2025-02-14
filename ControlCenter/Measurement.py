@@ -6,8 +6,8 @@ from scipy.ndimage import center_of_mass
 from scipy import integrate
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
-ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
-ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height()
+ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width() 2640
+ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height() 2300
 
 
 class Measurement():

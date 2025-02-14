@@ -155,23 +155,28 @@ class MathUtils():
     def centroid( ndarray):
         """
         this had to be modified from a simple scipy.center_of_mass, as it doesn't track correctly the spot center.
+        centroid = center_of_mass(ndarray)
+        return(np.array(centroid))
 
         :param ndarray:
         :return:
         """
         max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
         back_sub = ndarray - np.min(ndarray)
-        #ROI definition around the max:
+                #ROI definition around the max:
         x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
         y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
         roi = back_sub[x_min:x_max, y_min:y_max]
         com_roi = (center_of_mass(roi))
-        #print("this is the Center of Mas ROI: ", com_roi)
-
+                #print("this is the Center of Mas ROI: ", com_roi)
         com_global = (int(com_roi[0]) + x_min, int(com_roi[1]) + y_min)
-        #print(com_global[0], com_global[1])
-
+                #print(com_global[0], com_global[1])
+                
         return (com_global)
+
+
+
+
 
     @staticmethod
     def splitimage( nparray2D):

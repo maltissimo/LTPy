@@ -5,6 +5,7 @@ import sys
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
 from ControlCenter.Control_Utilities import Utilities as Uti
 from Graphics.Base_Classes_graphics.Motors_GUI import *
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Motors import MotorUtil, CompMotor
 
 
@@ -150,6 +151,10 @@ class MotorControls(QMainWindow):
 
         self.timer.start(100)   #updating every 100 ms
         self.timer.timeout.connect(self.update_all)  # connects to the update_all method
+
+        # Warning for RTT stage parallelism angles
+        parallel = myWarningBox(title = "Attention!", message = " RTT flat @ Pitch = -0.05 and Roll = -0.01 deg!")
+        parallel.show_warning()
 
     def Connect2_Pmac(self):
         """
@@ -329,7 +334,7 @@ class MotorControls(QMainWindow):
         try:
             self.pitch.real_pos = float(CS1[1][1:]) # this is B i.e. pitch
             self.roll.real_pos = float(CS1 [0][1:]) # this is A, i.e. roll
-            self.Z.real_pos = float(CS1 [0][1:])
+            self.Z.real_pos = float(CS1 [2][1:])
             self.yaw.real_pos = float(CS2[0][1:])
             self.X.real_pos = float(CS3[0][1:])
             self.Y.real_pos = float(CS3[1][1:])
@@ -395,7 +400,8 @@ class MotorControls(QMainWindow):
     def stopall(self):
         message = "#*kill"
         self.shell.send_message(message)
-        QtWidgets.QMessageBox.warning("All motors killed")
+        killed = myWarningBox(title = "Warning!!", message = "All motors killed, /n the Gantry needs a reset & home!")
+        killed.show_warning()
 
     def update_all(self):
         self.update_all_positions()
@@ -410,6 +416,17 @@ class MotorControls(QMainWindow):
     def restartTimer(self):
         self.timer.start()
 
+    def resetGantry (self):
+        MotorUtil.resetGantry()
+        reset = myWarningBox(title = "Warning!", message = "Gantry reset, press the Home button!")
+        reset.show_warning()
+
+    def homeGantry(self):
+        MotorUtil.resetGantry()
+        while not self.MotorUtil.gantryHomed():
+            time.sleep(2)
+        homed = myWarningBox(title="Success!", message="Home Completed")
+        homed.show_warning()
     """def show(self):
         self.show()"""
 

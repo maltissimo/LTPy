@@ -109,6 +109,3 @@ if __name__ == "__main__":
     window = LaserControl()
     window.show()
     sys.exit(app.exec_())
-
-    #TODO:
-    # Add a FWHM tool in the CamViewer option, for lens focus finding purposes

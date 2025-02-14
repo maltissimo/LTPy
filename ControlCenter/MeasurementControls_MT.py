@@ -181,7 +181,7 @@ class MeasurementControls(QMainWindow):
         else:
             self.today = self.today
         header = ""
-        header += "date of measurement: " + self.today + "\n"
+        header += "Date of measurement: " + self.today + "\n"
         header += "Nr of camera grabs per point: " + str(self.nrofgrabs) + "\n"
         header += "Length of measurement (mm): " + str(MathUtils.um2mm(self.length)) +"\n"
         header += "Nr of measurement points + 1: " +  str(self.points + 1 ) + "\n"
@@ -312,27 +312,29 @@ class MeasurementControls(QMainWindow):
         self.endmeasurement()
 
     def save_data(self, myposarray, slopesarray, heightsarray):
-
-        if self.gui.savelldata.isChecked():
-            filename = "FullData" + self.today + ".txt"
-            self.measurement.save_data(filename, self.results)
-            #self.show_warning( "Full Data saved", f"Data saved into {filename}")
-
         slopestobesaved = "Slope RMS: " + str(self.measurement.slopes_rms) + "\n"
         heightstobesaved = "Height RMS: " + str(self.measurement.heights_rms) + "\n"
         slopestobesaved += self.measurement.pretty_printing(myposarray, slopesarray)
         heightstobesaved += self.measurement.pretty_printing(myposarray, heightsarray)
 
+        filename = "FullData" + self.today + ".txt"
         filename2 = "Xpos_slopes" + self.today + ".txt"
         filename3 = "Xpos_heights" + self.today + ".txt"
 
-        self.measurement.save_data(filename2, slopestobesaved)
-        self.measurement.save_data(filename3, heightstobesaved)
-        if self.gui.savelldata.isChecked():
-            self.show_warning("Data saved!", f"Data saved into {filename}, {filename2}, {filename3}")
+
+        if self.gui.save_slope_data.isChecked():
+
+            self.measurement.save_data(filename2, slopestobesaved)
+            self.measurement.save_data(filename3, heightstobesaved)
+            self.show_warning("Slopes-Only Data saved!", f"Data saved into {filename2}, {filename3}")
 
         else:
-            self.show_warning("Data saved!", f"Data saved into {filename2}, {filename3}")
+
+            self.measurement.save_data(filename, self.results)
+            self.measurement.save_data(filename2, slopestobesaved)
+            self.measurement.save_data(filename3, heightstobesaved)
+
+            self.show_warning("Full Data saved!", f"Data saved into {filename}, {filename2}, {filename3}")
 
     def endmeasurement(self):
         """Housekeeping after each single measurement"""
@@ -368,6 +370,7 @@ class MeasurementControls(QMainWindow):
         self.camera.set_grab_nr(5)
         autopos = self.motors.X.get_real_pos
         self.show_warning("Warning!", "Measurement interrupted")
+        self.motors.
         self.motors.MotorUtil.homeGantry()
         self.motors.xmove.moveabs(autopos)
 
