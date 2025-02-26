@@ -94,6 +94,17 @@ class Laser (SerialConn):
         else:
             self.pow_level = original_power # better leave it unchanged
 
+    @synchronized_method
+    def get_all_status(self):
+        status = {}
+        status['current'] = self.serialmessage(isOUTCURLEVEL)
+        status['power_preset'] = self.serialmessage(isLASPOWLEVEL)
+        status['power'] = self.serialmessage(isOUTPOWLEVEL)
+        status['wlength'] = self.wlength
+        status['comms'] = self.serialmessage(isHSHAKE)
+        status['is_on'] = self.is_on
+        return status
+
     def show(self):
         self.show()
 

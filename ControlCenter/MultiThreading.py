@@ -23,7 +23,7 @@ class WorkerThread(QThread):
     end_signal = pyqtSignal()    # signal to send end work to the main thread
     error_signal = pyqtSignal(str) # in case there some mishap
 
-    def __init__(self, task, *args, **kwargs):
+    def __init__(self, task, sleep_time = 50,  *args, **kwargs):
         """
         Initialize the worker thread
         :param task: the callable (function or method) to run in the task
@@ -32,6 +32,7 @@ class WorkerThread(QThread):
         """
         super().__init__()
         self.task = task
+        self.sleep_time = sleep_time
         self.args = args
         self.kwargs = kwargs
         self.running = True
@@ -41,8 +42,9 @@ class WorkerThread(QThread):
         self.begin_signal.emit()
         try:
             while self.running:
-                self.task(*self.args, **self.kwargs)  # Call the task
-                self.msleep(50)  # Sleep to simulate a periodic task (adjust as needed)
+                result = self.task(*self.args, **self.kwargs)  # Call the task
+                self.update_signal.emit(result)
+                self.msleep(self.sleep_time)  # Sleep to simulate a periodic task (adjust as needed)
         except Exception as e:
             self.error_signal.emit(str(e))  # Emit error if something goes wrong
         finally:

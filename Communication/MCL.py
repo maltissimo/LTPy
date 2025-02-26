@@ -29,13 +29,13 @@ Info on OBIS Manual, part 3/
 It is  assumed here that, since the transfer is 9600 bps, the waiting time must be no less than 70ms, otherwise the
 answers comes back either empty or garbled.
 """
-import serial, serial.tools.list_ports
-
+import threading
 import time
-import os
-import glob
 
-from IPython.utils.capture import capture_output
+import serial
+import serial.tools.list_ports
+
+from ControlCenter.MultiThreading import *
 
 OBIS = "3405"
 #PORT = "/dev/ttyACM1" # /dev/ttyACM0 port over which the OBIS is connnected to MC
@@ -47,9 +47,9 @@ class SerialConn(serial.Serial):
     """
     Models a connection through the pyserial interface from the MC to the OBIS remote.
     """
-    def __init__(self, port = None, baudrate = None, lastcommand = None, lastouput = None):
-        PORT = self.find_port()
-        print(PORT)
+    def __init__(self, baudrate = None, lastcommand = None, lastouput = None):
+        PORT= self.find_port()
+        #print(self.port)
         super().__init__(port = PORT, baudrate = BAUD,
                          bytesize = serial.EIGHTBITS,
                          parity = serial.PARITY_NONE,
@@ -63,7 +63,10 @@ class SerialConn(serial.Serial):
                          )
         self.lastcommand = None
         self.lastoutput = None
+        self.worker = None
+        self.lock = threading.Lock()
 
+    @synchronized_method
     def serialsend (self, data):
         """
         Writes a string into the serial pipe, and updates the lastcommand of the SerialConn object,
@@ -72,22 +75,12 @@ class SerialConn(serial.Serial):
         :param data: string to be written
         :return:
         """
-        # self.reset_input_buffer()
         self.reset_input_buffer()
         command = str(data) + ENDL
         self.write(command.encode('ascii'))
         self.lastcommand = command
-        """
-        this below should go in usage, not in this method.
-        try: 
-            command = str(data) + ENDL
-            self.write(command.encode('ascii'))
-        except serial.SerialException as e: 
-            print(f"SerialException: error writing to serial port: {e}")
-        except Exception as e:
-            print(f"Exception: an unexpected error occurred : {e}")
-        """
 
+    @synchronized_method
     def serialread(self):
         """
         Reads the output from the serial, updates the lastoutput property of the SerialConn object,
@@ -110,12 +103,19 @@ class SerialConn(serial.Serial):
         #output = out[:-3]
         return(line)
 
-    def serialmessage(self, data):
-
+    @synchronized_method
+    def serialmessage(self, data, timeout = 0.1):
+        """
+                Sends a command and waits for a response.
+                WARNING: This method blocks the UI thread. Prefer send_command().
+        """
         self.serialsend(data)
-        time.sleep(0.14)
-
-        return(self.serialread())
+        start_time = time.time()
+        while (time.time() - start_time) <timeout:
+            if self.in_waiting > 0:
+                return (self.serialread())
+        #QThread.msleep((140))
+        return(print("serialmessage timed out"))
 
     def find_port (self):
 
@@ -125,17 +125,3 @@ class SerialConn(serial.Serial):
                 return(port.device)
             else:
                 return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
