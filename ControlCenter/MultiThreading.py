@@ -36,21 +36,26 @@ class WorkerThread(QThread):
         self.args = args
         self.kwargs = kwargs
         self.running = True
+        self._stop_event = threading.Event()
 
 
     def run(self):
         self.begin_signal.emit()
         try:
-            while self.running:
-                result = self.task(*self.args, **self.kwargs)  # Call the task
-                self.update_signal.emit(result)
-                self.msleep(self.sleep_time)  # Sleep to simulate a periodic task (adjust as needed)
-        except Exception as e:
-            self.error_signal.emit(str(e))  # Emit error if something goes wrong
+            while not self._stop_event.is_set():
+                try:
+                    result = self.task(*self.args, **self.kwargs)  # Call the task
+                    self.update_signal.emit(result)
+                 # Sleep to simulate a periodic task (adjust as needed)
+                except Exception as e:
+                    self.error_signal.emit(str(e))  # Emit error if something goes wrong
+                self.msleep(self.sleep_time)
         finally:
             self.end_signal.emit()  # Signal that the thread has finished
 
     def stop(self):
         """Stop the worker thread."""
+        self._stop_event.set()
         self.running = False
+        self.quit()
         self.wait()  # Wait for the thread to exit cleanly

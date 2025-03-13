@@ -69,8 +69,8 @@ class Camera:
         self.camera.Open()
         self.camera.UserSetSelector = "Default"
         self.camera.UserSetLoad.Execute()
-        self.camera.PixelFormat = "Mono12"
-        self.camera.ExposureTime = 12
+        self.camera.PixelFormat = "Mono8" #Use Mono12 if switching to Matplotlib. CV2 seems to be more responsive
+        self.camera.ExposureTime = 8
         self.isopen = self.camera.IsOpen()
         self.height = self.camera.Height()  # 4600 pixels
         self.width = self.camera.Width()  # 5280 pixels
@@ -121,4 +121,3 @@ class Camera:
     def set_gain(self, gain ):
         self.camera.Gain = gain
         #self.gain = self.camera.Gain
-

@@ -153,7 +153,7 @@ class MotorControls(QMainWindow):
         self.timer.timeout.connect(self.update_all)  # connects to the update_all method
 
         # Warning for RTT stage parallelism angles
-        parallel = myWarningBox(title = "Attention!", message = " RTT flat @ Pitch = -0.05 and Roll = -0.01 deg!")
+        parallel = myWarningBox(title = "Attention!", message = " RTT flat @ Pitch = -0.01 and Roll = -0.01 deg!")
         parallel.show_warning()
 
     def Connect2_Pmac(self):

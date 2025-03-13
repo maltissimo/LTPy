@@ -6,10 +6,11 @@ from ControlCenter.Control_Utilities import MathUtils
 from ControlCenter.Laser_MT import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls_MT import *
+from ControlCenter.CameraViewer_MT import *
 from Graphics.Base_Classes_graphics.Measurements_GUI import *
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Graphics.Base_Classes_graphics.RT_Dataplot import *
-from Graphics.CameraViewer_MT import *
+
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
@@ -246,7 +247,7 @@ class MeasurementControls(QMainWindow):
                 centroid = cu.MathUtils.centroid( image)
                 averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
                 #print("Current meas centroid X: ", centroid[0])
-                averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
+                averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. h to vertical axis
                 #print("Current meas centroid Y: ", centroid[1])
                 grab += 1
 
@@ -370,7 +371,6 @@ class MeasurementControls(QMainWindow):
         self.camera.set_grab_nr(5)
         autopos = self.motors.X.get_real_pos
         self.show_warning("Warning!", "Measurement interrupted")
-        self.motors.
         self.motors.MotorUtil.homeGantry()
         self.motors.xmove.moveabs(autopos)
 

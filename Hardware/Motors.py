@@ -219,6 +219,7 @@ class Motor():
         """
         command = str(self.pmac_name) + ".HomeComplete"
         result = int(self.connection.send_receive(command))
+        #print("result of ", command, "is: ", result)
         if result == 1:
             self.ishomed = True
         else:
@@ -393,7 +394,7 @@ class MotorUtil():
             time.sleep(0.01)
             self.connection.receive_message()
             rawarray.append(self.connection.textoutput[1]) # This initializes the array with all the outputs from interrogating the Pmac
-
+        #print(self.connection.textoutput[1])
         for i in range(len(rawarray)):
             if rawarray [i][0] == "&":
                 motors.append([rawarray[i][1], rawarray[i][3], rawarray[i][-1]]) # This is the list of motors present on the System.
