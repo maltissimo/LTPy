@@ -1,9 +1,13 @@
 from PyQt5.QtWidgets import QWidget, QInputDialog, QLineEdit, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
+from PyQt5.QtCore import QMutex, QMutexLocker, QWaitCondition
 
+import ControlCenter.Control_Utilities
 from Communication import MCG
 from Hardware import Source, Motors # , Detector
 from scipy.ndimage import center_of_mass
 import numpy as np
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
+from ControlCenter.MultiThreading import *
 
 class Utilities():
 
@@ -65,7 +69,31 @@ class Utilities():
 
         return move
 
+    @staticmethod
+    def connect2Pmac():
+        connector = Connection_initer()
+        PMAC_credentials = connector.get_credentials()
+
+        if not PMAC_credentials:
+            cred_warning = myWarningBox("Connection issues", "Connection initialization Cancelled")
+            cred_warning.show_warning()
+            return
+
+        print(PMAC_credentials)
+
+        try:
+            manager = SSHConnectionManager.get_instance(PMAC_credentials)
+        except Exception as e:
+            conn_warning = myWarningBox(title="Conn error", message=str({e}))
+            conn_warning.show_warning()
+            return
+        return ( manager.get_connection())
+
 class Connection_initer(QWidget):
+
+    """
+    This is a graphics class collecting IP, username and password for connecting to the PMAC.
+    """
     def __init__(self):
         super().__init__()
         self.ip = None
@@ -116,6 +144,48 @@ class Connection_initer(QWidget):
             return password_input.text()
         else:
             return None, False
+
+class SSHConnectionManager:
+    _instance = None
+
+    def __init__(self, credentials):
+        self.credentials = credentials
+        self.connection = None
+        self._initialize_connection()
+
+    def _initialize_connection(self):
+        self.connection = MCG.Gantry(
+            pmac_ip=self.credentials["ip"],
+            username=self.credentials["username"],
+            password=self.credentials["password"]
+        )
+
+        try:
+            print("Opening SSH connection...")
+            self.connection.openssh()
+            print("Connected!")
+
+            print("Initing the PMAC input...")
+            self.connection.pmac_init()
+            if not self.connection.isinit:
+                self.connection.pmac_init()
+
+            self.connection.set_echo()
+
+            print("PMAC Setup complete!")
+            print(self.connection.status())
+
+        except Exception as e:
+            raise RuntimeError(f"Failed to initialize PMAC connection: {e}")
+
+    @classmethod
+    def get_instance(cls, credentials):
+        if cls._instance is None:
+            cls._instance = SSHConnectionManager(credentials)
+        return cls._instance
+
+    def get_connection(self):
+        return self.connection
 
 
 class MathUtils():
@@ -210,7 +280,7 @@ class MathUtils():
     @staticmethod
     def my_fit(arrayX, arrayY, order):
         """
-
+timer = Qtimer()
         :param arrayX: typically, an array with the step positions of the measurement
         :param arrayY: array of values to be fit
         :param order: order of the polynomial fit
@@ -243,3 +313,118 @@ class MathUtils():
             return True
         except ValueError:
             return False
+
+
+class CoordMessenger():
+    """
+    This class is intended to act as a multi-threading messenger to and from the Gantry.
+    The goal is JUST to receive motor coordinates, and to pass those as a dictionary out.
+
+    """
+
+    def __init__(self, connection, sleep_time=51):
+        self.worker = WorkerThread(task=self.get_and_update_coords, sleep_time=sleep_time)
+        self.mutex = QMutex()
+        self.pause_condition = QWaitCondition()
+        self.paused = False
+        self.connection = connection
+
+        if not self.connection or self.connection.alive == False:
+            conn_warning = myWarningBox(title="Warning!",
+                                        message="PMAC Connection not active!")
+            conn_warning.show_warning()
+
+        self.coordinates = {
+            "X": 0.0,
+            "Y": 0.0,
+            "Z": 0.0,
+            "pitch": 0.0,
+            "roll": 0.0,
+            "yaw": 0.0
+        }
+
+        self.worker.update_signal.connect(self.update_coordinates)
+        self.worker.end_signal.connect(self.stop)
+        self.worker.begin_signal.connect(self.start)
+        self.worker.error_signal.connect(self.handleworkererror)
+
+    def get_and_update_coords(self):
+        self.mutex.lock()
+        while self.paused:
+            self.pause_condition.wait(self.mutex)
+        self.mutex.unlock()
+        self.connection.send_receive("&1,2,3p")
+        response = self.connection.textoutput
+        #print(response)
+
+        return(response)
+
+    def update_coordinates(self, response):
+        flag = 0
+        #print("update method called, with result: ", response)
+        response = list(response)
+        if not response:
+            return
+        try:
+            """if response[0] != '&1,2,3p':
+                print("full Response: ", response)
+                flag =1"""
+            while response and response[0] != '&1,2,3p':
+                response.pop(0)
+            """ The two lines above clean the PMAC response, so that only coordinates are received. """
+            """if flag == 0:
+                print("Cleaned response: ", response)
+                flag = 0"""
+            if len(response) < 4:
+                return # this avoids crashes from not-well formed responses. since the update is rapid this should not be an issue
+            CS1 = response[1].split()
+            CS2 = response[2].split()
+            CS3 = response[3].split()
+            #print("CS1: " + str(CS1) + "\nCS2 : " +str(CS2) + "\nCS3: " + str(CS3))
+            with QMutexLocker(self.mutex):
+                self.coordinates.update({
+                    "pitch" : float(CS1[1][1:]),
+                    "roll": float(CS1[0][1:]),
+                    "Z": float(CS1[2][1:]),
+                    "yaw": float(CS2[0][1:]),
+                    "X": float(CS3[0][1:]),
+                    "Y": float(CS3[1][1:])
+                })
+                """for key in self.coordinates :
+                    print(key, self.coordinates[key])"""
+
+        except ValueError as e:
+            get_coord_warning = myWarningBox(title="Error",
+                                         message=str(e))
+            get_coord_warning.show_warning()
+    def pause(self):
+        self.worker.pause()
+    def resume(self):
+        self.worker.resume()
+
+    def start(self):
+        if not self.worker.isRunning():
+            self.worker.start()
+
+    def stop(self):
+        self.worker.stop()
+
+    def handleworkererror(self, message):
+        worker_warning = myWarningBox(title="Error",
+                                      message=str(message))
+        worker_warning.show_warning()
+
+class MoveMessenger():
+    """
+    This class is intended to multi-thread move commands to the PMAC, in order to speedup
+    the GUI.
+    """
+    def __init__(self, connection, sleep_time = 100):
+        self.worker = WorkerThread(task = move_motor, sleep_time = sleep_time)
+        self.mutex = QMutex
+        self.connection = connection
+
+        if not self.connection or self.connection.alive == False:
+            conn_warning = myWarningBox(title = "Warning!",
+                                        message = "PMAC Connection not active!")
+            conn_warning.show_warning()

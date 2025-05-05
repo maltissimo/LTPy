@@ -22,7 +22,7 @@ class CamViewer(QMainWindow):
         self.gui.SetAcqTime.clicked.connect(self.setAcqTime)
 
         self.camera = Camera()
-        self.timer = QTimer()
+        self.running = False
 
         self.plot_layout = QVBoxLayout(self.gui.CamFrame)
         self.display_label = QLabel()
@@ -32,16 +32,25 @@ class CamViewer(QMainWindow):
         self.gui.StopGrab.setEnabled(False)
 
     def start_grab(self):
-        self.timer.start(100)  # Update every 100 ms
-        self.timer.timeout.connect(self.grab_data)
-        self.gui.StartGrab.setEnabled(False)
-        self.gui.StopGrab.setEnabled(True)
+        """self.timer.start(100)  # Update every 100 ms
+        self.timer.timeout.connect(self.grab_data)"""
+        if not self.running:
+            self.running = True
+            self.gui.StartGrab.setEnabled(False)
+            self.gui.StopGrab.setEnabled(True)
+            self.update_plot()
+
+    def update_plot(self):
+        if not self.running:
+            return
+        self.grab_data()
+        QTimer.singleShot(50, self.update_plot)
 
     def stop_grab(self):
-        self.timer.stop()
+        # self.timer.stop()
+        self.running = False
         self.gui.StartGrab.setEnabled(True)
         self.gui.StopGrab.setEnabled(False)
-
     def grab_data(self):
         self.camera.grabdata()
         if self.camera.frame is not None:

@@ -1,8 +1,8 @@
-
 from Communication.MCG import Gantry as gc
 import numpy as np
 import time
 import warnings
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 
 """
 These are some global definitions that may be useful during measurements. The values are taken 
@@ -51,7 +51,7 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 """
 """
 class Initer():
-   
+
     This class is designed to interrogate the PMAC about the number of motors and their respective CS's.
     The result of this is store in an 2D numpy array [[ CS, motornumber, motorname]]
     The array can be then traversed to get, for each valid motor of the PMAC:
@@ -64,11 +64,12 @@ class Initer():
     """
 
 """
-    
+
     MOVED THE CODE INTO THE MotorUtil class, seemed more reasonable
-    
+
    pass
    """
+
 
 class Motor():
     """
@@ -90,15 +91,16 @@ class Motor():
 
      Actual position must be derived from this and the homing position:
 
-         hom(e_pos = gpascii.get_variable"Motor[i].HomePos)
+         home_pos = gpascii.get_variable"Motor[i].HomePos)
 
      See the LTPy.mdj file for class basic design
 
      Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
      """
 
-    def __init__(self, connection, motorID=9, ishomed=False, motorname=None, cs=0, pmac_name= None, act_pos=0.0, jogspeed=0.0,
-                 homepos=0, real_pos = 0.0):
+    def __init__(self, connection, motorID=9, ishomed=False, motorname=None, cs=0, pmac_name=None, act_pos=0.0,
+                 jogspeed=0.0,
+                 homepos=0, real_pos=0.0):
         """ Init function for the motor object. In the QSYS convention the RTT stage has 4 motors:
          1, 2 and 3 are combined together in motors A, B and Z providing Roll/Tip, Pitch/Tilt rotations and translation along
          Z axis respectively.
@@ -127,8 +129,7 @@ class Motor():
          :param real_pos: act_pos - homespos
          """
 
-
-        self.connection = connection # a shell, possibly active...
+        self.connection = connection  # a shell, possibly active...
         self.motorID = motorID  # set by default to 9, as motor number 9 is not present on the machine.
         # self.mode = mode
         # self.speed = speed
@@ -143,15 +144,15 @@ class Motor():
             self.ishomed = ishomed
             self.real_pos = real_pos
         elif self.motorID == str(4):
-            #if self.motorID == 4:
+            # if self.motorID == 4:
             self.motorname = "C"
         elif self.motorID == str(5):
-            #elif self.motorID == 5:
+            # elif self.motorID == 5:
             self.motorname = "X"
         elif self.motorID == str(6):
-            #elif self.motorID == 6:
+            # elif self.motorID == 6:
             self.motorname = "Y"
-        self.pmac_name = "Motor[" + str(self.motorID) +"]"
+        self.pmac_name = "Motor[" + str(self.motorID) + "]"
         if self.pmac_name is not None:
             self.ishomed = self.homecomplete()
             self.act_pos = self.get_pos()
@@ -160,7 +161,7 @@ class Motor():
             self.real_pos = self.get_real_pos()
 
     def __str__(self):
-        return f"Composite motor: connection = {self.connection}, motorID= {self.motorID}, coordinate system = {self.cs},\
+        return f"Single motor: connection = {self.connection}, motorID= {self.motorID}, coordinate system = {self.cs},\
                 real position = {self.real_pos}, home completed = {self.ishomed}"
 
     def motor_conv(self):
@@ -174,8 +175,8 @@ class Motor():
 
         :return: ActPos, in motor units
         """
-        message = self.pmac_name + ".ActPos"+ "\n"
-        #print(message)
+        message = self.pmac_name + ".ActPos" + "\n"
+        # print(message)
         pos = self.connection.send_receive(message)
         attempts = 0
         while attempts < max_tries:
@@ -183,9 +184,12 @@ class Motor():
                 alan = float(pos)
                 self.act_pos = alan
                 return alan
-            except ValueError:
+            except ValueError as e:
                 attempts += 1
-                print(f"Error: Unable to convert '{pos}' to float. Attempt {attempts} of {max_tries}. Retrying...")
+                err_message = (f"Error: Unable to convert '{pos}' to float. Attempt {attempts} of {max_tries}. Retrying...")
+                mess_window = myWarningBox(title = "Conversion error!",
+                                           message = err_message)
+                mess_window.show_warning()
                 if attempts < max_tries:
                     pos = self.connection.send_receive(message)  # Retry fetching the position
                 else:
@@ -202,7 +206,7 @@ class Motor():
         """
         calc = self.get_pos() - self.homepos
         self.real_pos = calc
-        return(calc)
+        return (calc)
 
     def stop(self):
         """
@@ -217,14 +221,16 @@ class Motor():
 
         :return: the result of the check, either True or False.
         """
+        #print(self.pmac_name)
         command = str(self.pmac_name) + ".HomeComplete"
+        #print("Home complete request command issued:, ", command, "\n")
         result = int(self.connection.send_receive(command))
-        #print("result of ", command, "is: ", result)
+        #print("Home complete request result: ", result)
         if result == 1:
             self.ishomed = True
         else:
             self.ishomed = False
-        return(result)
+        return (result)
 
     def get_homepos(self):
         """
@@ -242,7 +248,7 @@ class Motor():
         :param value: Float, user-input
         :return: Changes the status of the jogspeed property
         """
-        old_speed = self.getjogspeed()
+        old_speed = self.jogspeed
         command = str(self.pmac_name) + ".jogspeed=" + str(value)
         result = self.connection.send_receive(command)
         if result != value:
@@ -256,9 +262,11 @@ class Motor():
         :return: the value of the motor.
         """
         command = str(self.pmac_name) + ".jogspeed"
+        #print(command)
+        #print (self.connection.send_receive(command))
         alan = float(self.connection.send_receive(command))
         self.jogspeed = alan
-        return(alan)
+        return (alan)
 
 
 class CompMotor():
@@ -270,7 +278,7 @@ class CompMotor():
 
     """
 
-    def __init__(self,connection = None, pmac_name = None, cs = 1, real_pos = 0.0, ishomed = 0):
+    def __init__(self, connection=None, pmac_name=None, cs=1, real_pos=0.0, ishomed=0):
         """
         :param connection: an active shell towards the pmac
         :param pmac_name: A, B or Z for roll, pitch and Z lift (see GantryHelp for info)
@@ -280,13 +288,23 @@ class CompMotor():
         """
         self.connection = connection
         if self.connection.alive == False:
-            raise ValueError("Connection to PMAC not active, inizialization impossible")
-        self.pmac_name = pmac_name # must be inited by user, either A, B or Z.
+            conn_emessage = "Connection to PMAC not active, inizialization impossible"
+            conn_ewindow = myWarningBox(title = "Connection error!",
+                                        message = conn_emessage)
+            conn_ewindow.show_warning()
+
+        self.pmac_name = pmac_name  # must be inited by user, either A, B or Z.
         if pmac_name.lower() not in ["a", "b", "z"]:
-            raise ValueError("The allowed names are only A, B or Z!")
+            cap_emessage ="The allowed names are only A, B or Z!"
+            cap_ewindow = myWarningBox(title = "Error!",
+                                       message = cap_emessage)
+            cap_ewindow.show_warning()
         self.cs = cs
         if self.cs != 1:
-            raise ValueError("The Coordinate system should be 1 @ Elettra!")
+            cs_emessage = "The Coordinate system should be 1 @ Elettra!"
+            cs_ewindow = myWarningBox(title = "Error!",
+                                      message = cs_emessage)
+            cs_ewindow.show_warning()
         self.real_pos = self.get_real_pos()
         self.ishomed = self.homecomplete()
 
@@ -306,26 +324,33 @@ class CompMotor():
             elif self.pmac_name == "Z":
                 pos = split[2][1:]
         except ValueError:
-            print("MotorName not initialized correctly!! Must be either A, B or Z")
+            pos_emessage = "MotorName not initialized correctly!! Must be either A, B or Z"
+            pos_ewindow = myWarningBox(title = "Init issue!",
+                                       messge = pos_emessage)
+            pos_ewindow.show_warning()
 
         self.real_pos = float(pos)
-        return(float(pos))
+        return (float(pos))
 
-    def homecomplete (self):
+    def homecomplete(self):
 
         ret = self.connection.send_receive("Coord[" + str(self.cs) + "].HomeComplete")
         self.ishomed = ret
-        return(ret)
+        return (ret)
+
 
 class MotorUtil():
     """
     A collection of motor utilities for the LTP.
     """
 
-    def __init__(self, connection, stillhoming = 1, motor = None):
-        self.connection = connection # an active PMAC shell.
+    def __init__(self, connection, stillhoming=1, motor=None):
+        self.connection = connection  # an active PMAC shell.
         if self.connection.alive == False:
-            warnings.warn("Connection to PMAC not active, inizialization impossible")
+            conn_wmessage = "Connection to PMAC not active, inizialization impossible!"
+            conn_wwindonw = myWarningBox(title = "Connection error!",
+                                         message = conn_wmessage)
+            conn_wwindonw.show_warning()
         self.stillhoming = stillhoming
         self.motor = motor
 
@@ -337,12 +362,12 @@ class MotorUtil():
 
         :return:
         """
-        out = [5]*3
-        for i in range (3):
-            mess = "Coord[" + str(i+1) + "].HomeInProgress"
+        out = [5] * 3
+        for i in range(3):
+            mess = "Coord[" + str(i + 1) + "].HomeInProgress"
             out[i] = self.connection.send_receive(mess)
-        ret = all(el  == out[0] for el in out)
-        return(ret)
+        ret = all(el == out[0] for el in out)
+        return (ret)
 
     def gantryHomed(self):
         """
@@ -351,24 +376,20 @@ class MotorUtil():
         """
         out = [5] * 3
         for i in range(3):
-            mess = "Coord[" + str(i+1) + "].HomeComplete"
+            mess = "Coord[" + str(i + 1) + "].HomeComplete"
             out[i] = self.connection.send_receive(mess)
         ret = all(el == out[0] for el in out)
         return (ret)
 
-
     def homeGantry(self):
-        selectAxes = "selectAxes=selectAll"
+        self.resetGantry()
         gohome = "requestHost=requestHome"
-        self.connection.send_receive(selectAxes)
-        time.sleep(0.07)
         self.connection.send_receive(gohome)
 
         """while not self.gantryHomed():
             print("still homing...")
             time.sleep(1)
         print("system homed!")"""
-
 
     def resetGantry(self):
         selectAxes = "selectAxes=selectAll"
@@ -387,97 +408,108 @@ class MotorUtil():
         rawarray = []
         motors = []
         no_motor_index = []
-        for i in range (12):
-            mess = '#'+str(i)+'->'
-            self.connection.send_message(mess)
-            self.connection.textoutput = []
-            time.sleep(0.01)
-            self.connection.receive_message()
-            rawarray.append(self.connection.textoutput[1]) # This initializes the array with all the outputs from interrogating the Pmac
-        #print(self.connection.textoutput[1])
+        for i in range(12):
+            mess = '#' + str(i) + '->'
+            self.connection.send_receive(mess)
+            #print(mess)
+            """self.connection.textoutput = []
+            #time.sleep(0.01)
+            self.connection.receive_message()"""
+            #print(self.connection.textoutput)
+            rawarray.append(self.connection.textoutput[1])  # This initializes the array with all the outputs from interrogating the Pmac
+            #print(self.connection.textoutput[1])
         for i in range(len(rawarray)):
-            if rawarray [i][0] == "&":
-                motors.append([rawarray[i][1], rawarray[i][3], rawarray[i][-1]]) # This is the list of motors present on the System.
-                                                            # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
-        return(motors)
+            if rawarray[i][0] == "&":
+                motors.append([rawarray[i][1], rawarray[i][3],
+                               rawarray[i][-1]])  # This is the list of motors present on the System.
+                # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
+        return (motors)
 
 
 class Move():
 
-    def __init__(self, connection, motor = None, cs = 0, name = None, util = None, movecomplete = True):
+    def __init__(self, connection, motor=None, cs=0, name=None, util=None, movecomplete=True):
         self.connection = connection
         if connection.alive == False:
-            raise ValueError("Connection to PMAC not active, inizialization impossible")
-        self.motor = motor # object fo class Motor or CompMotor
+            conn_emessage = "Connection to PMAC not active, inizialization impossible"
+            conn_ewindow = myWarningBox(title = "Connection error",
+                                        message = conn_emessage)
+            conn_ewindow.show_warning()
+
+        self.motor = motor  # object fo class Motor or CompMotor
         self.cs = 0
-        self.util = util # an object of class MotorUtil
+        self.util = util  # an object of class MotorUtil
         self.movecomplete = movecomplete
         self.name = name
         if hasattr(self.motor, "motorID"):
             self.cs = self.motor.cs
             self.name = self.motor.motorname
             if int(self.motor.motorID) <= 3:
-                raise Warning("Addressing single motors in the RTT stage, care must be taken!!")
+                mot_wmessage = "Addressing single motors in the RTT stage, care must be taken!!"
+                mot_wwindow = myWarningBox(title = "Motor warning!",
+                                           message = mot_wmessage)
         else:
             self.cs = self.motor.cs
             self.name = self.motor.pmac_name
 
-    def move_rel(self, speed = "rapid", distance = 0.0):
+    def move_rel(self, speed="rapid", distance=0.0):
         self.movecomplete = False
         if isinstance(self.motor, Motor):
-            movetime = abs(distance) / self.motor.getjogspeed() # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
+            #movetime = abs(distance) / self.motor.getjogspeed()  # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
-            #print("move command issued: ", move)
+            # print("move command issued: ", move)
             self.connection.send_receive(move)
-            #time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
-            while not self.movecomplete:
+            # time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
+            """while not self.movecomplete:
                 time.sleep(0.005)
-                self.movecomplete = self.check_in_pos()
+                self.movecomplete = self.check_in_pos()"""
 
         else:
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
             self.connection.send_receive(move)
-            time.sleep(0.5)  #half a second wait time for rotational moves, seems ok.
-            #print("move command issued: ", move)
-            while not self.movecomplete:
+            #time.sleep(0.5)  # half a second wait time for rotational moves, seems ok.
+            # print("move command issued: ", move)
+            """while not self.movecomplete:
                 time.sleep(0.005)
                 self.movecomplete = self.check_in_pos()
-            #self.movecomplete = self.check_in_pos()
+            # self.movecomplete = self.check_in_pos()
 
-
-        #Updating values in the objects:
+        # Updating values in the objects:
         if hasattr(self.motor, "motorID"):
             self.motor.act_pos = self.motor.get_pos()
-            #print(self.motor.act_pos)
+            # print(self.motor.act_pos)
             self.motor.real_pos = self.motor.get_real_pos()
         else:
-            self.motor.real_pos = self.motor.get_real_pos()
+            self.motor.real_pos = self.motor.get_real_pos()"""
 
-
-    def move_abs(self, speed = "rapid", coord =0.0):
+    def move_abs(self, speed="rapid", coord=0.0):
         # Composing the message  to be sent:
         move = f'&{str(self.cs)} cpx {(speed)} abs {self.name} {coord}\n'
-        #print(move)
-        #original_pos = self.motor.real_pos
+        # print(move)
+        # original_pos = self.motor.real_pos
         self.connection.send_message(move)
-        self.movecomplete = False
-        while not self.movecomplete:
+        """while not self.movecomplete:
             time.sleep(0.005)
             self.movecomplete = self.check_in_pos()
         if hasattr(self.motor, "motorID"):
             self.motor.act_pos = self.motor.get_pos()
             self.motor.real_pos = self.motor.get_real_pos()
         else:
-            self.motor.real_pos = self.motor.get_real_pos()
+            self.motor.real_pos = self.motor.get_real_pos()"""
 
     def check_in_pos(self):
         if self.motor is not None:
-            mess = "Coord[" + str(self.motor.cs) + "].InPos" # Using the CS, as it's more versatile than addressing the single motor. Also, same property for Motor and Compmotor.
+            #print("Selected CS: ", self.motor.cs)
+            mess = "Coord[" + str(
+                self.motor.cs) + "].InPos"  # Using the CS, as it's more versatile than addressing the single motor. Also, same property for Motor and Compmotor.
             out = self.connection.send_receive(mess)
         else:
-            raise ValueError("No motors specified!")
+            mot_emessaage = "No motors specified!"
+            mot_ewindow = myWarningBox(title = "Motor issues!",
+                                       message = mot_emessaage)
+            mot_ewindow.show_warning()
         return (out)
 
 

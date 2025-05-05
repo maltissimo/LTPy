@@ -1,3 +1,18 @@
+def MCG_conn ():
+
+    shell = Gantry()
+
+    shell.username = "root"
+
+    shell.password = "deltatau"
+    shell.pmac_ip = "192.168.0.200"
+
+    # opening ssh channel:
+    shell.openssh()
+    return (shell)
+
+
+
 """from Communication.MCL import *
 from Hardware.obis_commands import *
 

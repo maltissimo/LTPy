@@ -23,23 +23,6 @@ class Measurement():
                  ):
         self.nr_of_points = nr_of_points
         self.length = length  # length of measurement, units in mm. Must be converted to µm, as that's the unit of X.
-        """
-        self.motor1 = motor1
-        self.motor2 = motor2
-        self.motor3 = motor3
-        self.xmotor = X
-        self.xmove = xmove
-
-        self.ymotor = Y
-        self.ymove = ymove
-        self.zmotor = Z
-        self.zmove = zmove
-        self.pitch = pitch
-        self.pitchmove = pitchmove
-        self.roll = roll
-        self.rollmove = rollmove
-        self.yaw = yaw
-        self.yawmove = yawmove"""
 
         self.images = []
         self.stepsize = self.length / self.nr_of_points

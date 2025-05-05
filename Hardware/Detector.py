@@ -1,7 +1,8 @@
 import pypylon.pylon as py
+from ControlCenter.MultiThreading import *
 
 """
-Contains all the info necessary for the communication between Mainc Computer (MC) and CMOS detector (Det)
+Contains all the info necessary for the communication between Main Computer (MC) and CMOS detector (Det)
 
 """
 class Camera:
@@ -34,13 +35,14 @@ class Camera:
             """self.minexptime = self.camera.ExposureTime.Min
             self.maxexptime = self.camera.ExposureTime.Max"""
             self.height = self.camera.Height()
+            self.grab_nr = 5
             self.width = self.camera.Width()
             self.gain = self.camera.Gain()
         else:
             self.MyExpTime = 6.0  # set to 6 µseconds
             self.minexptime = 0.0
             self.maxexptime = 50.0
-            self.grab_nr = 1
+            self.grab_nr = grab_nr
             self.height = height
             self.width = width
             self.gain = gain
@@ -69,8 +71,8 @@ class Camera:
         self.camera.Open()
         self.camera.UserSetSelector = "Default"
         self.camera.UserSetLoad.Execute()
-        self.camera.PixelFormat = "Mono8" #Use Mono12 if switching to Matplotlib. CV2 seems to be more responsive
-        self.camera.ExposureTime = 8
+        self.camera.PixelFormat = "Mono8" #Use Mono12 if switching to Matplotlib. CV2 seems to be more responsive.
+        self.camera.ExposureTime = 8.0
         self.isopen = self.camera.IsOpen()
         self.height = self.camera.Height()  # 4600 pixels
         self.width = self.camera.Width()  # 5280 pixels
@@ -84,21 +86,28 @@ class Camera:
         self.camera.Close()
         self.isopen = self.camera.IsOpen()
 
+
     def acquire_once(self):
         res = self.camera.GrabOne(1000)
-        myimage = res.Array #this transforms res into and ndarray for further processing.
+        if res.GrabSucceeded():
+            self.frame = res.Array #this transforms res into and ndarray for further processing.
         res.Release()
-        return(myimage)
+        return(self.frame)
 
     def grabdata(self):
-        self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
+        if not self.camera.IsGrabbing():
+            self.camera.StartGrabbingMax(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
 
         if self.camera.IsGrabbing():
-            res = self.camera.RetrieveResult(5000, py.TimeoutHandling_ThrowException)
+            res = self.camera.RetrieveResult(100, py.TimeoutHandling_ThrowException)
             if res.GrabSucceeded():
                 self.frame = res.Array
             """ with camera.RetrieveResult(100) as res:"""
             res.Release()
+        #self.camera.StopGrabbing()
+        return(self.frame)
+
+    def stop(self):
         self.camera.StopGrabbing()
 
     def set_exp_time(self, custom_time):
@@ -113,7 +122,8 @@ class Camera:
         elif custom_time > self.camera.ExposureTime.Max:
             custom_time = self.camera.ExposureTime.Max
         self.camera.ExposureTime = custom_time
-        #self.MyExpTime = self.camera.ExposureTime()
+        # self.MyExpTime = self.camera.ExposureTime()
+
 
     def set_grab_nr(self, mynewgrabnumber=5):
         self.grab_nr = mynewgrabnumber
@@ -121,3 +131,4 @@ class Camera:
     def set_gain(self, gain ):
         self.camera.Gain = gain
         #self.gain = self.camera.Gain
+
