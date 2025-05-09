@@ -143,24 +143,26 @@ class Pmac_Shell():
 
     def receive_message(self):
         """
-       sets the textouput property of self as an array of strings.
-       Depending on the command before, the relevant output is
-       self.textoutput[-2] after a pmac_init
-       self.textoutput[-1] after any other command.
-
-        :return:
-        """
-        if self.pmac_shell.recv_ready():
-            self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("ascii")
-            outlines= self.rawoutput.split(delim)
-            self.worker.update_signal.emit(outlines)
-            return(outlines)
-
-            #print("Inside PMAC receive_message: ", self.textoutput, "\n")
-        else:
-            """out_error = myWarningBox (title = "Output error!",
-                                  message = "Something went wrong with the connection")
-            out_error.show_warning()"""
+          Sets the textoutput property of self as an array of strings.
+          Depending on the command before, the relevant output is
+          self.textoutput[-2] after a pmac_init
+          self.textoutput[-1] after any other command.
+          """
+        try:
+            if self.pmac_shell.recv_ready():
+                try:
+                    self.rawoutput = self.pmac_shell.recv(self.nbytes).decode("ascii")
+                    outlines = self.rawoutput.split(delim)
+                    self.worker.update_signal.emit(outlines)
+                    return outlines
+                except socket.timeout:
+                    print("Socket timeout occurred during recv, continuing...")
+                    return []
+            else:
+                return []
+        except Exception as e:
+            pass
+            #print(f"Unexpected error in receive_message: {e}")
             return []
 
     def store_message(self,message):

@@ -5,8 +5,7 @@ import time
 from Communication.MCG import *
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
 from ControlCenter.Control_Utilities import Utilities as Uti
-from ControlCenter.Control_Utilities import CoordMessenger
-from ControlCenter.MultiThreading import WorkerThread, SpeedWorker, synchronized_method, MoveWorker
+from ControlCenter.MultiThreading import WorkerThread, SpeedWorker, synchronized_method, MoveWorker, CoordMessenger
 from Graphics.Base_Classes_graphics.Motors_GUI import *
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Motors import MotorUtil, CompMotor
@@ -299,7 +298,7 @@ class MotorControls(QMainWindow):
         self.worker = None
 
     def get_speed(self):
-        self.messenger.pause()# Pause updates while fetching speed
+        #self.messenger.pause()# Pause updates while fetching speed
         index = self.gui.motor_selector_2.currentIndex()
         self.motor = self.user_motorlist[index]
         #print("request for: ", self.motor.pmac_name)
@@ -307,21 +306,21 @@ class MotorControls(QMainWindow):
         #print(f"Getting speed for motor: {self.motor}")  # Debugging print
 
         try:
-            act_speed = self.motor.getjogspeed()
+            act_speed = self.motor.jogspeed
             #print(f"Retrieved speed: {act_speed}")  # Debugging print
             #act_speed = round(act_speed, 2)
             self.gui.set_display.setText(str(act_speed))
         except Exception as e:
             print(f"Error retrieving speed: {e}")  # Catch and print any error
             QtWidgets.QMessageBox.warning(self, "Error!", f"Failed to get speed: {str(e)}")
-        finally:
-           self.messenger.resume()
+        """finally:
+           self.messenger.resume()"""
 
     def on_set_speed_clicked(self):
         worker = SpeedWorker(self.set_speed)
         QThreadPool.globalInstance().start(worker)
     def set_speed(self):
-        self.messenger.pause()
+        #self.messenger.pause()
         index = self.gui.motor_selector_2.currentIndex()
         # Motors in motor_selector_2 are from user_motorlist, so:
         self.motor= self.user_motorlist[index]
@@ -332,13 +331,14 @@ class MotorControls(QMainWindow):
         #print(speed, type(speed))
 
         self.motor.setjogspeed(float(speed))
-        self.messenger.resume()
+        #print(self.motor.jogspeed)
+        #self.messenger.resume()
         #self.get_speed() # this is just a sanity check...
 
     def stopall(self):
-        message = "#*kill"
+        message = "#*abort\n"
         self.shell.send_message(message)
-        killed = myWarningBox(title = "Warning!!", message = "All motors killed, /n the Gantry needs a reset & home!")
+        killed = myWarningBox(title = "Warning!!", message = "All motor stopped!")
         killed.show_warning()
     def movemotor(self):
         motorkey = self.gui.motor_selector.currentText()
@@ -364,14 +364,13 @@ class MotorControls(QMainWindow):
         #Move Relative:
         elif self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
             self.gui.pushButton_2.setEnabled(False)
-            self.messenger.pause()
+            #self.messenger.pause()
             self.mot2move.move_rel(distance = self.move_distance )
-
 
         #Move Absolute:
         elif not self.gui.move_rel.isChecked() and self.gui.move_abs.isChecked():
             self.gui.pushButton_2.setEnabled(False)
-            self.messenger.pause()
+            #self.messenger.pause()
             self.mot2move.move_abs(coord = self.move_distance)
 
     #@synchronized_method
@@ -380,7 +379,7 @@ class MotorControls(QMainWindow):
         self.gui.pushButton_2.setEnabled(True)
         self.mot2move.movecomplete = True
 
-        self.messenger.resume()
+        #self.messenger.resume()
         self.mot2move = None
         self.move_distance = None
 

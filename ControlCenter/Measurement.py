@@ -29,8 +29,6 @@ class Measurement():
         self.slopes_rms = 0.0
         self.heights_rms = 0.0
 
-
-
     def save_data(self, filename, text):
         """directory = os.path.dirname(filename)
         if directory and not os.path.exists(filename):
@@ -42,7 +40,7 @@ class Measurement():
 
     def slope_calc(self, Y):
         # this is the core of the measurement
-        slope_error = 0.5 * (math.atan((2.74 * ( ZERO_Y - Y)) / (LENSFOCAL * 1000)))
+        slope_error = 0.5 * (math.atan((2.74 * (  ZERO_Y - Y)) / (LENSFOCAL * 1000)))
 
         """print("Inside the slope_calc loop Y: ", Y)
         print("Inside the slope_calc loop ZERO_Y ", ZERO_Y)

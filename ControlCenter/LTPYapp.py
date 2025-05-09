@@ -1,4 +1,4 @@
-from ControlCenter.Laser import *
+from ControlCenter.Laser import LaserControl
 from ControlCenter.MotorControls import *
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from ControlCenter.Control_Utilities import Connection_initer, SSHConnectionManager

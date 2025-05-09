@@ -1,12 +1,13 @@
 import pyqtgraph as pg
 from PyQt5 import QtWidgets
 from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import QWidget, QVBoxLayout
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QSizePolicy
 
 
 class RealTime_plotter(QWidget):
     def __init__(self, parent=None):
         super().__init__()
+        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
@@ -26,6 +27,7 @@ class RealTime_plotter(QWidget):
         self.plotWidget.getAxis('bottom').setTickPen(mypen)
         self.plotWidget.getAxis('left').setTextPen(mypen)
         self.plotWidget.getAxis('bottom').setTextPen(mypen)
+        self.plotWidget.showGrid(x=True, y=True, alpha = 0.75)
 
         self.xData = []
         self.yData = []

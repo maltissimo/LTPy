@@ -1,9 +1,9 @@
-from Communication.MCG import Gantry as gc
-import numpy as np
-import time
-import warnings
-from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 
+import time
+
+from ControlCenter.MathUtils import MathUtils
+from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
+from ControlCenter.MultiThreading import MoveWorker
 """
 These are some global definitions that may be useful during measurements. The values are taken 
 directly from the config file of the Gantry PMac. It can be found inside the 
@@ -49,26 +49,6 @@ Further to this, here below the motor definitions for the specific Gantry in use
 Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 
 """
-"""
-class Initer():
-
-    This class is designed to interrogate the PMAC about the number of motors and their respective CS's.
-    The result of this is store in an 2D numpy array [[ CS, motornumber, motorname]]
-    The array can be then traversed to get, for each valid motor of the PMAC:
-    ishomed?
-    home position?
-    jog speed
-    plus limit
-    minus limit
-    Once this is known, it creates an object of class Motor(see below) with the appropriate naming and properties.
-    """
-
-"""
-
-    MOVED THE CODE INTO THE MotorUtil class, seemed more reasonable
-
-   pass
-   """
 
 
 class Motor():
@@ -209,11 +189,7 @@ class Motor():
         return (calc)
 
     def stop(self):
-        """
-        stops the motor from moving
-        :return:
-        """
-        pass
+        self.connection.send_receive("#"+ str(self.pmac_name) + "abort")
 
     def homecomplete(self):
         """
@@ -249,8 +225,9 @@ class Motor():
         :return: Changes the status of the jogspeed property
         """
         old_speed = self.jogspeed
-        command = str(self.pmac_name) + ".jogspeed=" + str(value)
-        result = self.connection.send_receive(command)
+        setcommand = str(self.pmac_name) + ".jogspeed=" + str(value)
+        self.connection.send_receive(setcommand)
+        result = self.getjogspeed()
         if result != value:
             self.jogspeed = old_speed
         else:
@@ -261,12 +238,15 @@ class Motor():
         Enquiries the system as to what is the current set jogspeed for the motor
         :return: the value of the motor.
         """
+        maxtries = 20
         command = str(self.pmac_name) + ".jogspeed"
-        #print(command)
-        #print (self.connection.send_receive(command))
-        alan = float(self.connection.send_receive(command))
-        self.jogspeed = alan
-        return (alan)
+        for attempt in range(maxtries):
+            alan = (self.connection.send_receive(command))
+            if MathUtils.is_float(alan):
+                self.jogspeed = float(alan)
+                return (float(alan))
+            else:
+                pass
 
 
 class CompMotor():
@@ -452,65 +432,102 @@ class Move():
             self.cs = self.motor.cs
             self.name = self.motor.pmac_name
 
+    def _init_worker(self, move_cmd):
+        def send_move_command():
+            self.connection.send_message(move_cmd)
+
+        self.worker = MoveWorker(self)
+
+        self.worker.begin_signal.connect(send_move_command)
+        self.worker.update_signal.connect(self._on_update_inpos)
+        self.worker.end_signal.connect(self._on_move_complete)
+        self.worker.error_signal.connect(self._on_move_error)
+
     def move_rel(self, speed="rapid", distance=0.0):
         self.movecomplete = False
         if isinstance(self.motor, Motor):
-            #movetime = abs(distance) / self.motor.getjogspeed()  # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
+            move = f'&{str(self.cs)} cpx {speed} inc {self.name} {distance}\n'
+            #print("called move: ", move)
+            self._init_worker(move)
+            self.worker.start()
+            """#movetime = abs(distance) / self.motor.getjogspeed()  # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
             # print("move command issued: ", move)
             self.connection.send_receive(move)
             # time.sleep(movetime * 1.1 / 1000)  # movetime is in ms, time.sleep requires s. Adding a 10% for safety/
-            """while not self.movecomplete:
-                time.sleep(0.005)
-                self.movecomplete = self.check_in_pos()"""
+            while not self.check_in_pos():
+                self.movecomplete = False
+            #print("Move ", move, " complete")
+            self.movecomplete = True"""
 
         else:
+
             # Composing the message  to be sent:
-            move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
-            self.connection.send_receive(move)
-            #time.sleep(0.5)  # half a second wait time for rotational moves, seems ok.
+            move = f'&{str(self.cs)} cpx {speed} inc {self.name} {distance}\n'
+            self._init_worker(move)
+            self.worker.start()
+            """#time.sleep(0.5)  # half a second wait time for rotational moves, seems ok.
             # print("move command issued: ", move)
-            """while not self.movecomplete:
-                time.sleep(0.005)
-                self.movecomplete = self.check_in_pos()
-            # self.movecomplete = self.check_in_pos()
-
-        # Updating values in the objects:
-        if hasattr(self.motor, "motorID"):
-            self.motor.act_pos = self.motor.get_pos()
-            # print(self.motor.act_pos)
-            self.motor.real_pos = self.motor.get_real_pos()
-        else:
-            self.motor.real_pos = self.motor.get_real_pos()"""
+            while not self.check_in_pos():
+                self.movecomplete = False
+            self.movecomplete = True"""
 
     def move_abs(self, speed="rapid", coord=0.0):
-        # Composing the message  to be sent:
-        move = f'&{str(self.cs)} cpx {(speed)} abs {self.name} {coord}\n'
-        # print(move)
-        # original_pos = self.motor.real_pos
-        self.connection.send_message(move)
-        """while not self.movecomplete:
-            time.sleep(0.005)
-            self.movecomplete = self.check_in_pos()
-        if hasattr(self.motor, "motorID"):
-            self.motor.act_pos = self.motor.get_pos()
-            self.motor.real_pos = self.motor.get_real_pos()
-        else:
-            self.motor.real_pos = self.motor.get_real_pos()"""
+        self.movecomplete = False
 
-    def check_in_pos(self):
+        # Composing the message  to be sent:
+        move = f'&{str(self.cs)} cpx {speed} abs {self.name} {coord}\n'
+        self._init_worker(move)
+        self.worker.start()
+        """ while not self.check_in_pos():
+            self.movecomplete = False
+        self.movecomplete = True"""
+
+    def _on_update_inpos(self, in_pos):
+       pass
+        # Optional: update GUI or log status
+
+    def _on_move_complete(self):
+        #print("[complete] Move completed.")
+        self.movecomplete = True
+        # Optional: trigger GUI updates or callbacks
+
+    def _on_move_error(self, error_msg):
+        move_error = myWarningBox(title = "Move error!", message = f"[error] MoveWorker reported: {error_msg}")
+        move_error.show_warning()
+        # Optional: show a warning dialog
+
+
+    def check_in_pos(self, max_retries=15):
         if self.motor is not None:
-            #print("Selected CS: ", self.motor.cs)
-            mess = "Coord[" + str(
-                self.motor.cs) + "].InPos"  # Using the CS, as it's more versatile than addressing the single motor. Also, same property for Motor and Compmotor.
-            out = self.connection.send_receive(mess)
+            mess = "Coord[" + str(self.motor.cs) + "].InPos"
+
+            for attempt in range(max_retries):
+                out = self.connection.send_receive(mess)
+                #print(f"Attempt {attempt + 1}, received output: {out}")
+                #print("check_in_pos output: ", out)
+
+                try:
+                    value = int(out.strip())
+                    if value in (0,1):
+                        #print("Check in pos final value: ", value)
+                        return value
+                except ValueError:
+                    pass
+                    #print(f"Still moving...")
+
+                #print("Retrying...")
+
+            #print("Max retries reached with invalid responses.")
+            return 1  # default/fallback return
+
         else:
             mot_emessaage = "No motors specified!"
-            mot_ewindow = myWarningBox(title = "Motor issues!",
-                                       message = mot_emessaage)
+            mot_ewindow = myWarningBox(title="Motor issues!", message=mot_emessaage)
             mot_ewindow.show_warning()
-        return (out)
+            return 0
+
 
 
 

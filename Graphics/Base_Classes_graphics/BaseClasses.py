@@ -287,7 +287,7 @@ class MyComboBox(QComboBox):
     def __init__(self, parent = None, width = 2 * WIDTH, height = HEIGHT):
         super().__init__(parent)
         self.setFixedSize(width, height)
-        self.setStyleSheet("QComboBox { qproperty-alignment: 'AlignCenter' }")
+        #self.setStyleSheet("QComboBox { qproperty-alignment: 'AlignCenter' }")
         #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 

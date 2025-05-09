@@ -1,16 +1,15 @@
 import datetime
-from itertools import filterfalse
 
-from ControlCenter import Control_Utilities as cu
+import ControlCenter.MathUtils
 from ControlCenter.Control_Utilities import *
-from ControlCenter.MultiThreading import *
+from ControlCenter.MathUtils import MathUtils
 from ControlCenter.Laser import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls import *
 from Graphics.Base_Classes_graphics.Measurements_GUI import *
-from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Graphics.Base_Classes_graphics.RT_Dataplot import *
 from Graphics.CameraViewer_MT import *
+from PyQt5.QtCore import QCoreApplication
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
@@ -81,14 +80,14 @@ class MeasurementControls(QMainWindow):
 
     def get_length(self):
         my_mm_length = float(self.gui.length_input.text())
-        self.length = cu.MathUtils.mm2um(my_mm_length)
+        self.length = ControlCenter.MathUtils.MathUtils.mm2um(my_mm_length)
         self.gui.length_input.clear()
         length_message = str(my_mm_length)
         self.gui.length_display.setText(length_message)
 
     def get_stepsize(self):
         stepsize = float(self.gui.stepsize_input.text())
-        self.stepsize = cu.MathUtils.mm2um(stepsize)
+        self.stepsize = ControlCenter.MathUtils.MathUtils.mm2um(stepsize)
         self.gui.stepsize_input.clear()
         stepsize_message = str(stepsize)
         self.gui.stepsize_display.setText(stepsize_message)
@@ -122,6 +121,8 @@ class MeasurementControls(QMainWindow):
 
         elif self.length != 0.0 and self.points != 0 and self.stepsize == 0.0:
             self.stepsize = self.length / self.points
+            stepsize_message = str(MathUtils.um2mm(self.stepsize))
+            self.gui.stepsize_display.setText(stepsize_message)
             #self.print_attributes()
             return True
 
@@ -136,7 +137,7 @@ class MeasurementControls(QMainWindow):
             self.show_warning(title = "Missing Values!",
                               message = "NEIN! At least two between Length, Step Size and Number of points are required")
             return False
-        #self.print_attributes()
+        self.print_attributes()
 
         return True
 
@@ -174,6 +175,10 @@ class MeasurementControls(QMainWindow):
         header += "\n"
         return header
 
+    def getXposfromfull(self):
+        full_pos = self.pos_update()
+        #print(full_pos)
+        return( full_pos["X"])
 
     def startMeasurement(self):
 
@@ -213,14 +218,14 @@ class MeasurementControls(QMainWindow):
         else:
             self.show_warning("Head moving", "Moving X Stage to starting position")
             self.motors.xmove.move_abs(speed = "rapid", coord = self.xStartPos)
-        print("Stepsize set at: ", self.stepsize, "microns")
+        #print("Stepsize set at: ", self.stepsize, "microns")
 
         # This below is the main measurement loop
         for i in range(self.points + 1):
-            full_pos = self.pos_update()
-            mypos = full_pos["X"]# this is in microns
+            mypos = self.getXposfromfull() # this is in microns
+            print("mypos: ", mypos)
             mysteppos = i * self.stepsize # this is in microns, a lot better for graphical representation.
-            print("\n")
+            #print("\n")
             print("Position ", i + 1, f" of {self.points + 1}")
             print("X Coordinate: ", mypos)
             label_message =  str(i + 1) + f" of {self.points}"
@@ -234,7 +239,7 @@ class MeasurementControls(QMainWindow):
                 image = self.camViewer.camera.acquire_once()
                 self.camViewer.camera.frame = image
                 #print(type(image))
-                centroid = cu.MathUtils.centroid( image)
+                centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
                 averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
                 #print("Current meas centroid X: ", centroid[0])
                 averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
@@ -258,24 +263,21 @@ class MeasurementControls(QMainWindow):
             myposarray = np.append(myposarray, mypos - self.xStartPos)
 
             mystepposarray = np.append(mystepposarray, mysteppos)
-            nextpos = mypos + self.stepsize # all should be in microns
+            nextpos = mypos + self.stepsize #all should be in microns
+            #print("stepsize =  ", self.stepsize)
 
             if i != self.points:
                 print("Moving stage to next position: ", nextpos)
-                self.motors.xmove.move_rel(speed = "rapid", distance = self.stepsize)
-                """while True:
-                    if abs(nextpos - float(self.motors.messenger.coordinates["X"]))<=1:
-                        break
+                #print("@ pos: ", i)
+                self.motors.xmove.move_abs(coord = nextpos)
+                #self.motors.xmove.move_rel (distance = self.stepsize)
+                self.waitformoveend()
 
-
-                #self.motors.xmove.move_rel(speed = "rapid", distance= self.stepsize)
-                i += 1
-                averageCentroidX  = 0.0
-                averageCentroidY = 0.0"""
+                #print("Move ended @: ", self.getXposfromfull())
 
         # Calculating heights:
 
-        fit, radius = cu.MathUtils.my_fit(arrayX = myposarray, arrayY = slopesarray, order = 1)
+        fit, radius = ControlCenter.MathUtils.MathUtils.my_fit(arrayX = myposarray, arrayY = slopesarray, order = 1)
         print("Radius as coeff[0], in m: ", radius / 1000000)
         to_be_plotted = slopesarray - fit # this is the REAL measurement value
        # print(type(to_be_plotted))
@@ -287,9 +289,9 @@ class MeasurementControls(QMainWindow):
             self.height_plot.updatePlot(mystepposarray[i] / 1000, heightsarray[i])
         #Calculating rms, then updating plots
 
-        self.measurement.slopes_rms = cu.MathUtils.RMS(to_be_plotted)
+        self.measurement.slopes_rms = ControlCenter.MathUtils.MathUtils.RMS(to_be_plotted)
         print(self.measurement.slopes_rms)
-        self.measurement.heights_rms = cu.MathUtils.RMS(heightsarray)
+        self.measurement.heights_rms = ControlCenter.MathUtils.MathUtils.RMS(heightsarray)
         roundslope = round(1000000 * self.measurement.slopes_rms, 3)
         roundheight = round(self.measurement.heights_rms, 3)
         slopelabel = self.slopes_plot.writeLabel(type = "RMS Slopes", value = roundslope , units = "urad")
@@ -299,8 +301,6 @@ class MeasurementControls(QMainWindow):
         self.height_plot.setCustomLabel(heightlabel)
 
         self.save_data(myposarray, slopesarray, heightsarray)
-
-
 
         self.endmeasurement()
 
@@ -342,12 +342,13 @@ class MeasurementControls(QMainWindow):
         self.gui.nrofgrabs_input.clear()
         self.gui.startButton.setEnabled(True)
         self.gui.stopButton.setEnabled(False)
-
+        self.motors.messenger.pause()
         act_speed = self.motors.X.jogspeed
         self.motors.X.setjogspeed(25)
         self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
         self.show_warning("End of Measurement!", f"Stage at the original position.")
         self.motors.X.setjogspeed(act_speed)
+        self.motors.messenger.resume()
 
 
     def pos_update(self):
@@ -357,6 +358,12 @@ class MeasurementControls(QMainWindow):
         pos_update = self.motors.messenger.coordinates.copy()
         self.motors.messenger.resume()
         return(pos_update)
+
+    def waitformoveend(self):
+        while not self.motors.xmove.movecomplete:
+            time.sleep(0.05)
+            QCoreApplication.processEvents()  # allows Qt signals to be processe
+        time.sleep(0.05)
 
     def is_this_real (self):
         return("Mona")

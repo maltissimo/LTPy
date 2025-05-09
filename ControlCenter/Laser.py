@@ -1,8 +1,6 @@
 import sys
-from PyQt5 import QtWidgets
 from Graphics.Base_Classes_graphics.LaserGUI2 import *
 from ControlCenter.Control_Utilities import Utilities as Uti
-from PyQt5.QtCore import QTimer
 from Hardware.Source import *
 from ControlCenter.MultiThreading import *
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
