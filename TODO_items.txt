@@ -1,20 +1,10 @@
 20241205
 
-Add FWHM calculations in Camera Viewer to spot dimensions of focus - > Done 20241213
-
-Add greying of buttons waiting for commands to end (i.e. Move...), this is linked to multithread
 
 Set 0 in mechanical coordinates, i.e. when aligned mirror.
 
-Add values below labels in MeasurementControls so as the user sees what's what -> Done 20241220
-
-Add defaults of length, # of steps, nr of grabs -> Done 20241220
-
-Add EXIT procedure to clean up everything
-
 20241227
 
-Finish multithreading Laser and motors
 Complete Graphic LTPy main app
 
 Add a search spot routine on the CMOS

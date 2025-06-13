@@ -4,6 +4,30 @@ from Communication import MCG
 from Hardware import Source, Motors # , Detector
 from ControlCenter.MultiThreading import *
 
+def get_last_commit_date():
+    import subprocess
+    result = subprocess.run(
+        ["git", "log", "-1", "--format=%cd"],
+        stdout=subprocess.PIPE,
+        text=True
+    )
+    return(result.stdout.strip())
+
+def console_welcome():
+    welcome = "###############################################\n"
+    welcome +="###############################################\n"
+    welcome +="######                                   ######\n"
+    welcome +="######         LTPy console              ######\n"
+    welcome +="######  (c) Elettra Sincrotrone Trieste  ######\n"
+    welcome +="######      Author: M. Altissimo         ######\n"
+    welcome +="######        Last commit date:          ######\n"
+    welcome +="######  " + get_last_commit_date() + "    ######\n"
+    welcome +="######                                   ######\n"
+    welcome +="###############################################\n"
+    welcome += "###############################################\n"
+    return(welcome)
+
+
 class Utilities():
 
     def create(my_object, **kwargs):

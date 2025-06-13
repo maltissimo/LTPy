@@ -2,8 +2,10 @@
 import math
 import os
 import numpy as np
+from PyQt5.QtWidgets import QFileDialog
 from scipy.ndimage import center_of_mass
 from scipy import integrate
+import datetime
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width() 2640
@@ -21,22 +23,39 @@ class Measurement():
                  length=1,  # adding a default seems sane
                  nr_of_grabs=5  # adding a default seems sane
                  ):
-        self.nr_of_points = nr_of_points
-        self.length = length  # length of measurement, units in mm. Must be converted to µm, as that's the unit of X.
+        # Some sanity values:
 
-        self.images = []
-        self.stepsize = self.length / self.nr_of_points
+        self.length = 0.0  # this is the length (in mm ) of the measurement
+        self.points = 0  # these are the number of measurement points
+        self.stepsize = 0.0  # this is the stepsize ( in mm) of the measurement
+        self.nrofgrabs = 5  # default nr of camera grabs per measurement point
+        self.xStartPos = 650000  # default @ middle of stage travel...
+        self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
+        self.directory = os.path.expanduser("~") # selecting the default directory as users home directory
+
         self.slopes_rms = 0.0
         self.heights_rms = 0.0
 
+    def get_save_directory(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+        options |= QFileDialog.ShowDirsOnly
+
+        self.directory = QFileDialog.getExistingDirectory(
+            None,
+            "Select Directory",
+            os.path.expanduser("~"),
+            options = options
+        )
+        #print(self.directory)
+
     def save_data(self, filename, text):
-        """directory = os.path.dirname(filename)
-        if directory and not os.path.exists(filename):
-            os.makedirs(directory)"""
-        # filename = "data of " + TODAY + ".txt"
-        with open(filename, "w", encoding="ASCII") as f:
-            f.write(text)
-        # print("Data saved into: " + filename )
+        if self.directory:
+            filename = os.path.join(self.directory, filename)
+            with open(filename, "w", encoding="ASCII") as f:
+                f.write(text)
+        else:
+            print("No directory selected")
 
     def slope_calc(self, Y):
         # this is the core of the measurement

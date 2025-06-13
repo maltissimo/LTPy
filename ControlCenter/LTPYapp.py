@@ -1,11 +1,49 @@
-from ControlCenter.Laser import LaserControl
-from ControlCenter.MotorControls import *
-from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
-from ControlCenter.Control_Utilities import Connection_initer, SSHConnectionManager
+from PyQt5.QtWidgets import QWidget, QVBoxLayout, QPlainTextEdit
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QTextCursor
+from PyQt5.QtWidgets import QApplication, QMainWindow
+from ControlCenter.MultiThreading import WorkerThread
+from ControlCenter.Control_Utilities import console_welcome
+from PyQt5.QtCore import QObject, pyqtSignal
 from ControlCenter.MeasurementControls import *
-from PyQt5.QtWidgets import QApplication
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QObject, pyqtSignal
 
+
+#####################Console code#####################
+class ConsoleStream(QObject):
+    new_text = pyqtSignal(str)
+    def __init__(self):
+        super().__init__()
+        self._buffer = ""
+
+    def write(self, text):
+        self._buffer += text
+        while "\n" in self._buffer:
+            line, self._buffer = self._buffer.split("\n", 1)
+            self.new_text.emit(line + "\n")
+
+    def flush(self):
+        if self._buffer:
+            self.new_text.emit(self._buffer)
+            self._buffer = ""
+        # Required for sys.stdout compatibility
+
+class ConsoleWidget(QPlainTextEdit):
+    def __init__(self, parent=None):
+        super().__init__(parent)
+        self.setReadOnly(True)
+        self.setLineWrapMode(QPlainTextEdit.NoWrap)
+        self.setStyleSheet("background-color: white; color: black; font-family: Consolas, monospace;")
+        self.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+
+    def append_text(self, text):
+        self.insertPlainText(text)
+        self.moveCursor(QTextCursor.End)
+
+    def clear_console(self):
+        self.setPlainText("")
+
+##################### Main App #####################
 class MainLTPApp:
     def __init__(self):
         self.PMAC_credentials = None
@@ -47,10 +85,27 @@ class MainLTPApp:
         self.motor_controls.show()
         self.controls.show()
 
-
+#####################Main App Entry#####################
 
 if __name__ == "__main__":
     app = QApplication([])
+
+    console_window = QMainWindow()
+    console_widget = ConsoleWidget()
+    console_stream = ConsoleStream()
+
+    console_stream.new_text.connect(console_widget.append_text)
+
+    sys.stdout = console_stream
+    sys.stderr = console_stream
+
+    console_window.setCentralWidget(console_widget)
+    console_window.setWindowTitle("LTPy output console")
+    console_window.resize(800, 200)
+    console_window.move(100, 800)
+    console_window.show()
+    print(console_welcome())
+
     main_app = MainLTPApp()
     main_app.run()
     app.exec_()  # Event loop for PyQt

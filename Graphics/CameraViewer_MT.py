@@ -11,7 +11,6 @@ from Graphics.Base_Classes_graphics.CameraViewer_GUI import Ui_PylonCamViewer
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Detector import Camera
 
-
 class CamViewer(QMainWindow):
     def __init__(self):
         super().__init__()

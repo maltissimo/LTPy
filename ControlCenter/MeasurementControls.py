@@ -15,6 +15,10 @@ LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
 ZERO_Y = 4600 / 2  # Have to start somewhere, this is half of camera.Height()
 
+STOP_WARNING = {"type": "Warning",
+                "title" : "Measurement stopped!",
+                "message" : "Measurement stopped by user!"}
+
 class MeasurementControls(QMainWindow):
     f = LENSFOCAL  # this is now in mm
     X0 = ZERO_X
@@ -27,8 +31,6 @@ class MeasurementControls(QMainWindow):
         else:
           self.shell = Utilities.connect2Pmac()
     # Initing objects for the measurements:
-        self.motor_timer = QTimer()
-        self.camera_timer = QTimer()
         if motors is not None:
             self.motors = motors
         else:
@@ -36,6 +38,8 @@ class MeasurementControls(QMainWindow):
 
         self.laser = Laser()
         self.measurement = Measurement()
+        self.stability_meas_flag = False
+        self.measurement_thread = None
         # Some sanity values:
 
         self.length = 0.0  # this is the length (in mm ) of the measurement
@@ -56,27 +60,22 @@ class MeasurementControls(QMainWindow):
         self.initHeightTab()
         self.initSlopesTab()
 
-        """print("Nr of measurement points: ", self.points)
-        print("Measurement lenght: ", self.length)
-        print("Measurement stepsize: ", self.stepsize)"""
-
         self.gui.points_input.returnPressed.connect(self.get_points)
         self.gui.length_input.returnPressed.connect(self.get_length)
         self.gui.stepsize_input.returnPressed.connect(self.get_stepsize)
         self.gui.nrofgrabs_input.returnPressed.connect(self.get_nrofgrabs)
 
-        self.gui.startButton.clicked.connect(self.startMeasurement)
-        self.gui.stopButton.clicked.connect(self.stopMeasurement)
+        self.gui.startButton.clicked.connect(self.on_start_pressed)
+        self.gui.stopButton.clicked.connect(self.on_stop_pressed)
         self.gui.xStartPos.clicked.connect(self.setXstartPos)
         self.gui.stopButton.setEnabled(False)
-
-
 
     def get_points(self):
         self.points = int(self.gui.points_input.text())
         self.gui.points_input.clear()
         points_message = str(self.points)
         self.gui.points_display.setText(points_message)
+        self.measurement.points = self.points
 
     def get_length(self):
         my_mm_length = float(self.gui.length_input.text())
@@ -84,6 +83,7 @@ class MeasurementControls(QMainWindow):
         self.gui.length_input.clear()
         length_message = str(my_mm_length)
         self.gui.length_display.setText(length_message)
+        self.measurement.length = self.length
 
     def get_stepsize(self):
         stepsize = float(self.gui.stepsize_input.text())
@@ -91,12 +91,14 @@ class MeasurementControls(QMainWindow):
         self.gui.stepsize_input.clear()
         stepsize_message = str(stepsize)
         self.gui.stepsize_display.setText(stepsize_message)
+        self.measurement.stepsize = self.stepsize
 
     def get_nrofgrabs(self):
         self.nrofgrabs = int(self.gui.nrofgrabs_input.text())
         self.gui.nrofgrabs_input.clear()
         grabs_message =str(self.nrofgrabs)
         self.gui.nrofgrabs_label_2.setText(grabs_message)
+        self.measurement.nrofgrabs = self.nrofgrabs
 
     def conditions_check(self):
         # Check if laser is on:
@@ -126,12 +128,19 @@ class MeasurementControls(QMainWindow):
             #self.print_attributes()
             return True
 
-        elif self.length!= 0 and self.points!= 0 and self.stepsize !=0:
+        elif self.length!= 0.0 and self.points!= 0 and self.stepsize !=0.0:
             self.stepsize = self.length / self.points
             stepsize_message = str(MathUtils.um2mm(self.stepsize))
             self.gui.stepsize_display.setText(stepsize_message)
             #self.print_attributes()
             return True
+
+        elif self.length ==0.0  or self.stepsize == 0.0 and self.points !=0:
+            self.gui.stepsize_display.setText("0.0")
+            self.stability_meas_flag = True
+            self.show_warning(title = "Stability measurement!",
+                              message = "Carriying out laser position stability measurement.")
+
 
         else:
             self.show_warning(title = "Missing Values!",
@@ -168,6 +177,7 @@ class MeasurementControls(QMainWindow):
         header = ""
         header += "Date of measurement: " + self.today + "\n"
         header += "Nr of camera grabs per point: " + str(self.nrofgrabs) + "\n"
+        header += "Camera exposure time per point: " + str(self.camViewer.camera.camera.ExposureTime()) + " usec" + "\n"
         header += "Length of measurement (mm): " + str(MathUtils.um2mm(self.length)) +"\n"
         header += "Nr of measurement points + 1: " +  str(self.points + 1 ) + "\n"
         header += "Stepsize of measurement (mm): " + str(MathUtils.um2mm(self.stepsize)) + "\n"
@@ -182,127 +192,137 @@ class MeasurementControls(QMainWindow):
 
     def startMeasurement(self):
 
-        self.slopes_plot.clearPlot()# Clear plot at the beginning of the measurement.
-        self.height_plot.clearPlot() # Clear plot at the beginning of the measurement
-
-        self.camViewer.camera.set_grab_nr(1)
-        self.camViewer.camera.set_exp_time(8)
-        print("Exposure time: ", self.camViewer.camera.camera.ExposureTime())
-        print("Number of grabs per point: ", self.nrofgrabs)
-        self.camViewer.stop_grab()
-
         if not self.conditions_check():
             return
-        #print("Inside the StartMeasurement method: ")
-        self.print_attributes()
 
-        # Ensure points, length, and stepsize are set
-        if self.points == 0 or self.length == 0.0 or self.stepsize == 0.0:
-            self.show_warning("Missing Values!", "Please provide valid inputs for points, length, and stepsize.")
-            return
 
-        self.gui.startButton.setEnabled(False)
-        self.gui.stopButton.setEnabled(True)
+        self.measurement_thread.update_signal.emit({"type": "print_attributes"})
 
         self.results = self.writeheader()
         #print(self.results)
         #Instantiating the arrays for storing the results
-        myposarray = np.array([])
+        self.myposarray = np.array([])
         mystepposarray = np.array([])
-        slopesarray = np.array([])
-        heightsarray = np.array([])
+        self.slopesarray = np.array([])
+        self.heightsarray = np.array([])
 
         if not self.motors.messenger.coordinates["X"] - self.xStartPos > 1.0: # difference bigger than 1 micron
-            print("Stage at starting position!")
+            self.measurement_thread.update_signal.emit({"type": "startPosOk"})
 
         else:
-            self.show_warning("Head moving", "Moving X Stage to starting position")
+            self.measurement_thread.update_signal.emit({"type": "Warning",
+                                                        "title": "Head moving",
+                                                        "message": "Moving X stage to starting position"})
+
             self.motors.xmove.move_abs(speed = "rapid", coord = self.xStartPos)
         #print("Stepsize set at: ", self.stepsize, "microns")
 
         # This below is the main measurement loop
         for i in range(self.points + 1):
+            if not self.measurement_thread.running:
+                self.measurement_thread.update_signal.emit(STOP_WARNING)
+                return
+
             mypos = self.getXposfromfull() # this is in microns
-            print("mypos: ", mypos)
             mysteppos = i * self.stepsize # this is in microns, a lot better for graphical representation.
-            #print("\n")
-            print("Position ", i + 1, f" of {self.points + 1}")
-            print("X Coordinate: ", mypos)
-            label_message =  str(i + 1) + f" of {self.points}"
-            self.gui.step_label.setText(label_message)
-            print("Measuring @ X coord: ", mypos, "\n")
+            self.measurement_thread.update_signal.emit({"type": "pos_update",
+                                                        "step": i,
+                                                        "x_coord": mypos})
 
             averageX= 0.0  # resetting back to 0 after each round of the loop below.
             averageY = 0.0
 
             for grab in range(self.nrofgrabs):
+                if not self.measurement_thread.running:
+                    self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
+                    self.measurement_thread.update_signal.emit({"type": "stop_measurement"})
+                    self.measurement_thread.update_signal.emit(STOP_WARNING)
+                    return
+
                 image = self.camViewer.camera.acquire_once()
-                self.camViewer.camera.frame = image
-                #print(type(image))
+                self.measurement_thread.update_signal.emit({"type": "camimage",
+                                                            "image": image})
+
                 centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
+
                 averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-                #print("Current meas centroid X: ", centroid[0])
+
                 averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
-                #print("Current meas centroid Y: ", centroid[1])
-                grab += 1
+
+                #grab += 1
 
             averageCentroidX = averageX / self.nrofgrabs
             averageCentroidY = averageY / self.nrofgrabs
-            #print("Current averaged centroid X: ", averageCentroidX, "\n")
-            #print("Current averaged centroid Y: ", averageCentroi1dY, "\n")
+
 
             slope = self.measurement.slope_calc(averageCentroidY) #changed for trial on 2024 12 20 MA, gave 14 urad with 100 grabs
-            #slope = self.measurement.slope_calc(averageCentroidX) gave 2 urad, but radius way off.
 
-            slopesarray = np.append(slopesarray, slope)
-            #print(slopesarray)
+            self.slopesarray = np.append(self.slopesarray, slope)
 
             self.results += (str(mypos) + "\t\t" + str(self.motors.messenger.coordinates["Y"]) +
                              "\t\t" + str(averageCentroidX) + "\t\t" + str(averageCentroidY) + "\n")
 
-            myposarray = np.append(myposarray, mypos - self.xStartPos)
+            self.myposarray = np.append(self.myposarray, mypos - self.xStartPos)
 
             mystepposarray = np.append(mystepposarray, mysteppos)
             nextpos = mypos + self.stepsize #all should be in microns
             #print("stepsize =  ", self.stepsize)
 
             if i != self.points:
-                print("Moving stage to next position: ", nextpos)
-                #print("@ pos: ", i)
-                self.motors.xmove.move_abs(coord = nextpos)
-                #self.motors.xmove.move_rel (distance = self.stepsize)
-                self.waitformoveend()
+                if not self.measurement_thread.running:
+                    self.measurement_thread.update_signal.emit(STOP_WARNING)
+                    return
 
-                #print("Move ended @: ", self.getXposfromfull())
+                if self.stability_meas_flag == False:
+                    update_message = "Moving stage to next position" + str(nextpos)
+                    self.measurement_thread.update_signal.emit({"type": "next",
+                                                                "message": update_message})
+                    #print("Moving stage to next position: ", nextpos)
+                    #print("@ pos: ", i)
+                    self.motors.xmove.move_abs(coord = nextpos)
+                    #self.motors.xmove.move_rel (distance = self.stepsize)
+                    self.waitformoveend()
+
+                elif self.stability_meas_flag == True:
+                    stab_message = "Measurement  " + str(i) +" taken"
+                    self.measurement_thread.update_signal.emit({"type": "stabnext",
+                                                                "message": stab_message})
 
         # Calculating heights:
 
-        fit, radius = ControlCenter.MathUtils.MathUtils.my_fit(arrayX = myposarray, arrayY = slopesarray, order = 1)
-        print("Radius as coeff[0], in m: ", radius / 1000000)
-        to_be_plotted = slopesarray - fit # this is the REAL measurement value
-       # print(type(to_be_plotted))
+        fit, radius = ControlCenter.MathUtils.MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
 
-        heightsarray = self.measurement.height_calc(to_be_plotted, myposarray)
+        to_be_plotted = self.slopesarray - fit # this is the REAL measurement value
 
-        for i in range(len(heightsarray)):
-            self.slopes_plot.updatePlot(mystepposarray[i] / 1000, to_be_plotted[i])
-            self.height_plot.updatePlot(mystepposarray[i] / 1000, heightsarray[i])
+        self.heightsarray = self.measurement.height_calc(to_be_plotted, self.myposarray)
+
+
+
         #Calculating rms, then updating plots
-
         self.measurement.slopes_rms = ControlCenter.MathUtils.MathUtils.RMS(to_be_plotted)
-        print(self.measurement.slopes_rms)
-        self.measurement.heights_rms = ControlCenter.MathUtils.MathUtils.RMS(heightsarray)
+        self.measurement.heights_rms = ControlCenter.MathUtils.MathUtils.RMS(self.heightsarray)
         roundslope = round(1000000 * self.measurement.slopes_rms, 3)
         roundheight = round(self.measurement.heights_rms, 3)
-        slopelabel = self.slopes_plot.writeLabel(type = "RMS Slopes", value = roundslope , units = "urad")
-        heightlabel = self.height_plot.writeLabel(type = "RMS Heights",value = roundheight, units = "um")
 
-        self.slopes_plot.setCustomLabel(slopelabel)
-        self.height_plot.setCustomLabel(heightlabel)
 
-        self.save_data(myposarray, slopesarray, heightsarray)
+        end_message = "Radius as coeff[0], in m: " + str(radius / 1000000) + "\n"
+        end_message += "RMS slope of the measurement:  " + str(roundslope) + " urad \n"
+        end_message += "RMS height of the measurement: " + str(roundheight) + "um\n"
+        self.measurement_thread.update_signal.emit({"type": "sumprint",
+                                                    "message": end_message})
 
-        self.endmeasurement()
+
+
+        self.measurement_thread.update_signal.emit({"type": "plot_update",
+                                                    "x_array": mystepposarray,
+                                                    "slopes": to_be_plotted,
+                                                    "heights": self.heightsarray,
+                                                    "roundslopes": roundslope,
+                                                    "roundheights": roundheight
+                                                    })
+
+        self.measurement_thread.update_signal.emit({ "type": "end_measurement"
+        })
 
     def save_data(self, myposarray, slopesarray, heightsarray):
         slopestobesaved = "Slope RMS: " + str(self.measurement.slopes_rms) + "\n"
@@ -314,11 +334,13 @@ class MeasurementControls(QMainWindow):
         filename2 = "Xpos_slopes" + self.today + ".txt"
         filename3 = "Xpos_heights" + self.today + ".txt"
 
-
         if self.gui.save_slope_data.isChecked():
-
             self.measurement.save_data(filename2, slopestobesaved)
             self.measurement.save_data(filename3, heightstobesaved)
+            """self.measurement_thread.update_signal.emit({"type" : "Warning",
+                                                        "title" : "Slopes-Only Data saved!",
+                                                        "message": f"Data saved into {filename2}, {filename3}"
+                                                        })"""
             self.show_warning("Slopes-Only Data saved!", f"Data saved into {filename2}, {filename3}")
 
         else:
@@ -326,13 +348,126 @@ class MeasurementControls(QMainWindow):
             self.measurement.save_data(filename, self.results)
             self.measurement.save_data(filename2, slopestobesaved)
             self.measurement.save_data(filename3, heightstobesaved)
+            """self.measurement_thread.update_signal.emit({"type": "Warning",
+                                                        "title" : "Full Data saved!",
+                                                        "message": f"Data saved into {filename}, {filename2}, {filename3}"
+            })"""
 
             self.show_warning("Full Data saved!", f"Data saved into {filename}, {filename2}, {filename3}")
 
+    def on_start_pressed(self):
+        if self.measurement_thread is None or not self.measurement_thread.isRunning():
+            #Moving all the GUI-related pre-measurement ops here, in order to avoid clashes between GUI updates and worker threads
+            self.gui.startButton.setEnabled(False)
+            self.gui.stopButton.setEnabled(True)
+            self.camViewer.stop_grab()
+            self.slopes_plot.clearPlot()
+            self.height_plot.clearPlot()
+            self.camViewer.camera.set_grab_nr(1)
+            self.camViewer.camera.set_exp_time(self.camViewer.camera.camera.ExposureTime())
+            #print("Exposure time: ", self.camViewer.camera.camera.ExposureTime())
+            #print("Number of grabs per point: ", self.nrofgrabs)
+            self.measurement_thread = WorkerThread(self.startMeasurement)
+            self.measurement_thread.end_signal.connect(self.endmeasurement)
+            self.measurement_thread.update_signal.connect(self.on_update)
+            self.measurement_thread.start()
+
+    def on_stop_pressed(self):
+        if self.measurement_thread and self.measurement_thread.isRunning():
+            self.measurement_thread.stop()
+            self.stopMeasurement()
+
+    def on_update(self, data):
+        #print(f"on_update received: {data} ({type(data)})")
+
+        if not isinstance(data, dict) or "type" not in data:
+            return
+
+        msg_type = data["type"]
+        #print(f"Parsed msg_type: {msg_type}")
+
+        if msg_type == "print_attributes":
+            self.print_attributes()
+
+        if msg_type == "Warning":
+            warning = myWarningBox(title = data["title"],
+                                        message = data["message"])
+            warning.show_warning()
+
+        if msg_type == "startPosOk":
+            print("Stage at starting position!")
+
+        if msg_type == "camimage":
+            self.camViewer.camera.frame = data["image"]
+
+        if msg_type == "pos_update":
+            position = data["step"] + 1
+            print("Position ", position, f" of {self.points +1}")
+            print("X Coordinate: ", data["x_coord"])
+            label_message = str(position) + f" of {self.points +1}"
+            self.gui.step_label.setText(label_message)
+
+        if msg_type == "next":
+            print(data["message"])
+
+        if msg_type == "stabnext":
+            print(data["message"])
+
+        if msg_type == "sumprint":
+            print(data["message"])
+
+        if msg_type == "plot_update":
+            slope_label = self.slopes_plot.writeLabel(type="RMS Slopes", value=data["roundslopes"], units="urad")
+            height_label = self.height_plot.writeLabel(type="RMS Heights", value=data["roundheights"], units="um")
+            for i in range(len(data["heights"])):
+                self.slopes_plot.updatePlot(data["x_array"][i]/1000, data["slopes"][i])
+                self.height_plot.updatePlot(data["x_array"][i]/1000, data["heights"][i])
+            self.slopes_plot.setCustomLabel(slope_label)
+            self.height_plot.setCustomLabel(height_label)
+
+        if msg_type == "get_save_dir":
+            self.measurement.get_save_directory()
+
+        if msg_type == "end_measurement" :
+            self.endmeasurement()
+
+        elif msg_type == "stop_measurement":
+            self.on_measurement_stopped()
+        #else:
+            #print(f"Unknown data type: {msg_type}")
+
     def endmeasurement(self):
         """Housekeeping after each single measurement"""
-        #self.motors.restartTimer()
+        self.motors.messenger.pause()
+        if self.measurement_thread is not None:
+            try:
+                self.measurement_thread.update_signal.disconnect()
+                self.measurement_thread.end_signal.disconnect()
+            except TypeError:
+                # Already disconnected
+                pass
+            self.measurement_thread.running = False
+            self.measurement_thread = None
+        #print("Thread killed")
+        # Saving the data:
+        self.measurement.get_save_directory() # This updates the self.directory attribute
+        self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
 
+        act_speed = self.motors.X.jogspeed
+        self.motors.X.setjogspeed(25)
+        self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
+        self.show_warning("End of Measurement!", f"Stage at the original position.")
+        self.motors.X.setjogspeed(act_speed)
+        self.motors.messenger.resume()
+        self.clear_gui()
+
+
+    def clear_gui(self):
+        """
+        This is to reset the GUI after a measurement has finished or has stopped:
+        :return:
+        """
+        #re-set camera:
         self.camViewer.camera.set_grab_nr(5)
         self.camViewer.start_grab()
         # Clear input fields
@@ -342,14 +477,6 @@ class MeasurementControls(QMainWindow):
         self.gui.nrofgrabs_input.clear()
         self.gui.startButton.setEnabled(True)
         self.gui.stopButton.setEnabled(False)
-        self.motors.messenger.pause()
-        act_speed = self.motors.X.jogspeed
-        self.motors.X.setjogspeed(25)
-        self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
-        self.show_warning("End of Measurement!", f"Stage at the original position.")
-        self.motors.X.setjogspeed(act_speed)
-        self.motors.messenger.resume()
-
 
     def pos_update(self):
         self.motors.messenger.pause()
@@ -365,17 +492,13 @@ class MeasurementControls(QMainWindow):
             QCoreApplication.processEvents()  # allows Qt signals to be processe
         time.sleep(0.05)
 
-    def is_this_real (self):
-        return("Mona")
-
-    def stopMeasurement(self):
+    def on_measurement_stopped(self):
         # TODO: dump all the motors positions into a file. Then set the positions after homing to those values
         old_coords_dict = self.motors.get_all_pos()
         self.motors.stopall()
-        #self.motors.restartTimer()
-        self.camera.set_grab_nr(5)
+        self.measurement_thread.stop()
+        self.camera.camera.set_grab_nr(5)
         self.show_warning("Warning!", "Measurement interrupted")
-        self.motors.MotorUtil.homeGantry()
         if self.motors.X.get_real_pos() != old_coords_dict["X"]:
             self.motors.xmove.moveabs(old_coords_dict["X"])
         if self.motors.Y.get_real_pos() != old_coords_dict["Y"]:
@@ -388,8 +511,7 @@ class MeasurementControls(QMainWindow):
             self.motors.pitchmove.moveabs(old_coords_dict["pitch"])
         if self.motors.yaw.get_real_pos() != old_coords_dict["yaw"]:
             self.motors.yawmove.moveabs(old_coords_dict["yaw"])
-        self.gui.startButton.setEnabled(True)
-        self.gui.stopButton.setEnabled(False)
+        self.clear_gui()
 
     def setXstartPos(self):
         self.xStartPos = self.motors.messenger.coordinates["X"]

@@ -37,21 +37,26 @@ class ConsoleWidget(QPlainTextEdit):
 
 
 class MainWindow(QMainWindow):
-    def __init__(self):
+    def __init__(self, console):
         super().__init__()
-        self.console = ConsoleWidget()
+        self.console = console
         self.setCentralWidget(self.console)
+        self.setWindowTitle("PyQt Console Output")
+        self.resize(800, 400)
 
-        # Redirect stdout and stderr
-        sys.stdout = self.console
-        sys.stderr = self.console
-
+        # Output something to test
         print("Welcome to the PyQt Console!")
         for i in range(10):
             print(f"Line {i}")
 
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
 
-app = QApplication(sys.argv)
-window = MainWindow()
-window.show()
-sys.exit(app.exec_())
+    # Create console and redirect BEFORE creating main window
+    console = ConsoleWidget()
+    sys.stdout = console
+    sys.stderr = console
+
+    window = MainWindow(console)
+    window.show()
+    sys.exit(app.exec_())
