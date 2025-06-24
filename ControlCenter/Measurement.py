@@ -110,3 +110,12 @@ class Measurement():
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
         return (heights)"""
 
+"""class StabilityMeasurement(Measurement):
+    def __init__(self, *args, **kwargs):
+        super().__init__():
+        self.time_per_point = 1 # 1 second per point
+        self.length = 0.0
+        self.points = 100 # adding a default seems sane
+        self.stepsize = 0.0 # we don't want to move the stage
+        self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
+        self.directory = os.path.expanduser("~")"""

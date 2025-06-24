@@ -408,18 +408,19 @@ class MotorControls(QMainWindow):
         homed.show_warning()
 
     def closeEvent(self, event):
-        """Handle cleanup before closing the window."""
+        """Handle cleanup before closing the window.
         reply = QMessageBox.question(
             self, "Exit Confirmation", "Are you sure you want to exit?",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
 
-        if reply == QMessageBox.Yes:
-            self.stop_coord_monitoring()  # Stop monitoring
+        if reply == QMessageBox.Yes:"""
+        self.stop_coord_monitoring()  # Stop monitoring
+        if self.shell.alive:
             self.shell.close_connection()  # Close SSH connection if applicable
-            event.accept()  # Allow the window to close
-        else:
-            event.ignore()  # Prevent the window from closing
+        event.accept()   # Allow the window to close
+        """else:
+            event.ignore()  # Prevent the window from closing"""
 
 
 if __name__ == "__main__":

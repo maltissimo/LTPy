@@ -3,7 +3,7 @@ from Communication.MCL import *
 
 
 class Laser (SerialConn):
-    def __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
+    def         __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
         super().__init__()
         self.comms_on = comms_on
         self.is_on = self.serialmessage(isLASON)
@@ -105,7 +105,7 @@ class Laser (SerialConn):
         status['is_on'] = self.is_on
         return status
 
-    def show(self):
-        self.show()
+    """def show(self):
+        self.show()"""
 
 

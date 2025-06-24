@@ -32,7 +32,7 @@ class LaserControl(QtWidgets.QMainWindow):
         self.gui.horizontalSlider.setValue(0)
         self.gui.horizontalSlider.valueChanged.connect(self.slider_change)
 
-        self.show()
+        #self.show()
 
         # Create worker thread, calling self.source.get_all_status() every 100 ms.
         self.monitor_thread = WorkerThread(task=self.source.get_all_status, sleep_time=150)

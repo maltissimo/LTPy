@@ -24,7 +24,7 @@ class MeasurementControls(QMainWindow):
     X0 = ZERO_X
     Y0 = ZERO_Y
 
-    def __init__(self, shell, motors = None ):
+    def __init__(self, shell, motors = None , detector = None):
         #The motors object have to be passed by the caller, otherwise this won't work.
         if shell is not None:
             self.shell = shell
@@ -35,6 +35,8 @@ class MeasurementControls(QMainWindow):
             self.motors = motors
         else:
             self.motors = MotorControls(shell = self.shell)
+        if detector is not None:
+            self.detector = detector
 
         self.laser = Laser()
         self.measurement = Measurement()
@@ -139,7 +141,12 @@ class MeasurementControls(QMainWindow):
             self.gui.stepsize_display.setText("0.0")
             self.stability_meas_flag = True
             self.show_warning(title = "Stability measurement!",
-                              message = "Carriying out laser position stability measurement.")
+                              message = "Carriying out stability measurement.")
+            """
+            we pick from here and call a new method for the stability measurement
+            First we kill the 
+            """
+            self.stability_measurement()
 
 
         else:
@@ -284,6 +291,9 @@ class MeasurementControls(QMainWindow):
                     self.waitformoveend()
 
                 elif self.stability_meas_flag == True:
+                    """
+                    need to kill the measurement_thread worker and start a
+                    """
                     stab_message = "Measurement  " + str(i) +" taken"
                     self.measurement_thread.update_signal.emit({"type": "stabnext",
                                                                 "message": stab_message})
@@ -334,7 +344,7 @@ class MeasurementControls(QMainWindow):
         filename2 = "Xpos_slopes" + self.today + ".txt"
         filename3 = "Xpos_heights" + self.today + ".txt"
 
-        if self.gui.save_slope_data.isChecked():
+        if self.gui.savelldata.isChecked():
             self.measurement.save_data(filename2, slopestobesaved)
             self.measurement.save_data(filename3, heightstobesaved)
             """self.measurement_thread.update_signal.emit({"type" : "Warning",
@@ -378,6 +388,7 @@ class MeasurementControls(QMainWindow):
             self.stopMeasurement()
 
     def on_update(self, data):
+
         #print(f"on_update received: {data} ({type(data)})")
 
         if not isinstance(data, dict) or "type" not in data:
@@ -406,6 +417,7 @@ class MeasurementControls(QMainWindow):
             print("X Coordinate: ", data["x_coord"])
             label_message = str(position) + f" of {self.points +1}"
             self.gui.step_label.setText(label_message)
+            self.gui.xcoord_value_label.setText(str(data["x_coord"]))
 
         if msg_type == "next":
             print(data["message"])
@@ -521,24 +533,26 @@ class MeasurementControls(QMainWindow):
         self.height_plot = RealTime_plotter()
 
         self.height_plot.setLabels(bottom_label = "X position", bottom_units = "mm", left_label="Heights", left_units = "um")
+        self.height_plot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        height_layout = QtWidgets.QVBoxLayout()
+        height_layout = QtWidgets.QVBoxLayout(self.gui.height_tab)
         height_layout.addWidget(self.height_plot)
 
         self.gui.height_tab.setLayout(height_layout)
 
     def initSlopesTab(self):
         self.slopes_plot = RealTime_plotter()
+        slopes_layout = QtWidgets.QVBoxLayout(self.gui.Slopes_tab)
+        slopes_layout.addWidget(self.slopes_plot)
+        self.gui.Slopes_tab.setLayout(slopes_layout)
         self.slopes_plot.setLabels(bottom_label = "X position", bottom_units = "mm", left_label="Slope", left_units = "rad")
 
-        slopes_layout = QtWidgets.QVBoxLayout()
-        slopes_layout.addWidget(self.slopes_plot)
+        self.slopes_plot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        self.gui.Slopes_tab.setLayout(slopes_layout)
 
     def initCameraTab(self):
 
-        self.camViewer = CamViewer()
+        self.camViewer = CamViewer(self.detector)
 
         CamTabLayout = QtWidgets.QVBoxLayout(self.gui.cam_tab)
         CamTabLayout.addWidget(self.camViewer)
@@ -555,17 +569,12 @@ class MeasurementControls(QMainWindow):
 
     def closeEvent(self, event):
         """Handle cleanup before closing the window."""
-        reply = QMessageBox.question(
-            self, "Exit Confirmation", "Are you sure you want to exit?",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
 
-        if reply == QMessageBox.Yes:
+        if shell.alive:  # Check if the shell is alive
             self.shell.close_connection()  # Close SSH connection if applicable
-            self.camViewer.camera.closecam() #closes the Cam.
-            event.accept()  # Allow the window to close
-        else:
-            event.ignore()  # Prevent the window from closing
+        self.camViewer.camera.closecam() #closes the Cam.
+        event.accept()  # Allow the window to close
+        event.ignore()  # Prevent the window from closing
 
 
 

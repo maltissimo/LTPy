@@ -16,3 +16,9 @@ Add controls on RT_slope plot for:
     - loading data from external file
 
 Add mirror alignment procedure
+
+20250613
+
+CORRECT the issues with Measurementts_GUI.py!!!!!
+
+Implement the measurement backwards! (from Max X to StartX)

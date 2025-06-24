@@ -21,7 +21,7 @@ def console_welcome():
     welcome +="######  (c) Elettra Sincrotrone Trieste  ######\n"
     welcome +="######      Author: M. Altissimo         ######\n"
     welcome +="######        Last commit date:          ######\n"
-    welcome +="######  " + get_last_commit_date() + "    ######\n"
+    welcome +="######  " + get_last_commit_date() + "   ######\n"
     welcome +="######                                   ######\n"
     welcome +="###############################################\n"
     welcome += "###############################################\n"

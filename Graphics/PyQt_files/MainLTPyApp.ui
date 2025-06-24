@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>223</width>
-    <height>419</height>
+    <width>224</width>
+    <height>438</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,13 +26,13 @@
      <verstretch>0</verstretch>
     </sizepolicy>
    </property>
-   <widget class="QFrame" name="frame">
+   <widget class="QFrame" name="AppWidgets">
     <property name="geometry">
      <rect>
       <x>0</x>
       <y>0</y>
       <width>220</width>
-      <height>311</height>
+      <height>331</height>
      </rect>
     </property>
     <property name="sizePolicy">
@@ -75,6 +75,30 @@
        </property>
        <property name="text">
         <string>Measurement Widget</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="StabMeasurement">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>200</width>
+         <height>60</height>
+        </size>
+       </property>
+       <property name="font">
+        <font>
+         <pointsize>12</pointsize>
+        </font>
+       </property>
+       <property name="text">
+        <string>Stability Measurement</string>
        </property>
       </widget>
      </item>
@@ -152,13 +176,13 @@
      </item>
     </layout>
    </widget>
-   <widget class="QFrame" name="frame_2">
+   <widget class="QFrame" name="QuitWidget">
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>310</y>
+      <y>330</y>
       <width>220</width>
-      <height>101</height>
+      <height>100</height>
      </rect>
     </property>
     <property name="sizePolicy">

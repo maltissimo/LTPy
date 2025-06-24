@@ -7,6 +7,8 @@ from ControlCenter.Control_Utilities import console_welcome
 from PyQt5.QtCore import QObject, pyqtSignal
 from ControlCenter.MeasurementControls import *
 from PyQt5.QtCore import QObject, pyqtSignal
+from Hardware.Detector import Camera
+from Graphics.Base_Classes_graphics.MainLTPyApp_GUI import Ui_LTPy
 
 
 #####################Console code#####################
@@ -42,11 +44,76 @@ class ConsoleWidget(QPlainTextEdit):
 
     def clear_console(self):
         self.setPlainText("")
+##################### LTPy startup window #####################
+class LTPyStartupWindow(QMainWindow):
+    def __init__(self, main_app):
+        super().__init__()
+        self.main_app = main_app
+        self.ui = Ui_LTPy()
+        self.ui.setupUi(self)
 
-##################### Main App #####################
+        # Buttons connections:
+        self.ui.MeasurementButton.clicked.connect(self.show_measurement_controls)
+        self.ui.StabMeasurement.clicked.connect(self.show_stability_measurement)
+        self.ui.LaserButton.clicked.connect(self.show_laser_controls)
+        self.ui.MotorsButton.clicked.connect(self.show_motor_controls)
+        self.ui.QuitButton.clicked.connect(self.quit_application)
+
+        self.setWindowTitle("LTPy - Widget Launcher")
+
+    def show_measurement_controls(self):
+        if hasattr(self.main_app, "controls") and self.main_app.controls:
+            self.main_app.controls.show()
+            self.show_laser_controls(self)
+            self.show_motor_controls(self)
+            self.main_app.raise_()
+            self.main_app.activateWindow()
+        else:
+            print("Measurement controls not initialized")
+
+    def show_stability_measurement(self):
+        pass
+        """
+        passing for the minute
+        if hasattr(self.main_app, "stability_meas"):
+            self.main_app.stability_meassurement.show()
+        else:
+            pass"""
+    def show_laser_controls(self):
+        if hasattr(self.main_app, "laser") and self.main_app.laser:
+            self.main_app.laser.show()
+            self.main_app.laer.raise_()
+            self.main_app.activateWindow()
+        else:
+            print("Laser controls not initialized")
+
+    def show_motor_controls(self):
+        if hasattr (self.main_app, "motor_controls") and self.main_app.motor_controls:
+            self.main_app.motor_controls.show()
+            self.main_app.motor_controls.raise_()
+            self.main_app.motor_controls.activateWindow()
+        else:
+            print("Motor controls not initialized")
+
+    def quit_application(self):
+        reply = QMessageBox.question(
+            self, "Exit Confirmation",
+            "Are you sure you want to quit LTPy?\nThis will close all control windows.",
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            self.main_app.cleanup_and_quit()
+        ##################### Main App #####################
 class MainLTPApp:
     def __init__(self):
         self.PMAC_credentials = None
+        self.motor_controls = None
+        self.laser = None
+        self.controls = None
+        self.camera_controls = None
+        self.stability_meas = None
+        self.startup_window = None
 
         self.PMAC_credentials = self.PMAC_connector()
         """print(self.PMAC_credentials["ip"])
@@ -58,20 +125,76 @@ class MainLTPApp:
             cred_warning.show_warning()
             return
 
-        print(self.PMAC_credentials)
+        print("Correct PMAC Credentials, connecting...")
 
         try:
             self.manager = SSHConnectionManager.get_instance(self.PMAC_credentials)
+            shared_connection = self.manager.get_connection()
+
+
         except Exception as e:
             conn_warning = myWarningBox(title = "Conn error", message = str({e}))
             conn_warning.show_warning()
             return
-        shared_connection = self.manager.get_connection()
 
-        self.motor_controls = MotorControls(shared_connection)
-        self.laser = LaserControl()
-        self.controls = MeasurementControls(shell = shared_connection,
-                                            motors = self.motor_controls)
+        camera = Camera()
+        self.startup_window = LTPyStartupWindow(self)
+        self.initialize_controls(shared_connection, camera)
+
+    def initialize_controls(self, shared_connection, camera):
+        try:
+            print("Initializing controls...")
+            self.motor_controls = MotorControls(shell = shared_connection)
+            print()
+            print("Motor Controls Initialized")
+
+            self.laser = LaserControl()
+            print()
+            print("Laser Controls Initialized")
+
+            self.controls = MeasurementControls(shell = shared_connection,
+                                                motors = self.motor_controls, detector = camera)
+            print()
+            print("Measurement Controls Initialized")
+
+            self.camera_controls = CamViewer(detector= camera)
+            print()
+            print("Camera Controls Initialized")
+
+            self.stability_meas = StabilityMeasurement()
+            print()
+            print("Stability Measurement Initialized")
+
+        except Exception as e:
+            error_msg = f"Error initializing controls: {str(e)}"
+            print(error_msg)
+            error_warning = myWarningBox(title="Initialization Error", message=error_msg)
+            error_warning.show_warning()
+
+    def run(self):
+        if self.startup_window:
+            self.startup_window.show()
+        else:
+            print("Startup window not initialized")
+
+    def cleanup_and_quit(self):
+        print("Cleaning up and quitting...")
+        if self.motor_controls:
+            self.motor_controls.close()
+        if self.laser:
+            self.laser.close()
+        if self.controls:
+            self.controls.close()
+        if self.camera_controls:
+            self.camera_controls.close()
+        if self.stability_meas:
+            self.stability_meas.close()
+        if self.startup_window:
+            self.startup_window.close()
+        print("Cleanup complete. Exiting...")
+
+        QApplication.quit()
+
 
     def PMAC_connector(self):
         conn_initer = Connection_initer()
@@ -80,10 +203,10 @@ class MainLTPApp:
             return None
         return credentials
 
-    def run(self):
+    """def run(self):
         self.laser.show()
         self.motor_controls.show()
-        self.controls.show()
+        self.controls.show()"""
 
 #####################Main App Entry#####################
 
@@ -107,5 +230,9 @@ if __name__ == "__main__":
     print(console_welcome())
 
     main_app = MainLTPApp()
-    main_app.run()
-    app.exec_()  # Event loop for PyQt
+    if main_app.startup_window:
+        main_app.run()
+        sys.exit(app.exec_())  # Event loop for PyQt
+    else:
+        print("Application not initialized")
+        sys.exit(1)

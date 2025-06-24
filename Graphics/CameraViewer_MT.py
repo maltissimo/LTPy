@@ -12,7 +12,7 @@ from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Detector import Camera
 
 class CamViewer(QMainWindow):
-    def __init__(self):
+    def __init__(self, detector = None):
         super().__init__()
         self.gui = Ui_PylonCamViewer()
         self.gui.setupUi(self)
@@ -22,7 +22,10 @@ class CamViewer(QMainWindow):
         self.gui.StopGrab.clicked.connect(self.stop_grab)
         self.gui.SetAcqTime.clicked.connect(self.setAcqTime)
 
-        self.camera = Camera()
+        if detector is not None:
+            self.camera = detector
+        else:
+            self.camera = Camera()
         self.running = False
 
         self.plot_layout = QVBoxLayout(self.gui.CamFrame)

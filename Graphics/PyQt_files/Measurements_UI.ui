@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1390</width>
-    <height>1006</height>
+    <width>1023</width>
+    <height>1017</height>
    </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
   </property>
   <property name="windowTitle">
    <string notr="true">MainWindow</string>
@@ -31,8 +37,8 @@
      <rect>
       <x>10</x>
       <y>0</y>
-      <width>1351</width>
-      <height>791</height>
+      <width>1001</width>
+      <height>801</height>
      </rect>
     </property>
     <property name="toolTipDuration">
@@ -42,6 +48,12 @@
      <number>0</number>
     </property>
     <widget class="QWidget" name="cam_tab">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <attribute name="title">
       <string>Camera</string>
      </attribute>
@@ -73,11 +85,23 @@
      </widget>
     </widget>
     <widget class="QWidget" name="Slopes_tab">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <attribute name="title">
       <string>Slopes</string>
      </attribute>
     </widget>
     <widget class="QWidget" name="height_tab">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
      <attribute name="title">
       <string>Height</string>
      </attribute>
@@ -88,7 +112,7 @@
      <rect>
       <x>10</x>
       <y>800</y>
-      <width>1351</width>
+      <width>1001</width>
       <height>141</height>
      </rect>
     </property>
@@ -104,7 +128,7 @@
        <x>20</x>
        <y>3</y>
        <width>981</width>
-       <height>131</height>
+       <height>140</height>
       </rect>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -137,7 +161,7 @@
            </widget>
           </item>
           <item>
-           <widget class="QCheckBox" name="savelldata">
+           <widget class="QCheckBox" name="savealldata">
             <property name="text">
              <string>Save all Data</string>
             </property>
@@ -253,7 +277,7 @@
          <number>15</number>
         </property>
         <property name="bottomMargin">
-         <number>30</number>
+         <number>15</number>
         </property>
         <item>
          <widget class="MyLabel" name="meas_step_label">
@@ -264,6 +288,26 @@
         </item>
         <item>
          <widget class="MyLabel" name="step_label">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MyLabel" name="xcoord_label">
+          <property name="text">
+           <string>X Position:</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MyLabel" name="xcoord_value_label">
           <property name="sizePolicy">
            <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
             <horstretch>0</horstretch>
@@ -286,7 +330,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1390</width>
+     <width>1023</width>
      <height>22</height>
     </rect>
    </property>
