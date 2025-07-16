@@ -1,0 +1,404 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+    <class>Stability_measurements</class>
+    <widget class="QMainWindow" name="Stability_measurements">
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>1130</width>
+                <height>1043</height>
+            </rect>
+        </property>
+        <property name="sizePolicy">
+            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+            </sizepolicy>
+        </property>
+        <property name="windowTitle">
+            <string notr="true">MainWindow</string>
+        </property>
+        <property name="toolTip">
+            <string notr="true"/>
+        </property>
+        <property name="statusTip">
+            <string notr="true"/>
+        </property>
+        <property name="whatsThis">
+            <string notr="true"/>
+        </property>
+        <property name="accessibleName">
+            <string notr="true"/>
+        </property>
+        <widget class="QWidget" name="centralwidget">
+            <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                </sizepolicy>
+            </property>
+            <layout class="QVBoxLayout" name="verticalLayout_7">
+                <property name="spacing">
+                    <number>0</number>
+                </property>
+                <property name="sizeConstraint">
+                    <enum>QLayout::SetFixedSize</enum>
+                </property>
+                <item>
+                    <widget class="QTabWidget" name="Stab_meas">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>1100</width>
+                                <height>760</height>
+                            </size>
+                        </property>
+                        <property name="toolTipDuration">
+                            <number>-1</number>
+                        </property>
+                        <property name="currentIndex">
+                            <number>2</number>
+                        </property>
+                        <widget class="QWidget" name="cam_tab">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>1100</width>
+                                    <height>750</height>
+                                </size>
+                            </property>
+                            <attribute name="title">
+                                <string>Camera</string>
+                            </attribute>
+                        </widget>
+                        <widget class="QWidget" name="Slopes_tab">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>1100</width>
+                                    <height>750</height>
+                                </size>
+                            </property>
+                            <attribute name="title">
+                                <string>Slopes</string>
+                            </attribute>
+                        </widget>
+                        <widget class="QWidget" name="height_tab">
+                            <property name="sizePolicy">
+                                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                    <horstretch>0</horstretch>
+                                    <verstretch>0</verstretch>
+                                </sizepolicy>
+                            </property>
+                            <property name="minimumSize">
+                                <size>
+                                    <width>1100</width>
+                                    <height>750</height>
+                                </size>
+                            </property>
+                            <attribute name="title">
+                                <string>Height</string>
+                            </attribute>
+                        </widget>
+                    </widget>
+                </item>
+                <item>
+                    <widget class="QFrame" name="frame">
+                        <property name="sizePolicy">
+                            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                                <horstretch>0</horstretch>
+                                <verstretch>0</verstretch>
+                            </sizepolicy>
+                        </property>
+                        <property name="minimumSize">
+                            <size>
+                                <width>1100</width>
+                                <height>0</height>
+                            </size>
+                        </property>
+                        <property name="maximumSize">
+                            <size>
+                                <width>16777215</width>
+                                <height>220</height>
+                            </size>
+                        </property>
+                        <property name="frameShape">
+                            <enum>QFrame::StyledPanel</enum>
+                        </property>
+                        <property name="frameShadow">
+                            <enum>QFrame::Raised</enum>
+                        </property>
+                        <layout class="QVBoxLayout" name="verticalLayout_9">
+                            <item>
+                                <layout class="QHBoxLayout" name="horizontalLayout_2">
+                                    <property name="spacing">
+                                        <number>30</number>
+                                    </property>
+                                    <item>
+                                        <layout class="QVBoxLayout" name="verticalLayout_5">
+                                            <item>
+                                                <layout class="QHBoxLayout" name="horizontalLayout">
+                                                    <item>
+                                                        <widget class="MyPushButton" name="startButton">
+                                                            <property name="text">
+                                                                <string>Start</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="MyPushButton" name="stopButton">
+                                                            <property name="text">
+                                                                <string>Stop</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                    <item>
+                                                        <widget class="QCheckBox" name="savealldata">
+                                                            <property name="text">
+                                                                <string>Save all Data</string>
+                                                            </property>
+                                                        </widget>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                            <item>
+                                                <layout class="QHBoxLayout" name="horizontalLayout_3">
+                                                    <property name="spacing">
+                                                        <number>0</number>
+                                                    </property>
+                                                    <item>
+                                                        <layout class="QVBoxLayout" name="verticalLayout"/>
+                                                    </item>
+                                                    <item>
+                                                        <layout class="QVBoxLayout" name="verticalLayout_2">
+                                                            <item>
+                                                                <widget class="MyQLineEdit" name="points_input"/>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="points_label">
+                                                                    <property name="text">
+                                                                        <string># of points</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="points_display">
+                                                                    <property name="text">
+                                                                        <string>Setting:</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                        </layout>
+                                                    </item>
+                                                    <item>
+                                                        <layout class="QVBoxLayout" name="verticalLayout_3">
+                                                            <item>
+                                                                <widget class="MyQLineEdit" name="stepsize_input"/>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="stepsize_label">
+                                                                    <property name="text">
+                                                                        <string>Time per point (s)</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="stepsize_display">
+                                                                    <property name="text">
+                                                                        <string>Setting:</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                        </layout>
+                                                    </item>
+                                                    <item>
+                                                        <layout class="QVBoxLayout" name="verticalLayout_4">
+                                                            <item>
+                                                                <widget class="MyQLineEdit" name="nrofgrabs_input"/>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="nrofgrabs_label">
+                                                                    <property name="text">
+                                                                        <string>Number of grabs</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                            <item>
+                                                                <widget class="MyLabel" name="nrofgrabs_label_2">
+                                                                    <property name="text">
+                                                                        <string>Setting:</string>
+                                                                    </property>
+                                                                </widget>
+                                                            </item>
+                                                        </layout>
+                                                    </item>
+                                                </layout>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                    <item>
+                                        <layout class="QVBoxLayout" name="verticalLayout_6">
+                                            <property name="spacing">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="leftMargin">
+                                                <number>15</number>
+                                            </property>
+                                            <property name="topMargin">
+                                                <number>10</number>
+                                            </property>
+                                            <property name="rightMargin">
+                                                <number>15</number>
+                                            </property>
+                                            <property name="bottomMargin">
+                                                <number>15</number>
+                                            </property>
+                                            <item>
+                                                <widget class="MyLabel" name="meas_step_label">
+                                                    <property name="text">
+                                                        <string>Measurement step:</string>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="MyLabel" name="step_label">
+                                                    <property name="sizePolicy">
+                                                        <sizepolicy hsizetype="MinimumExpanding"
+                                                                    vsizetype="MinimumExpanding">
+                                                            <horstretch>0</horstretch>
+                                                            <verstretch>0</verstretch>
+                                                        </sizepolicy>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string/>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="MyLabel" name="xcoord_label">
+                                                    <property name="text">
+                                                        <string/>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                            <item>
+                                                <widget class="MyLabel" name="xcoord_value_label">
+                                                    <property name="sizePolicy">
+                                                        <sizepolicy hsizetype="MinimumExpanding"
+                                                                    vsizetype="MinimumExpanding">
+                                                            <horstretch>0</horstretch>
+                                                            <verstretch>0</verstretch>
+                                                        </sizepolicy>
+                                                    </property>
+                                                    <property name="text">
+                                                        <string/>
+                                                    </property>
+                                                </widget>
+                                            </item>
+                                        </layout>
+                                    </item>
+                                </layout>
+                            </item>
+                        </layout>
+                    </widget>
+                </item>
+            </layout>
+        </widget>
+        <widget class="QMenuBar" name="menubar">
+            <property name="geometry">
+                <rect>
+                    <x>0</x>
+                    <y>0</y>
+                    <width>1130</width>
+                    <height>24</height>
+                </rect>
+            </property>
+            <widget class="QMenu" name="menuFile">
+                <property name="title">
+                    <string>File</string>
+                </property>
+                <addaction name="separator"/>
+                <addaction name="actionStart_Measurement"/>
+                <addaction name="actionSave"/>
+                <addaction name="separator"/>
+                <addaction name="actionQuit"/>
+            </widget>
+            <widget class="QMenu" name="menuHelp">
+                <property name="title">
+                    <string>Help</string>
+                </property>
+                <addaction name="separator"/>
+                <addaction name="actionGantry_Help"/>
+                <addaction name="actionLaser_Help"/>
+                <addaction name="actionCamera_Help"/>
+            </widget>
+            <addaction name="menuFile"/>
+            <addaction name="menuHelp"/>
+        </widget>
+        <action name="actionStart_Measurement">
+            <property name="text">
+                <string>Start Measurement</string>
+            </property>
+        </action>
+        <action name="actionSave">
+            <property name="text">
+                <string>Save</string>
+            </property>
+        </action>
+        <action name="actionGantry_Help">
+            <property name="text">
+                <string>Gantry Help</string>
+            </property>
+        </action>
+        <action name="actionLaser_Help">
+            <property name="text">
+                <string>Laser Help</string>
+            </property>
+        </action>
+        <action name="actionCamera_Help">
+            <property name="text">
+                <string>Camera Help</string>
+            </property>
+        </action>
+        <action name="actionQuit">
+            <property name="text">
+                <string>Quit</string>
+            </property>
+        </action>
+    </widget>
+    <customwidgets>
+        <customwidget>
+            <class>MyLabel</class>
+            <extends>QLabel</extends>
+            <header location="global">BaseClasses.py</header>
+        </customwidget>
+        <customwidget>
+            <class>MyQLineEdit</class>
+            <extends>QLineEdit</extends>
+            <header location="global">BaseClasses.py</header>
+        </customwidget>
+        <customwidget>
+            <class>MyPushButton</class>
+            <extends>QPushButton</extends>
+            <header location="global">Graphics.BaseClasses</header>
+        </customwidget>
+    </customwidgets>
+    <resources/>
+    <connections/>
+</ui>

@@ -163,7 +163,7 @@ class MyLabel(QLabel):
 class MyPushButton(QPushButton):
     def __init__(self, parent = None, width =  1.5 * WIDTH, height = 1.6 * HEIGHT):
         super().__init__(parent)
-        self.setFixedSize(width, height)
+        self.setFixedSize(int(width), int(height))
         #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
