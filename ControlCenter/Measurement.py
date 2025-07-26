@@ -6,6 +6,7 @@ from PyQt5.QtWidgets import QFileDialog
 from scipy.ndimage import center_of_mass
 from scipy import integrate
 import datetime
+from ControlCenter.MathUtils import MathUtils
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width() 2640
@@ -57,28 +58,27 @@ class Measurement():
         else:
             print("No directory selected")
 
-    def slope_calc(self, Y):
+    def slope_calc(self, Y, focal=LENSFOCAL):
         # this is the core of the measurement
-        slope_error = 0.5 * (math.atan((2.74 * (  ZERO_Y - Y)) / (LENSFOCAL * 1000)))
-
-        """print("Inside the slope_calc loop Y: ", Y)
-        print("Inside the slope_calc loop ZERO_Y ", ZERO_Y)
-        print("Inside the slope_calc loop focal: ", LENSFOCAL, "\t", LENSFOCAL * 1000)
-        print("inside the slope_calc loop, (Y - ZERO_Y): ", 2.74 * (Y - ZERO_Y))
-        print("inside the slope_calc loop, math.atan(Y - ZERO_Y): ", math.atan(2.74* (Y - ZERO_Y)))
-        print("Inside the slope_calc loop slope: ", slope_error)"""
+        slope_error = 0.5 * (math.atan((2.74 * (  ZERO_Y - Y)) / (focal * 1000)))
         return (slope_error)
 
-    def pretty_printing(self, array1, array2):
+    def pretty_printing(self, *arrays):
         """
         Printing data in a decent format for saving.
         :param array1: a 1D np array, size N
         :param array2: a 1D np array, size N
         :return: a tab formatted text, ready to be saved
         """
+        if not arrays:
+            return ""
         text = ""
-        for i in range(len(array1)):
-            text += str(array1[i]) + "\t" + str(array2[i]) + "\n"
+
+        for i in range(len(arrays[0])):
+            row = []
+            for array in arrays:
+                row.append(str(array[i]))
+            text += "\t".join(row) + "\n"
         return (text)
 
     def height_calc(self, arrayY, arrayX):
@@ -95,8 +95,6 @@ class Measurement():
         heights = np.array([])
         heights = integrate.cumtrapz(arrayY, arrayX, initial=0)
         return (heights)
-
-
 
     def figure_error(self, arrayX, arrayY):
         """

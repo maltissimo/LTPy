@@ -51,16 +51,21 @@ class MeasurementControls(QMainWindow):
         self.xStartPos = 650000 # default @ middle of stage travel...
         self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
 
+
     # Create an instance of the Measurement_GUI class:
         super().__init__()
         self.gui = Ui_MeasurementGUI()
+        print("GUI inited")
         self.gui.setupUi(self)
 
 
         # Dealing with the GUI:
         self.initCameraTab()
+        #print("Camera tab inited")
         self.initHeightTab()
+        print("Height tab inited")
         self.initSlopesTab()
+        print("Slopes tab inited")
 
         self.gui.points_input.returnPressed.connect(self.get_points)
         self.gui.length_input.returnPressed.connect(self.get_length)
@@ -71,7 +76,7 @@ class MeasurementControls(QMainWindow):
         self.gui.stopButton.clicked.connect(self.on_stop_pressed)
         self.gui.xStartPos.clicked.connect(self.setXstartPos)
         self.gui.stopButton.setEnabled(False)
-
+        print("logics inited")
     def get_points(self):
         self.points = int(self.gui.points_input.text())
         self.gui.points_input.clear()
@@ -197,20 +202,22 @@ class MeasurementControls(QMainWindow):
         #print(full_pos)
         return( full_pos["X"])
 
+    def clear_console(self):
+        print("\033[H\033[J", end="")
+        print("Console cleared, new measurement starting.")
+
     def startMeasurement(self):
 
         if not self.conditions_check():
             return
-
-
         self.measurement_thread.update_signal.emit({"type": "print_attributes"})
 
         self.results = self.writeheader()
-        #print(self.results)
         #Instantiating the arrays for storing the results
         self.myposarray = np.array([])
         mystepposarray = np.array([])
         self.slopesarray = np.array([])
+        self.slopes_to_be_plotted = np.array([])
         self.heightsarray = np.array([])
 
         if not self.motors.messenger.coordinates["X"] - self.xStartPos > 1.0: # difference bigger than 1 micron
@@ -240,6 +247,7 @@ class MeasurementControls(QMainWindow):
             averageY = 0.0
 
             for grab in range(self.nrofgrabs):
+                #Safety check, is thread running?
                 if not self.measurement_thread.running:
                     self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
                     self.measurement_thread.update_signal.emit({"type": "stop_measurement"})
@@ -247,41 +255,52 @@ class MeasurementControls(QMainWindow):
                     return
 
                 image = self.camViewer.camera.acquire_once()
-                self.measurement_thread.update_signal.emit({"type": "camimage",
-                                                            "image": image})
-
                 centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
-
                 averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-
                 averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
 
-                #grab += 1
+            self.measurement_thread.update_signal.emit({"type": "camimage",
+                                                        "image": image})
+            #Positions arrays update:
 
+            self.myposarray = np.append(self.myposarray, mypos - self.xStartPos)
+            mystepposarray = np.append(mystepposarray, mysteppos)
+            nextpos = mypos + self.stepsize  # all should be in microns
+
+            # One point taken, now the calculations:
             averageCentroidX = averageX / self.nrofgrabs
             averageCentroidY = averageY / self.nrofgrabs
 
-
-            slope = self.measurement.slope_calc(averageCentroidY) #changed for trial on 2024 12 20 MA, gave 14 urad with 100 grabs
+            ########################################
+            #       SLOPE CALCULATIONS
+            ########################################
+            slope = self.measurement.slope_calc(averageCentroidY)
+            ########################################
+            ########################################
 
             self.slopesarray = np.append(self.slopesarray, slope)
+            if self.slopesarray.size >= 2:
+                fit, radius = MathUtils.my_fit(self.myposarray, self.slopesarray, order = 1)
+                self.slopes_to_be_plotted = self.slopesarray - fit
+                self.heightsarray = self.measurement.height_calc(self.slopes_to_be_plotted, self.myposarray)
+
+            #Updatig plots:
+                self.measurement_thread.update_signal.emit({"type": "meas_plot_update",
+                                                        "x_array": mystepposarray,
+                                                        "raw_slopes": self.slopesarray,
+                                                        "fitted_slopes": self.slopes_to_be_plotted,
+                                                        "heights": self.heightsarray
+                                                        })
 
             self.results += (str(mypos) + "\t\t" + str(self.motors.messenger.coordinates["Y"]) +
                              "\t\t" + str(averageCentroidX) + "\t\t" + str(averageCentroidY) + "\n")
-
-            self.myposarray = np.append(self.myposarray, mypos - self.xStartPos)
-
-            mystepposarray = np.append(mystepposarray, mysteppos)
-            nextpos = mypos + self.stepsize #all should be in microns
-            #print("stepsize =  ", self.stepsize)
-
             if i != self.points:
                 if not self.measurement_thread.running:
                     self.measurement_thread.update_signal.emit(STOP_WARNING)
                     return
 
                 if self.stability_meas_flag == False:
-                    update_message = "Moving stage to next position" + str(nextpos)
+                    update_message = "Moving stage to next position " + str(nextpos)
                     self.measurement_thread.update_signal.emit({"type": "next",
                                                                 "message": update_message})
                     #print("Moving stage to next position: ", nextpos)
@@ -300,17 +319,13 @@ class MeasurementControls(QMainWindow):
 
         # Calculating heights:
 
-        fit, radius = ControlCenter.MathUtils.MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
+        fit, radius = MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
 
         to_be_plotted = self.slopesarray - fit # this is the REAL measurement value
 
-        self.heightsarray = self.measurement.height_calc(to_be_plotted, self.myposarray)
-
-
-
         #Calculating rms, then updating plots
-        self.measurement.slopes_rms = ControlCenter.MathUtils.MathUtils.RMS(to_be_plotted)
-        self.measurement.heights_rms = ControlCenter.MathUtils.MathUtils.RMS(self.heightsarray)
+        self.measurement.slopes_rms = MathUtils.RMS(to_be_plotted)
+        self.measurement.heights_rms = MathUtils.RMS(self.heightsarray)
         roundslope = round(1000000 * self.measurement.slopes_rms, 3)
         roundheight = round(self.measurement.heights_rms, 3)
 
@@ -321,9 +336,7 @@ class MeasurementControls(QMainWindow):
         self.measurement_thread.update_signal.emit({"type": "sumprint",
                                                     "message": end_message})
 
-
-
-        self.measurement_thread.update_signal.emit({"type": "plot_update",
+        self.measurement_thread.update_signal.emit({"type": "final_plot_update",
                                                     "x_array": mystepposarray,
                                                     "slopes": to_be_plotted,
                                                     "heights": self.heightsarray,
@@ -334,36 +347,27 @@ class MeasurementControls(QMainWindow):
         self.measurement_thread.update_signal.emit({ "type": "end_measurement"
         })
 
-    def save_data(self, myposarray, slopesarray, heightsarray):
+    def save_data(self, myposarray, slopesarray, fittedslopesarray, heightsarray):
         slopestobesaved = "Slope RMS: " + str(self.measurement.slopes_rms) + "\n"
         heightstobesaved = "Height RMS: " + str(self.measurement.heights_rms) + "\n"
-        slopestobesaved += self.measurement.pretty_printing(myposarray, slopesarray)
+        slopestobesaved += self.measurement.pretty_printing(myposarray, slopesarray, fittedslopesarray)
         heightstobesaved += self.measurement.pretty_printing(myposarray, heightsarray)
 
         filename = "FullData" + self.today + ".txt"
         filename2 = "Xpos_slopes" + self.today + ".txt"
         filename3 = "Xpos_heights" + self.today + ".txt"
 
-        if self.gui.savelldata.isChecked():
-            self.measurement.save_data(filename2, slopestobesaved)
-            self.measurement.save_data(filename3, heightstobesaved)
-            """self.measurement_thread.update_signal.emit({"type" : "Warning",
-                                                        "title" : "Slopes-Only Data saved!",
-                                                        "message": f"Data saved into {filename2}, {filename3}"
-                                                        })"""
-            self.show_warning("Slopes-Only Data saved!", f"Data saved into {filename2}, {filename3}")
-
-        else:
-
+        if self.gui.savealldata.isChecked():
             self.measurement.save_data(filename, self.results)
             self.measurement.save_data(filename2, slopestobesaved)
             self.measurement.save_data(filename3, heightstobesaved)
-            """self.measurement_thread.update_signal.emit({"type": "Warning",
-                                                        "title" : "Full Data saved!",
-                                                        "message": f"Data saved into {filename}, {filename2}, {filename3}"
-            })"""
 
-            self.show_warning("Full Data saved!", f"Data saved into {filename}, {filename2}, {filename3}")
+            print(f"Full Data saved into {filename}, {filename2}, {filename3}")
+        else:
+            self.measurement.save_data(filename2, slopestobesaved)
+            self.measurement.save_data(filename3, heightstobesaved)
+
+            print( f" Slopes-OnlyData saved into {filename2}, {filename3}")
 
     def on_start_pressed(self):
         if self.measurement_thread is None or not self.measurement_thread.isRunning():
@@ -409,7 +413,7 @@ class MeasurementControls(QMainWindow):
             print("Stage at starting position!")
 
         if msg_type == "camimage":
-            self.camViewer.camera.frame = data["image"]
+            self.camViewer.display_image(data["image"])
 
         if msg_type == "pos_update":
             position = data["step"] + 1
@@ -428,14 +432,47 @@ class MeasurementControls(QMainWindow):
         if msg_type == "sumprint":
             print(data["message"])
 
-        if msg_type == "plot_update":
+        if msg_type == "final_plot_update":
+            self.fittedslopes_plot.clearPlot()
             slope_label = self.slopes_plot.writeLabel(type="RMS Slopes", value=data["roundslopes"], units="urad")
             height_label = self.height_plot.writeLabel(type="RMS Heights", value=data["roundheights"], units="um")
-            for i in range(len(data["heights"])):
-                self.slopes_plot.updatePlot(data["x_array"][i]/1000, data["slopes"][i])
-                self.height_plot.updatePlot(data["x_array"][i]/1000, data["heights"][i])
+            x_data = data["x_array"]/1000
+            self.slopes_plot.updatePlotBatch(self.fittedslopes_plot, x_data, data["slopes"])
+            self.height_plot.updatePlotBatch(self.heights, x_data, data["heights"])
+            """for i in range(len(data["heights"])):
+                self.slopes_plot.updatePlot(self.fittedslopes_plot,data["x_array"][i]/1000, data["slopes"][i])
+                self.height_plot.updatePlot(self.heights,data["x_array"][i]/1000, data["heights"][i])"""
             self.slopes_plot.setCustomLabel(slope_label)
             self.height_plot.setCustomLabel(height_label)
+            self.slopes_plot.forceAutoRange()
+            self.height_plot.forceAutoRange()
+            #self.height_plot.updatePlot()
+
+        if msg_type == "meas_plot_update":
+            """ self.slopesarray_plot.clearData()
+            self.fittedslopes_plot.clearData()
+            self.heights.clearData()"""
+            if (len(data["x_array"])) == 0:
+                self.slopes_plot.clearPlot()
+                self.height_plot.clearPlot()
+                return
+            """ else:
+            for i in range (len(data["x_array"])):
+                self.slopes_plot.updatePlot(self.slopesarray_plot,data["x_array"][i]/1000, data["raw_slopes"][i])
+                self.slopes_plot.updatePlot(self.fittedslopes_plot,data["x_array"][i]/1000, data["fitted_slopes"][i])
+                self.height_plot.updatePlot(self.heights,data["x_array"][i]/1000, data["heights"][i])"""
+            x_data = data["x_array"]/1000
+            self.slopes_plot.updatePlotBatch(self.slopesarray_plot,x_data, data["raw_slopes"])
+            self.slopes_plot.updatePlotBatch(self.fittedslopes_plot,x_data, data["fitted_slopes"])
+            self.height_plot.updatePlotBatch(self.heights, x_data, data["heights"])
+            self.slopes_plot.forceAutoRange()
+            self.height_plot.forceAutoRange()
+
+            slopesarray_label = ("As-measured slopes")
+            self.slopes_plot.setCustomLabel(slopesarray_label)
+            """self.slopes_plot.rightViewBox.autoRange()
+            self.slopes_plot.plotWidget.enableAutoRange("xy")"""
+            #self.slopes_plot.updatePlotItem()
 
         if msg_type == "get_save_dir":
             self.measurement.get_save_directory()
@@ -463,12 +500,12 @@ class MeasurementControls(QMainWindow):
         #print("Thread killed")
         # Saving the data:
         self.measurement.get_save_directory() # This updates the self.directory attribute
-        self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
+        self.save_data(self.myposarray, self.slopesarray, self.slopes_to_be_plotted, self.heightsarray)
 
         act_speed = self.motors.X.jogspeed
         self.motors.X.setjogspeed(25)
         self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
-        self.show_warning("End of Measurement!", f"Stage at the original position.")
+        print("End of Measurement!" + "\n" + f"Stage at the original position.")
         self.motors.X.setjogspeed(act_speed)
         self.motors.messenger.resume()
         self.clear_gui()
@@ -531,24 +568,37 @@ class MeasurementControls(QMainWindow):
 
     def initHeightTab(self):
         self.height_plot = RealTime_plotter()
-
-        self.height_plot.setLabels(bottom_label = "X position", bottom_units = "mm", left_label="Heights", left_units = "um")
-        self.height_plot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
         height_layout = QtWidgets.QVBoxLayout(self.gui.height_tab)
         height_layout.addWidget(self.height_plot)
-
         self.gui.height_tab.setLayout(height_layout)
+        self.height_plot.setLabels(bottom_label = "X position", bottom_units = "mm", left_label="Heights", left_units = "um")
+        self.height_plot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        self.heights = MyPlot(color = 'b', width = 1,
+                              symbol = "o", symbolSize = 8, symbolBrush='b', symbolPen = None,
+                              name = "Height", y_axis = "left")
+        self.height_plot.addPlot(self.heights)
+        #print("height plot initialized")
 
     def initSlopesTab(self):
         self.slopes_plot = RealTime_plotter()
         slopes_layout = QtWidgets.QVBoxLayout(self.gui.Slopes_tab)
         slopes_layout.addWidget(self.slopes_plot)
         self.gui.Slopes_tab.setLayout(slopes_layout)
-        self.slopes_plot.setLabels(bottom_label = "X position", bottom_units = "mm", left_label="Slope", left_units = "rad")
-
+        self.slopes_plot.setLabels(bottom_label = "X position", bottom_units = "mm",
+                                   left_label="Fitted Slope", left_units = "rad",
+                                   right_label = "Raw Slope", right_units = "rad")
         self.slopes_plot.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        #Two-lines plotting capability.
+        self.slopesarray_plot = MyPlot(color = 'b', width = 1,
+                                       symbol= 'o', symbolSize = 8, symbolBrush= "b", symbolPen= 'b',
+                                       name = "Raw slope", y_axis = "right")
+        self.fittedslopes_plot = MyPlot(color = 'r', width = 1,
+                                        symbol = 'd', symbolSize = 8, symbolBrush= "r", symbolPen= 'r',
+                                        name = "Fitted slope", y_axis = "left")
 
+        self.slopes_plot.addPlot(self.slopesarray_plot)
+        self.slopes_plot.addPlot(self.fittedslopes_plot)
+        #print("slopes plot initialized")
 
     def initCameraTab(self):
 
@@ -570,7 +620,7 @@ class MeasurementControls(QMainWindow):
     def closeEvent(self, event):
         """Handle cleanup before closing the window."""
 
-        if shell.alive:  # Check if the shell is alive
+        if self.shell.alive:  # Check if the shell is alive
             self.shell.close_connection()  # Close SSH connection if applicable
         self.camViewer.camera.closecam() #closes the Cam.
         event.accept()  # Allow the window to close

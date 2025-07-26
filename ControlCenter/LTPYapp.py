@@ -67,7 +67,7 @@ class LTPyStartupWindow(QMainWindow):
             self.show_laser_controls(self)
             self.show_motor_controls(self)
             self.main_app.raise_()
-            self.main_app.activateWindow()
+            #self.main_app.activateWindow()
         else:
             print("Measurement controls not initialized")
 
@@ -82,8 +82,8 @@ class LTPyStartupWindow(QMainWindow):
     def show_laser_controls(self):
         if hasattr(self.main_app, "laser") and self.main_app.laser:
             self.main_app.laser.show()
-            self.main_app.laer.raise_()
-            self.main_app.activateWindow()
+            self.main_app.laser.raise_()
+            #self.main_app.activateWindow()
         else:
             print("Laser controls not initialized")
 
@@ -91,7 +91,7 @@ class LTPyStartupWindow(QMainWindow):
         if hasattr (self.main_app, "motor_controls") and self.main_app.motor_controls:
             self.main_app.motor_controls.show()
             self.main_app.motor_controls.raise_()
-            self.main_app.motor_controls.activateWindow()
+            #self.main_app.motor_controls.activateWindow()
         else:
             print("Motor controls not initialized")
 
