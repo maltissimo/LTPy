@@ -46,14 +46,17 @@ class MathUtils():
         :return:
         """
         max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
-        back_sub = ndarray - np.min(ndarray)
+        #back_sub = ndarray - np.min(ndarray)
                 #ROI definition around the max:
         x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
         y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
-        roi = back_sub[x_min:x_max, y_min:y_max]
-        com_roi = (center_of_mass(roi))
-                #print("this is the Center of Mas ROI: ", com_roi)
-        com_global = (int(com_roi[0]) + x_min, int(com_roi[1]) + y_min)
+        roi = ndarray[x_min:x_max, y_min:y_max]
+        #subtract background from the Region of Interest
+        back_sub = roi - np.min(roi)
+
+        com_roi = (center_of_mass(back_sub)) # center of mass of the ROI
+                #print("this is the Center of Mass ROI: ", com_roi)
+        com_global = ((com_roi[0]) + x_min, (com_roi[1]) + y_min) # removed the integer casting, as I'm trying sub-pixel resolution.
                 #print(com_global[0], com_global[1])
 
         return (com_global)
@@ -122,4 +125,13 @@ class MathUtils():
             float(string)
             return True
         except (ValueError):
+            return False
+
+    @staticmethod
+    def compare_within(number1, number2, tolerance):
+        """Functio to compare two numbers withtin a tolernce"""
+
+        if abs(number1 - number2) < tolerance:
+            return True
+        else:
             return False

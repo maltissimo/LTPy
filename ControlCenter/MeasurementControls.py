@@ -48,7 +48,7 @@ class MeasurementControls(QMainWindow):
         self.points = 0  # these are the number of measurement points
         self.stepsize = 0.0  # this is the stepsize ( in mm) of the measurement
         self.nrofgrabs = 5  # default nr of camera grabs per measurement point
-        self.xStartPos = 650000 # default @ middle of stage travel...
+        self.xStartPos = None # default, set at startMeasurement if user didn't set...
         self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
 
 
@@ -212,6 +212,13 @@ class MeasurementControls(QMainWindow):
             return
         self.measurement_thread.update_signal.emit({"type": "print_attributes"})
 
+        """ # Check if camera is running:
+        #print("Check if camera is running...")
+        if not self.camViewer.camera.camera.IsGrabbing():
+            #print("camera not running, starting it.")
+            self.camViewer.camera.startgrabbing()
+        # The lines above are used ONLY if grabdata is used as the method to grab images."""
+
         self.results = self.writeheader()
         #Instantiating the arrays for storing the results
         self.myposarray = np.array([])
@@ -219,10 +226,13 @@ class MeasurementControls(QMainWindow):
         self.slopesarray = np.array([])
         self.slopes_to_be_plotted = np.array([])
         self.heightsarray = np.array([])
+        #print("Arrays instantiated")
 
-        if not self.motors.messenger.coordinates["X"] - self.xStartPos > 1.0: # difference bigger than 1 micron
+        if self.xStartPos == None:
+            self.xStartPos = self.getXposfromfull() # X stage is where it is... the issue is with the user.
+
+        elif not self.motors.messenger.coordinates["X"] - self.xStartPos > 1.0: # difference bigger than 1 micron
             self.measurement_thread.update_signal.emit({"type": "startPosOk"})
-
         else:
             self.measurement_thread.update_signal.emit({"type": "Warning",
                                                         "title": "Head moving",
@@ -248,16 +258,19 @@ class MeasurementControls(QMainWindow):
 
             for grab in range(self.nrofgrabs):
                 #Safety check, is thread running?
+               # print("Now checking if thread is running, line 258")
                 if not self.measurement_thread.running:
+                    print("Thread killed for some reason...")
                     self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
                     self.measurement_thread.update_signal.emit({"type": "stop_measurement"})
                     self.measurement_thread.update_signal.emit(STOP_WARNING)
                     return
 
-                image = self.camViewer.camera.acquire_once()
-                centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
-                averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-                averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis
+                image = self.camViewer.camera.grabdata()
+                if image is not None:
+                    centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
+                    averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+                    averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
 
             self.measurement_thread.update_signal.emit({"type": "camimage",
                                                         "image": image})
@@ -303,10 +316,7 @@ class MeasurementControls(QMainWindow):
                     update_message = "Moving stage to next position " + str(nextpos)
                     self.measurement_thread.update_signal.emit({"type": "next",
                                                                 "message": update_message})
-                    #print("Moving stage to next position: ", nextpos)
-                    #print("@ pos: ", i)
                     self.motors.xmove.move_abs(coord = nextpos)
-                    #self.motors.xmove.move_rel (distance = self.stepsize)
                     self.waitformoveend()
 
                 elif self.stability_meas_flag == True:
@@ -321,10 +331,12 @@ class MeasurementControls(QMainWindow):
 
         fit, radius = MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
 
-        to_be_plotted = self.slopesarray - fit # this is the REAL measurement value
+        to_be_plotted = self.slopesarray - fit # this is the REAL measurement value\
+
+        to_be_plotted_smooth = self.measurement.FOP_smoothing(to_be_plotted)
 
         #Calculating rms, then updating plots
-        self.measurement.slopes_rms = MathUtils.RMS(to_be_plotted)
+        self.measurement.slopes_rms = MathUtils.RMS(to_be_plotted_smooth)
         self.measurement.heights_rms = MathUtils.RMS(self.heightsarray)
         roundslope = round(1000000 * self.measurement.slopes_rms, 3)
         roundheight = round(self.measurement.heights_rms, 3)
@@ -338,7 +350,7 @@ class MeasurementControls(QMainWindow):
 
         self.measurement_thread.update_signal.emit({"type": "final_plot_update",
                                                     "x_array": mystepposarray,
-                                                    "slopes": to_be_plotted,
+                                                    "slopes": to_be_plotted_smooth,
                                                     "heights": self.heightsarray,
                                                     "roundslopes": roundslope,
                                                     "roundheights": roundheight
@@ -374,9 +386,10 @@ class MeasurementControls(QMainWindow):
             #Moving all the GUI-related pre-measurement ops here, in order to avoid clashes between GUI updates and worker threads
             self.gui.startButton.setEnabled(False)
             self.gui.stopButton.setEnabled(True)
-            self.camViewer.stop_grab()
+            #self.camViewer.camera.stop() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
             self.slopes_plot.clearPlot()
             self.height_plot.clearPlot()
+            self.measurement.get_save_directory()  # This updates the self.directory attribute
             self.camViewer.camera.set_grab_nr(1)
             self.camViewer.camera.set_exp_time(self.camViewer.camera.camera.ExposureTime())
             #print("Exposure time: ", self.camViewer.camera.camera.ExposureTime())
@@ -456,11 +469,6 @@ class MeasurementControls(QMainWindow):
                 self.slopes_plot.clearPlot()
                 self.height_plot.clearPlot()
                 return
-            """ else:
-            for i in range (len(data["x_array"])):
-                self.slopes_plot.updatePlot(self.slopesarray_plot,data["x_array"][i]/1000, data["raw_slopes"][i])
-                self.slopes_plot.updatePlot(self.fittedslopes_plot,data["x_array"][i]/1000, data["fitted_slopes"][i])
-                self.height_plot.updatePlot(self.heights,data["x_array"][i]/1000, data["heights"][i])"""
             x_data = data["x_array"]/1000
             self.slopes_plot.updatePlotBatch(self.slopesarray_plot,x_data, data["raw_slopes"])
             self.slopes_plot.updatePlotBatch(self.fittedslopes_plot,x_data, data["fitted_slopes"])
@@ -497,9 +505,9 @@ class MeasurementControls(QMainWindow):
                 pass
             self.measurement_thread.running = False
             self.measurement_thread = None
-        #print("Thread killed")
+        print("Thread killed")
         # Saving the data:
-        self.measurement.get_save_directory() # This updates the self.directory attribute
+        #self.measurement.get_save_directory() # This updates the self.directory attribute moved to start_measurement, makes more sense, so the app does not hang.
         self.save_data(self.myposarray, self.slopesarray, self.slopes_to_be_plotted, self.heightsarray)
 
         act_speed = self.motors.X.jogspeed
@@ -508,6 +516,7 @@ class MeasurementControls(QMainWindow):
         print("End of Measurement!" + "\n" + f"Stage at the original position.")
         self.motors.X.setjogspeed(act_speed)
         self.motors.messenger.resume()
+        #self.camViewer.camera.camera.StopGrabbing()
         self.clear_gui()
 
 
@@ -562,9 +571,51 @@ class MeasurementControls(QMainWindow):
             self.motors.yawmove.moveabs(old_coords_dict["yaw"])
         self.clear_gui()
 
+    def centerLaser(self):
+        """
+        First sketch of the method: 20251111.
+
+        This function centers the laser on the mirror.
+        The idea is to run this AFTER the user has set all the relevant measurement parameters.
+        Desired centroid position on Camera if laser is @ mirror center:
+
+        X = 2640
+        Y = 2300
+        remember:
+        Roll controls centroid X
+        Pitch controls centroid Y
+
+        """
+        desired_centroid_x = 2640
+        desired_centroid_y = 2300
+        print("Centering the laser on the mirror...")
+        self.laser.serialmessage(LASPOWLEVEL + "0.002")
+        original_speed = self.motors.X.getjogspeed()
+
+        self.motors.X.setjogspeed(20)
+        self.motors.xmove.move_rel(distance = self.length/2)
+        self.waitformoveend()
+        original_laser_power = self.laser.serialmessage(isOUTPOWLEVEL)
+
+        image = self.camViewer.camera.grabdata()
+        if image is not None:
+            centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
+            averageX += round(centroid[1],0)  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+            averageY += round(centroid[0],0)  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+
+        #
+
+        # Resetting to original state:
+        self.laser.serialmessage(original_laser_power)
+        self.motors.xmove.move_rel(distance = - self.length/2)
+        self.motors.X.setjogspeed(original_speed)
+        print("Laser correctly centered!")
+
+
+
     def setXstartPos(self):
-        self.xStartPos = self.motors.messenger.coordinates["X"]
-        self.show_warning("Warning!", "Measurement starting position set!")
+            self.xStartPos = self.motors.messenger.coordinates["X"]
+            self.show_warning("Warning!", "Measurement starting position set!")
 
     def initHeightTab(self):
         self.height_plot = RealTime_plotter()

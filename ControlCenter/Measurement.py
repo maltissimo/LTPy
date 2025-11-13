@@ -21,15 +21,15 @@ class Measurement():
     def __init__(self,
 
                  nr_of_points=10,  # adding a default seems sane
-                 length=1,  # adding a default seems sane
+                 length= 0.0,  # adding a default seems sane
                  nr_of_grabs=5  # adding a default seems sane
                  ):
         # Some sanity values:
 
-        self.length = 0.0  # this is the length (in mm ) of the measurement
-        self.points = 0  # these are the number of measurement points
+        self.length = length  # this is the length (in mm ) of the measurement
+        self.points = nr_of_points  # these are the number of measurement points
         self.stepsize = 0.0  # this is the stepsize ( in mm) of the measurement
-        self.nrofgrabs = 5  # default nr of camera grabs per measurement point
+        self.nrofgrabs = nr_of_grabs  # default nr of camera grabs per measurement point
         self.xStartPos = 650000  # default @ middle of stage travel...
         self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
         self.directory = os.path.expanduser("~") # selecting the default directory as users home directory
@@ -96,8 +96,42 @@ class Measurement():
         heights = integrate.cumtrapz(arrayY, arrayX, initial=0)
         return (heights)
 
-    def figure_error(self, arrayX, arrayY):
+    def FOP_smoothing(self, arrayX):
+        """"
+        This function is designed to smooth out the Fuck Off Points (FOP) in the measurement.
+        Those points are the ones sticking out of the curve by more than 5 times the RMS.
+        The function calculates the average of the 2 point either side of the FOP, and replaces the FOP with the average.
+
+        :param arrayX: an array of slopes.
+        :return: an array of smoothed slopes
         """
+        smoothed_array = arrayX # first just a copy
+        rms = MathUtils.RMS(arrayX)
+        topvalue = 4 * rms
+        FOP = [] # array of indices of Fuck Off Points
+        for i in range(len(arrayX)):
+            if arrayX[i] > topvalue:
+                FOP.append(i)
+        for i in FOP:
+            smoothed_array[i] = (arrayX[i - 1] + arrayX[i + 1]) / 2 # substituting the FOPs with the average in the smoothed array.
+        return (smoothed_array)
+
+    def compute_spot_intensity(self, ndarray):
+        max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
+        # back_sub = ndarray - np.min(ndarray)
+        # ROI definition around the max:
+        x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
+        y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
+        roi = ndarray[x_min:x_max, y_min:y_max]
+        # subtract background from the Region of Interest
+        back_sub = roi - np.min(roi)
+        intensity = np.sum(back_sub)
+        return(intensity)
+
+
+
+    """def figure_error(self, arrayX, arrayY):
+        
                 Calculates the figure error given and array of positions/slopes
                 :param arrayX: y-position of the centroid? or X-position of the head?
                 :param arrayY: slopes

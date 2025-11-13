@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>464</width>
-    <height>206</height>
+    <width>465</width>
+    <height>205</height>
    </rect>
+  </property>
+  <property name="font">
+   <font>
+    <weight>50</weight>
+    <bold>false</bold>
+   </font>
   </property>
   <property name="windowTitle">
    <string notr="true">Obis Laser Controller</string>
@@ -39,9 +45,9 @@
      <property name="geometry">
       <rect>
        <x>0</x>
-       <y>0</y>
+       <y>10</y>
        <width>211</width>
-       <height>201</height>
+       <height>191</height>
       </rect>
      </property>
      <property name="frameShape">
@@ -50,41 +56,95 @@
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_3">
-      <item>
-       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,0">
+     <widget class="MyPushButton" name="pushButton">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>20</y>
+        <width>189</width>
+        <height>31</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Laser ON/OFF</string>
+      </property>
+     </widget>
+     <widget class="QFrame" name="frame_2">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>60</y>
+        <width>201</width>
+        <height>131</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QWidget" name="layoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>10</x>
+         <y>0</y>
+         <width>181</width>
+         <height>124</height>
+        </rect>
+       </property>
+       <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0">
         <property name="spacing">
-         <number>60</number>
-        </property>
-        <property name="sizeConstraint">
-         <enum>QLayout::SetFixedSize</enum>
+         <number>5</number>
         </property>
         <property name="topMargin">
-         <number>19</number>
+         <number>10</number>
         </property>
         <property name="bottomMargin">
-         <number>0</number>
+         <number>10</number>
         </property>
         <item>
-         <widget class="MyPushButton" name="pushButton">
+         <widget class="MyLabel" name="power_level_label">
           <property name="text">
-           <string>Laser ON/OFF</string>
+           <string>Power Level input:</string>
           </property>
          </widget>
         </item>
         <item>
-         <widget class="QSlider" name="horizontalSlider">
-          <property name="toolTip">
-           <string notr="true"/>
+         <widget class="MyQLineEdit" name="power_input_field">
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
           </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+          <property name="font">
+           <font>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MyLabel" name="power_preset_label">
+          <property name="text">
+           <string>Preset power (mW):</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="MyLabel" name="power_preset_display">
+          <property name="text">
+           <string/>
           </property>
          </widget>
         </item>
        </layout>
-      </item>
-     </layout>
+      </widget>
+     </widget>
+     <zorder>frame_2</zorder>
+     <zorder>pushButton</zorder>
     </widget>
     <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
@@ -98,121 +158,182 @@
      <property name="title">
       <string>Status Indicators</string>
      </property>
-     <widget class="QWidget" name="layoutWidget">
+     <widget class="QSplitter" name="splitter">
       <property name="geometry">
        <rect>
         <x>0</x>
-        <y>20</y>
-        <width>241</width>
-        <height>71</height>
+        <y>30</y>
+        <width>251</width>
+        <height>161</height>
        </rect>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <widget class="MyLabel" name="comms_label">
-           <property name="text">
-            <string>Comms:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="MyIndicator" name="comms_onoff">
-           <property name="enabled">
-            <bool>true</bool>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel{background-color: red;}</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-       <item>
-        <layout class="QHBoxLayout" name="horizontalLayout_2">
-         <item>
-          <widget class="MyLabel" name="laser_label">
-           <property name="text">
-            <string>Laser:</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="MyIndicator" name="laser_onoff">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="styleSheet">
-            <string notr="true">QLabel{background-color: red;}</string>
-           </property>
-           <property name="text">
-            <string/>
-           </property>
-          </widget>
-         </item>
-        </layout>
-       </item>
-      </layout>
-     </widget>
-     <widget class="QWidget" name="layoutWidget">
-      <property name="geometry">
-       <rect>
-        <x>3</x>
-        <y>107</y>
-        <width>243</width>
-        <height>91</height>
-       </rect>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <layout class="QGridLayout" name="gridLayout" columnstretch="2,0">
-       <property name="horizontalSpacing">
-        <number>55</number>
-       </property>
-       <item row="0" column="0">
-        <widget class="MyLabel" name="wavelength_label">
-         <property name="text">
-          <string>Wavelength (nm)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="MyTextBrowser" name="wlength_display"/>
-       </item>
-       <item row="1" column="0">
-        <widget class="MyLabel" name="int_display_2">
-         <property name="text">
-          <string>Intensity (W)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="MyTextBrowser" name="int_display"/>
-       </item>
-       <item row="2" column="0">
-        <widget class="MyLabel" name="cur_label">
-         <property name="text">
-          <string>Current (A)</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="MyTextBrowser" name="cur_display"/>
-       </item>
-      </layout>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+          <property name="spacing">
+           <number>0</number>
+          </property>
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="MyLabel" name="comms_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Comms:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="MyIndicator" name="comms_onoff">
+            <property name="enabled">
+             <bool>true</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QLabel{background-color: red;}</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+        <item>
+         <layout class="QHBoxLayout" name="horizontalLayout_2">
+          <property name="leftMargin">
+           <number>10</number>
+          </property>
+          <property name="rightMargin">
+           <number>10</number>
+          </property>
+          <item>
+           <widget class="MyLabel" name="laser_label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Laser:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="MyIndicator" name="laser_onoff">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>20</width>
+              <height>32</height>
+             </size>
+            </property>
+            <property name="styleSheet">
+             <string notr="true">QLabel{background-color: red;}</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="layoutWidget">
+       <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
+        <property name="leftMargin">
+         <number>10</number>
+        </property>
+        <property name="topMargin">
+         <number>5</number>
+        </property>
+        <property name="rightMargin">
+         <number>10</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <property name="horizontalSpacing">
+         <number>40</number>
+        </property>
+        <item row="0" column="0">
+         <widget class="MyLabel" name="wavelength_label">
+          <property name="text">
+           <string>Wavelength (nm)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="MyTextBrowser" name="wlength_display"/>
+        </item>
+        <item row="1" column="0">
+         <widget class="MyLabel" name="int_display_2">
+          <property name="text">
+           <string>Intensity (W)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1">
+         <widget class="MyTextBrowser" name="int_display"/>
+        </item>
+        <item row="2" column="0">
+         <widget class="MyLabel" name="cur_label">
+          <property name="text">
+           <string>Current (A)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="MyTextBrowser" name="cur_display"/>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </widget>
+   </widget>
+   <widget class="QSplitter" name="splitter_3">
+    <property name="geometry">
+     <rect>
+      <x>0</x>
+      <y>0</y>
+      <width>0</width>
+      <height>0</height>
+     </rect>
+    </property>
+    <property name="orientation">
+     <enum>Qt::Vertical</enum>
+    </property>
    </widget>
   </widget>
  </widget>
@@ -236,6 +357,11 @@
    <class>MyIndicator</class>
    <extends>QLabel</extends>
    <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+  <customwidget>
+   <class>MyQLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">BaseClasses.py</header>
   </customwidget>
  </customwidgets>
  <resources/>

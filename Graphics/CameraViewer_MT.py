@@ -42,6 +42,7 @@ class CamViewer(QMainWindow):
             self.running = True
             self.gui.StartGrab.setEnabled(False)
             self.gui.StopGrab.setEnabled(True)
+            #self.camera.startgrabbing()
             self.update_plot()
 
     def update_plot(self):
@@ -58,16 +59,16 @@ class CamViewer(QMainWindow):
     def grab_data(self):
         self.camera.grabdata()
         if self.camera.frame is not None:
-            image = self.camera.frame
+            #image = self.camera.frame
 
             if self.gui.FWHM_checkBox.isChecked():
-                self.display_fwhm(image)
+                self.display_fwhm(self.camera.frame)
 
             if self.gui.centroid_checkBox.isChecked():
-                self.display_centroid(image)
+                self.display_centroid(self.camera.frame)
 
-            self.plot_center_mark(image)
-            self.display_image(image)
+            self.plot_center_mark(self.camera.frame)
+            self.display_image(self.camera.frame)
 
     def setAcqTime(self):
         newtime = float(self.gui.AcqTLineEdit.text())
@@ -93,8 +94,10 @@ class CamViewer(QMainWindow):
 
     def display_centroid(self, nparray2D):
         centroid = ControlCenter.MathUtils.MathUtils.centroid(nparray2D)
-        self.gui.centroidX_label.setText(str(centroid[1]))
-        self.gui.centroidY_label.setText(str(centroid[0]))
+        centroidX = round(centroid[1], 0)
+        centroidY = round(centroid[0], 0)
+        self.gui.centroidX_label.setText(str(centroidX))
+        self.gui.centroidY_label.setText(str(centroidY))
 
     def add_grid(self, image):
         """

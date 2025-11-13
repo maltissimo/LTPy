@@ -6,6 +6,7 @@ from ControlCenter.MultiThreading import WorkerThread
 from ControlCenter.Control_Utilities import console_welcome
 from PyQt5.QtCore import QObject, pyqtSignal
 from ControlCenter.MeasurementControls import *
+from ControlCenter.Alignment_Utilities import *
 from PyQt5.QtCore import QObject, pyqtSignal
 from Hardware.Detector import Camera
 from Graphics.Base_Classes_graphics.MainLTPyApp_GUI import Ui_LTPy
@@ -64,9 +65,9 @@ class LTPyStartupWindow(QMainWindow):
     def show_measurement_controls(self):
         if hasattr(self.main_app, "controls") and self.main_app.controls:
             self.main_app.controls.show()
-            self.show_laser_controls(self)
-            self.show_motor_controls(self)
-            self.main_app.raise_()
+            self.show_laser_controls()
+            self.show_motor_controls()
+            self.main_app.controls.raise_()
             #self.main_app.activateWindow()
         else:
             print("Measurement controls not initialized")
@@ -164,6 +165,10 @@ class MainLTPApp:
             self.stability_meas = StabilityMeasurement()
             print()
             print("Stability Measurement Initialized")
+
+            self.autoaligner = Aligner()
+            print()
+            prin("AutoAligner Initialized")
 
         except Exception as e:
             error_msg = f"Error initializing controls: {str(e)}"

@@ -1,5 +1,7 @@
 import pypylon.pylon as py
-from ControlCenter.MultiThreading import *
+
+from ControlCenter.MathUtils import MathUtils
+import threading
 
 """
 Contains all the info necessary for the communication between Main Computer (MC) and CMOS detector (Det)
@@ -48,6 +50,7 @@ class Camera:
             self.gain = gain
 
         self.frame = None
+        self.camera_lock = threading.Lock()
 
     def __str__(self):
         return f"Basler camera: Exposure time = {self.camera.ExposureTime()}, default nr of frames to grab = {self.grab_nr}, \
@@ -94,7 +97,24 @@ class Camera:
         res.Release()
         return(self.frame)
 
-    def grabdata(self):
+
+    def grabdata(self, calculate_centroid = False):
+        with self.camera_lock:
+            if not self.camera.IsGrabbing():
+                self.camera.StartGrabbingMax( py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
+
+            if self.camera.IsGrabbing():
+                res = self.camera.RetrieveResult(50, py.TimeoutHandling_ThrowException)
+                if res.GrabSucceeded():
+                    self.frame = res.Array
+                    res.Release()
+                    return (MathUtils.centroid(self.frame)) if calculate_centroid else self.frame
+            else:
+                res.Release()
+                return None
+
+
+        """
         if not self.camera.IsGrabbing():
             self.camera.StartGrabbingMax(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
 
@@ -102,13 +122,13 @@ class Camera:
             res = self.camera.RetrieveResult(100, py.TimeoutHandling_ThrowException)
             if res.GrabSucceeded():
                 self.frame = res.Array
-            """ with camera.RetrieveResult(100) as res:"""
             res.Release()
         #self.camera.StopGrabbing()
-        return(self.frame)
+        return(self.frame)"""
 
     def stop(self):
-        self.camera.StopGrabbing()
+        if self.camera.IsGrabbing():
+            self.camera.StopGrabbing()
 
     def set_exp_time(self, custom_time):
         """
