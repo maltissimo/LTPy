@@ -1,7 +1,7 @@
 
 import time
 
-from ControlCenter.MathUtils import MathUtils
+from ControlCenter import MathUtils
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from ControlCenter.MultiThreading import MoveWorker
 """

@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 
-import ControlCenter.MathUtils
+from ControlCenter import MathUtils
 from ControlCenter import Control_Utilities as cu
 from Graphics.Base_Classes_graphics.CameraViewer_GUI import Ui_PylonCamViewer
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
@@ -86,14 +86,14 @@ class CamViewer(QMainWindow):
                        thickness=10)
 
     def display_fwhm(self, nparray2D):
-        fwhm_X, fwhm_Y = ControlCenter.MathUtils.MathUtils.calc_2D_fwhm(nparray2D)
+        fwhm_X, fwhm_Y = MathUtils.calc_2D_fwhm(nparray2D)
         fwhm_X = round((2.74 * fwhm_X), 2)
         fwhm_Y = round((2.74 * fwhm_Y), 2)
         self.gui.FWHMX_label.setText(str(fwhm_X))
         self.gui.FWHMY_label.setText(str(fwhm_Y))
 
     def display_centroid(self, nparray2D):
-        centroid = ControlCenter.MathUtils.MathUtils.centroid(nparray2D)
+        centroid = MathUtils.centroid(nparray2D)
         centroidX = round(centroid[1], 0)
         centroidY = round(centroid[0], 0)
         self.gui.centroidX_label.setText(str(centroidX))

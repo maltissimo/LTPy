@@ -1,8 +1,7 @@
 import datetime
 
-import ControlCenter.MathUtils
+from ControlCenter import MathUtils
 from ControlCenter.Control_Utilities import *
-from ControlCenter.MathUtils import MathUtils
 from ControlCenter.Laser import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls import *
@@ -86,7 +85,7 @@ class MeasurementControls(QMainWindow):
 
     def get_length(self):
         my_mm_length = float(self.gui.length_input.text())
-        self.length = ControlCenter.MathUtils.MathUtils.mm2um(my_mm_length)
+        self.length = MathUtils.mm2um(my_mm_length)
         self.gui.length_input.clear()
         length_message = str(my_mm_length)
         self.gui.length_display.setText(length_message)
@@ -94,7 +93,7 @@ class MeasurementControls(QMainWindow):
 
     def get_stepsize(self):
         stepsize = float(self.gui.stepsize_input.text())
-        self.stepsize = ControlCenter.MathUtils.MathUtils.mm2um(stepsize)
+        self.stepsize = MathUtils.mm2um(stepsize)
         self.gui.stepsize_input.clear()
         stepsize_message = str(stepsize)
         self.gui.stepsize_display.setText(stepsize_message)
@@ -253,8 +252,8 @@ class MeasurementControls(QMainWindow):
                                                         "step": i,
                                                         "x_coord": mypos})
 
-            averageX= 0.0  # resetting back to 0 after each round of the loop below.
-            averageY = 0.0
+            self.averageX= 0.0  # resetting back to 0 after each round of the loop below.
+            self.averageY = 0.0
 
             for grab in range(self.nrofgrabs):
                 #Safety check, is thread running?
@@ -267,11 +266,15 @@ class MeasurementControls(QMainWindow):
                     return
 
                 image = self.camViewer.camera.grabdata()
-                if image is not None:
-                    centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
-                    averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-                    averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+                #print(type(image))
 
+                if image is not None:
+                    self.measurement_thread.update_signal.emit({"type": "centroid_calc",
+                                                                "image": image})
+                    """ centroid = MathUtils.centroid(image)
+                    self.averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+                    self.averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+                    """
             self.measurement_thread.update_signal.emit({"type": "camimage",
                                                         "image": image})
             #Positions arrays update:
@@ -281,8 +284,8 @@ class MeasurementControls(QMainWindow):
             nextpos = mypos + self.stepsize  # all should be in microns
 
             # One point taken, now the calculations:
-            averageCentroidX = averageX / self.nrofgrabs
-            averageCentroidY = averageY / self.nrofgrabs
+            averageCentroidX = self.averageX / self.nrofgrabs
+            averageCentroidY = self.averageY / self.nrofgrabs
 
             ########################################
             #       SLOPE CALCULATIONS
@@ -386,7 +389,7 @@ class MeasurementControls(QMainWindow):
             #Moving all the GUI-related pre-measurement ops here, in order to avoid clashes between GUI updates and worker threads
             self.gui.startButton.setEnabled(False)
             self.gui.stopButton.setEnabled(True)
-            #self.camViewer.camera.stop() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
+            self.camViewer.camera.stop() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
             self.slopes_plot.clearPlot()
             self.height_plot.clearPlot()
             self.measurement.get_save_directory()  # This updates the self.directory attribute
@@ -488,6 +491,9 @@ class MeasurementControls(QMainWindow):
         if msg_type == "end_measurement" :
             self.endmeasurement()
 
+        if msg_type == "centroid_calc":
+            self.centroid_calculation(data["image"])
+
         elif msg_type == "stop_measurement":
             self.on_measurement_stopped()
         #else:
@@ -519,6 +525,11 @@ class MeasurementControls(QMainWindow):
         #self.camViewer.camera.camera.StopGrabbing()
         self.clear_gui()
 
+    def centroid_calculation(self, image):
+        #print("inside centroid calculation", type(image))
+        centroid = MathUtils.centroid(image)
+        self.averageX += centroid[1]  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+        self.averageY += centroid[0]  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
 
     def clear_gui(self):
         """
@@ -599,7 +610,7 @@ class MeasurementControls(QMainWindow):
 
         image = self.camViewer.camera.grabdata()
         if image is not None:
-            centroid = ControlCenter.MathUtils.MathUtils.centroid(image)
+            centroid = MathUtils.MathUtils.centroid(image)
             averageX += round(centroid[1],0)  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
             averageY += round(centroid[0],0)  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
 

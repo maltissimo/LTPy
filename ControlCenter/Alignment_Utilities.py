@@ -183,7 +183,7 @@ class Aligner():
                 self.move_rel_and_find(axis="Y", distance = distance)
                 if self.spot_found:
                     newInt = Measurement.compute_spot_intensity()
-                    if MathUtils.compare_within(newInt, 0.5*self.intensity_start , 0.1):
+                    if MathUtils2.compare_within(newInt, 0.5*self.intensity_start , 0.1):
                         # this is the bingo condition: I have found the Y limit at this edge of the mirror
                         self.Y1 = self.motors.messenger.coordinates ["Y"]
                         return

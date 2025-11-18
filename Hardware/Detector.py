@@ -1,6 +1,6 @@
 import pypylon.pylon as py
 
-from ControlCenter.MathUtils import MathUtils
+from ControlCenter import MathUtils
 import threading
 
 """
@@ -99,32 +99,37 @@ class Camera:
 
 
     def grabdata(self, calculate_centroid = False):
-        with self.camera_lock:
+        """
+        try:
             if not self.camera.IsGrabbing():
-                self.camera.StartGrabbingMax( py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
+                self.camera.StartGrabbing( py.GrabStrategy_LatestImageOnly)
 
-            if self.camera.IsGrabbing():
-                res = self.camera.RetrieveResult(50, py.TimeoutHandling_ThrowException)
-                if res.GrabSucceeded():
-                    self.frame = res.Array
-                    res.Release()
-                    return (MathUtils.centroid(self.frame)) if calculate_centroid else self.frame
+            #if self.camera.IsGrabbing():
+            res = self.camera.RetrieveResult(25, py.TimeoutHandling_ThrowException)
+            if res.GrabSucceeded():
+                self.frame = res.Array
+                res.Release()
+                return (MathUtils.centroid(self.frame)) if calculate_centroid else self.frame
             else:
                 res.Release()
                 return None
+        except Exception as e:
+            print(f"[Camera grabdata] Error: {e}")
+            return None
 
 
         """
         if not self.camera.IsGrabbing():
-            self.camera.StartGrabbingMax(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
+            self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
 
         if self.camera.IsGrabbing():
             res = self.camera.RetrieveResult(100, py.TimeoutHandling_ThrowException)
-            if res.GrabSucceeded():
-                self.frame = res.Array
-            res.Release()
+        if res.GrabSucceeded():
+            self.frame = res.Array
+        res.Release()
         #self.camera.StopGrabbing()
-        return(self.frame)"""
+        return(self.frame)
+
 
     def stop(self):
         if self.camera.IsGrabbing():

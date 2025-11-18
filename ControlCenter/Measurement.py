@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QFileDialog
 from scipy.ndimage import center_of_mass
 from scipy import integrate
 import datetime
-from ControlCenter.MathUtils import MathUtils
+from ControlCenter import MathUtils
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width() 2640
@@ -99,7 +99,7 @@ class Measurement():
     def FOP_smoothing(self, arrayX):
         """"
         This function is designed to smooth out the Fuck Off Points (FOP) in the measurement.
-        Those points are the ones sticking out of the curve by more than 5 times the RMS.
+        Those points are the ones sticking out of the curve by more than 4 times the RMS.
         The function calculates the average of the 2 point either side of the FOP, and replaces the FOP with the average.
 
         :param arrayX: an array of slopes.
