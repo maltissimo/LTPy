@@ -1,7 +1,7 @@
 from Hardware.Detector import *
 import time
 cam = Camera()
-nr_of_grabs = 15
+nr_of_grabs = 1000
 start = time.time()
 for _ in range (nr_of_grabs):
     cam.grabdata()

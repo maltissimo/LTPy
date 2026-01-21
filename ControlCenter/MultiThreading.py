@@ -182,6 +182,12 @@ class CoordMessenger():
             CS1 = response[1].split()
             CS2 = response[2].split()
             CS3 = response[3].split()
+            
+            # Check if we have enough data in the split strings to avoid IndexError
+            if len(CS1) < 3 or len(CS2) < 1 or len(CS3) < 2:
+                # print(f"Malformed coordinate response: {response}")
+                return
+
             #print("CS1: " + str(CS1) + "\nCS2 : " +str(CS2) + "\nCS3: " + str(CS3))
             with QMutexLocker(self.mutex):
                 self.coordinates.update({
