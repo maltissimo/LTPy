@@ -42,7 +42,7 @@ class CamViewer(QMainWindow):
             self.running = True
             self.gui.StartGrab.setEnabled(False)
             self.gui.StopGrab.setEnabled(True)
-            #self.camera.startgrabbing()
+            # self.camera.startgrabbing()
             self.update_plot()
 
     def update_plot(self):
@@ -56,8 +56,13 @@ class CamViewer(QMainWindow):
         self.running = False
         self.gui.StartGrab.setEnabled(True)
         self.gui.StopGrab.setEnabled(False)
+
+    def stop_while_measuring(self):
+        self.running = False
+
     def grab_data(self):
-        self.camera.grabdata()
+        if self.running:
+            self.camera.grabdata()
         if self.camera.frame is not None:
             #image = self.camera.frame
 

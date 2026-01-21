@@ -1,5 +1,5 @@
 import sys
-from Graphics.Base_Classes_graphics.LaserGUI2 import *
+from Graphics.Base_Classes_graphics.Laser_GUI3_1 import *
 from ControlCenter.Control_Utilities import Utilities as Uti
 from Hardware.Source import *
 from ControlCenter.MultiThreading import *
@@ -26,11 +26,12 @@ class LaserControl(QtWidgets.QMainWindow):
 
         #Connect the various bits in the UI:
         self.gui.pushButton.clicked.connect(self.toggle_laser)
+        self.gui.power_input_field.returnPressed.connect(self.setLaserPower)
 
-        self.gui.horizontalSlider.setMinimum(0)
-        self.gui.horizontalSlider.setMaximum(1000)
-        self.gui.horizontalSlider.setValue(0)
-        self.gui.horizontalSlider.valueChanged.connect(self.slider_change)
+        #self.gui.horizontalSlider.setMinimum(0)
+        #self.gui.horizontalSlider.setMaximum(1000)
+        #self.gui.horizontalSlider.setValue(0)
+        #self.gui.horizontalSlider.valueChanged.connect(self.slider_change)
 
         #self.show()
 
@@ -58,7 +59,7 @@ class LaserControl(QtWidgets.QMainWindow):
         self.gui.wlength_display.updateValue(status.get("wlength", "N/A"))
         #Update slider based on power preset value.
         power_preset = status.get("power_preset", 0)
-        self.gui.horizontalSlider.setValue((self.slider_value(power_preset)))
+        #self.gui.horizontalSlider.setValue((self.slider_value(power_preset)))
         #Update comms_label:
         comms = status.get("comms", "OFF")
         if comms =="ON":
@@ -105,6 +106,12 @@ class LaserControl(QtWidgets.QMainWindow):
             self.source.set_power(pow) # sets the POWer Level preset to 80% of max power
             self.source.turnON(LASON)
             self.source.is_on = "ON"
+
+    def setLaserPower(self):
+        mypower = float(self.gui.power_input_field.text())
+        self.gui.power_input_field.clear()
+        self.source.set_power(mypower)
+        self.gui.power_preset_display.setText(str(mypower*1000))
 
     def int_low_high(self):
         low = float(self.source.p_low_lim)

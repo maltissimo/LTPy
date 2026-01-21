@@ -97,39 +97,37 @@ class Camera:
         res.Release()
         return(self.frame)
 
-
-    def grabdata(self, calculate_centroid = False):
-        """
-        try:
-            if not self.camera.IsGrabbing():
-                self.camera.StartGrabbing( py.GrabStrategy_LatestImageOnly)
-
-            #if self.camera.IsGrabbing():
-            res = self.camera.RetrieveResult(25, py.TimeoutHandling_ThrowException)
-            if res.GrabSucceeded():
-                self.frame = res.Array
-                res.Release()
-                return (MathUtils.centroid(self.frame)) if calculate_centroid else self.frame
-            else:
-                res.Release()
-                return None
-        except Exception as e:
-            print(f"[Camera grabdata] Error: {e}")
-            return None
-
-
-        """
+    def start_continuous_grabbing(self):
         if not self.camera.IsGrabbing():
             self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
 
-        if self.camera.IsGrabbing():
-            res = self.camera.RetrieveResult(100, py.TimeoutHandling_ThrowException)
+    def grabdata(self, ensure_started = True):
+        if ensure_started and not self.camera.IsGrabbing():
+            self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly, py.GrabLoop_ProvidedByUser)
+        try:
+            res = self.camera.RetrieveResult(25, py.TimeoutHandling_ThrowException)  #tested a few values, 25 seems the minimum
+            if res.GrabSucceeded():
+                self.frame = res.Array
+                res.Release()
+                return self.frame
+            else:
+                res.Release()
+                return None
+        except py.TimeoutHandling_ThrowException:
+            return None # this takes care of the possibility of a timeout.
+        except Exception as e:
+            print (f"[Camera grabdata] Error :{e}")
+            return None
+
+        """"### MY OLD CODE HERE BELOW
+        if not self.camera.IsGrabbing():
+            self.camera.StartGrabbing(py.GrabStrategy_LatestImageOnly)
+        res = self.camera.RetrieveResult(100, py.TimeoutHandling_ThrowException)
         if res.GrabSucceeded():
-            self.frame = res.Array
+            self.frame = res.GetArray()
         res.Release()
         #self.camera.StopGrabbing()
-        return(self.frame)
-
+        return(self.frame)"""
 
     def stop(self):
         if self.camera.IsGrabbing():

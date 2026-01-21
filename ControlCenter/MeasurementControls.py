@@ -269,14 +269,14 @@ class MeasurementControls(QMainWindow):
                 #print(type(image))
 
                 if image is not None:
-                    self.measurement_thread.update_signal.emit({"type": "centroid_calc",
-                                                                "image": image})
-                    """ centroid = MathUtils.centroid(image)
+                    """self.measurement_thread.update_signal.emit({"type": "centroid_calc",
+                                                                "image": image})"""
+                    centroid = MathUtils.centroid(image)
                     self.averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
                     self.averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
-                    """
+
             self.measurement_thread.update_signal.emit({"type": "camimage",
-                                                        "image": image})
+                                                        "image": image}) # 20260120: this may be the slow-acquisition culprit.
             #Positions arrays update:
 
             self.myposarray = np.append(self.myposarray, mypos - self.xStartPos)
@@ -389,7 +389,9 @@ class MeasurementControls(QMainWindow):
             #Moving all the GUI-related pre-measurement ops here, in order to avoid clashes between GUI updates and worker threads
             self.gui.startButton.setEnabled(False)
             self.gui.stopButton.setEnabled(True)
-            self.camViewer.camera.stop() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
+            self.camViewer.stop_while_measuring()
+            self.camViewer.camera.camera.StopGrabbing() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
+            print("Stopped grabbing from on_start_pressed")
             self.slopes_plot.clearPlot()
             self.height_plot.clearPlot()
             self.measurement.get_save_directory()  # This updates the self.directory attribute
@@ -397,6 +399,7 @@ class MeasurementControls(QMainWindow):
             self.camViewer.camera.set_exp_time(self.camViewer.camera.camera.ExposureTime())
             #print("Exposure time: ", self.camViewer.camera.camera.ExposureTime())
             #print("Number of grabs per point: ", self.nrofgrabs)
+            self.camViewer.camera.start_continuous_grabbing()
             self.measurement_thread = WorkerThread(self.startMeasurement)
             self.measurement_thread.end_signal.connect(self.endmeasurement)
             self.measurement_thread.update_signal.connect(self.on_update)
@@ -582,45 +585,66 @@ class MeasurementControls(QMainWindow):
             self.motors.yawmove.moveabs(old_coords_dict["yaw"])
         self.clear_gui()
 
-    def centerLaser(self):
+    def center_laser(self):
         """
         First sketch of the method: 20251111.
 
-        This function centers the laser on the mirror.
+        This function centers the laser on the CCD, while positioned at the center of the mirror.
         The idea is to run this AFTER the user has set all the relevant measurement parameters.
         Desired centroid position on Camera if laser is @ mirror center:
 
         X = 2640
         Y = 2300
         remember:
-        Roll controls centroid X
-        Pitch controls centroid Y
+        Roll controls centroid X, positive roll means DECREASING centroid X value
+        Pitch controls centroid Y, positive pitch means INCREASING centroid Y value
 
         """
-        desired_centroid_x = 2640
-        desired_centroid_y = 2300
-        print("Centering the laser on the mirror...")
+        desired_centroid = [ 2640.0, 2300] # in X and Y respectively!
+        tol = 0.3 # tolerance for the comparison.
+        print("Centering the laser on the mirror")
+        print("Some preliminary settings first...")
+        print("")
+        original_laser_power = self.laser.serialmessage(isOUTPOWLEVEL)
         self.laser.serialmessage(LASPOWLEVEL + "0.002")
         original_speed = self.motors.X.getjogspeed()
-
         self.motors.X.setjogspeed(20)
         self.motors.xmove.move_rel(distance = self.length/2)
         self.waitformoveend()
-        original_laser_power = self.laser.serialmessage(isOUTPOWLEVEL)
 
-        image = self.camViewer.camera.grabdata()
-        if image is not None:
-            centroid = MathUtils.MathUtils.centroid(image)
-            averageX += round(centroid[1],0)  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-            averageY += round(centroid[0],0)  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+        mov_unit = 0.0002 # based on the observation that 0.0002 deg movements means about 1 pixel variation.
+        print("Starting the centering loop now...")
+        while n <= 10: #let's do 10 iterations max.
+            print(f"iteration nr {n}")
+            print("")
+            image = self.camViewer.camera.grabdata()
+            if image is not None:
+                meas_centroid = MathUtils.MathUtils.centroid(image)
+                # centroid[1] this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+                # centroid [0] this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+            centroid = [ round(el, 1) for el in meas_centroid]
+            delta = centroid - desired_centroid
+            print("Delta vector (actual - desired): ", delta)
 
-        #
-
+            if abs(delta) <= tol:
+                break
+            if n == 10:
+                self.show_warning("Warning!",
+                                  message = "Laser could not be centered within the allowed iterations.")
+                return
+            rel_move_x = - delta[0] * mov_unit
+            rel_move_y = delta[1] * mov_unit
+            self.motors.rollmove.move_rel(distance = rel_move_x)
+            self.waitformoveend()
+            self.motors.pitchmove.move_rel(distance = rel_move_y)
+            self.waitformoveend()
+            n += 1
         # Resetting to original state:
         self.laser.serialmessage(original_laser_power)
         self.motors.xmove.move_rel(distance = - self.length/2)
         self.motors.X.setjogspeed(original_speed)
         print("Laser correctly centered!")
+        return
 
 
 

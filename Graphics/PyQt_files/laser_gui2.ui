@@ -273,7 +273,7 @@
       <widget class="QWidget" name="layoutWidget">
        <layout class="QGridLayout" name="gridLayout" columnstretch="0,0">
         <property name="leftMargin">
-         <number>10</number>
+         <number>6</number>
         </property>
         <property name="topMargin">
          <number>5</number>
@@ -300,7 +300,7 @@
         <item row="1" column="0">
          <widget class="MyLabel" name="int_display_2">
           <property name="text">
-           <string>Intensity (W)</string>
+           <string>Intensity (W)  </string>
           </property>
          </widget>
         </item>

@@ -110,7 +110,7 @@ class Measurement():
         topvalue = 4 * rms
         FOP = [] # array of indices of Fuck Off Points
         for i in range(len(arrayX)):
-            if arrayX[i] > topvalue:
+            if arrayX[i] >= topvalue:
                 FOP.append(i)
         for i in FOP:
             smoothed_array[i] = (arrayX[i - 1] + arrayX[i + 1]) / 2 # substituting the FOPs with the average in the smoothed array.
@@ -151,3 +151,14 @@ class Measurement():
         self.stepsize = 0.0 # we don't want to move the stage
         self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
         self.directory = os.path.expanduser("~")"""
+
+class Mirror():
+    def __init__(self):
+        self.mirrorlength = 400 # this is in mm
+        self.mirrorwidth = 40 # this is in mm.
+
+    def define_length(self,actual_length):
+        self.mirrorlength = actual_length
+
+    def define_width (self,actual_width):
+        self.mirrorwidth = actual_width

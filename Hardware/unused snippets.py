@@ -115,3 +115,63 @@ def move_abs_one_axis(self, axis, speed, coordinate="0"):
         elif axis == "rot" or axis == "rotation" or axis == "yaw":
             ret = "C"
         return (ret)
+
+
+def centerLaser(self):
+    """
+    First sketch of the method: 20251111.
+
+    This function centers the laser on the mirror.
+    The idea is to run this AFTER the user has set all the relevant measurement parameters.
+    Desired centroid position on Camera if laser is @ mirror center:
+
+    X = 2640
+    Y = 2300
+    remember:
+    Roll controls centroid X
+    Pitch controls centroid Y
+
+    """
+    desired_centroid_x = 2640
+    desired_centroid_y = 2300
+    original_laser_power = self.laser.serialmessage(isOUTPOWLEVEL)
+    print("Centering the laser on the mirror...")
+    self.laser.serialmessage(LASPOWLEVEL + "0.002")
+    original_speed = self.motors.X.getjogspeed()
+
+    self.motors.X.setjogspeed(20)
+    self.motors.xmove.move_rel(distance=self.length / 2)
+    self.waitformoveend()
+
+    image = self.camViewer.camera.grabdata()
+    if image is not None:
+        centroid = self.centroid_calculation(image)
+        """centerX += round(centroid[1], 0)  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+        centerY += round(centroid[0],0)  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi"""
+    while centroid != [desired_centroid_x, desired_centroid_y]:
+        self.centering_loop(centroid, increment=0.0001)
+        image = self.camViewer.camera.grabdata()
+        if image is not None:
+            centroid = self.centroid_calculation(image)
+
+    #
+
+    # Resetting to original state:
+    self.laser.serialmessage(original_laser_power)
+    self.motors.xmove.move_rel(distance=- self.length / 2)
+    self.motors.X.setjogspeed(original_speed)
+    print("Laser correctly centered!")
+
+
+def centering_loop(self, actual, increment=0.0001):
+    """
+
+    :param actual: centroid as a list!
+    :param increment: angular increment for motion
+    :return:
+    """
+    if actual[0] != ZERO_X:
+        move1 = "roll"
+    elif actual[1] != ZERO_Y:
+        move2 = "pitch"
+
