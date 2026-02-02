@@ -56,7 +56,8 @@ class MotorControls(QMainWindow):
         #Multithreading facilities
         self.messenger = getattr(self, "messenger", None) or CoordMessenger(connection=self.shell, sleep_time=100)
         # Instantiating an object of MotorUtil class
-        self.util = Uti.create(my_object="util", connection=self.shell)
+        self.util = Uti.create(my_object="util",
+                               connection=self.shell)
         # Assigning motors and moves:
         self.init_motors()
         self.set_motorname_list()
@@ -110,9 +111,9 @@ class MotorControls(QMainWindow):
         self.gui.distance.enter_pressed.connect(self.update_distance)
 
         # Warning for RTT stage parallelism angles
-        parallel = myWarningBox(title = "Attention!",
-                                message = " RTT flat @ Pitch = -0.05 and Roll = -0.01 deg!")
-        parallel.show_warning()
+        #parallel = myWarningBox(title = "Attention!",
+                                #message = " RTT flat @ Pitch = -0.05 and Roll = -0.01 deg!")
+        #parallel.show_warning()
 
         self.start_coord_monitoring()
         self.update_all()
@@ -244,7 +245,7 @@ class MotorControls(QMainWindow):
 
     def start_coord_monitoring(self):
         if not self.messenger.worker.isRunning():
-            print("starting worker thread")
+            #print("starting worker thread")
             self.messenger.start()
         else:
             print("Worker already working")

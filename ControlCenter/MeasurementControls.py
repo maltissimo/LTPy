@@ -1,14 +1,12 @@
-import datetime
-
-from ControlCenter import MathUtils
 from ControlCenter.Control_Utilities import *
 from ControlCenter.Laser import *
 from ControlCenter.Measurement import *
 from ControlCenter.MotorControls import *
-from Graphics.Base_Classes_graphics.Measurements_GUI import *
+from Graphics.Base_Classes_graphics.Measurements_GUI2 import *
 from Graphics.Base_Classes_graphics.RT_Dataplot import *
-from Graphics.CameraViewer_MT import *
+from ControlCenter.CameraViewer_MT import *
 from PyQt5.QtCore import QCoreApplication
+from PyQt5.QtGui import QIntValidator
 
 LENSFOCAL = 502.5  # this is the nominal focal length in mm of our lens
 ZERO_X = 5280 / 2  # Have to start somewhere, this is half of camera.Width()
@@ -70,12 +68,65 @@ class MeasurementControls(QMainWindow):
         self.gui.length_input.returnPressed.connect(self.get_length)
         self.gui.stepsize_input.returnPressed.connect(self.get_stepsize)
         self.gui.nrofgrabs_input.returnPressed.connect(self.get_nrofgrabs)
+        self.gui.height_lineedit.returnPressed.connect(self.set_acq_size)
+        self.gui.width_lineedit.returnPressed.connect(self.set_acq_size)
 
         self.gui.startButton.clicked.connect(self.on_start_pressed)
         self.gui.stopButton.clicked.connect(self.on_stop_pressed)
         self.gui.xStartPos.clicked.connect(self.setXstartPos)
+        self.gui.acq_size_set.clicked.connect(self.set_acq_size)
+
         self.gui.stopButton.setEnabled(False)
         print("logics inited")
+
+        #Integer validation
+
+        self.gui.width_lineedit.setValidator(QIntValidator(48, 5280))
+        self.gui.height_lineedit.setValidator(QIntValidator(4, 4600))
+
+        # Some settings:
+        frame_text = "5280x4600 px (H x W)"
+        self.gui.frame_size_label.setText(frame_text)
+        self.gui.nrofgrabs_label_2.setText(str("Not set!"))
+        self.gui.length_display.setText(str("Not set!"))
+        self.gui.stepsize_display.setText(str("Not set!"))
+        self.gui.points_display.setText(str("Not set!"))
+
+    def set_acq_size(self):
+        mewidth = None
+        meheight = None
+
+        # Check Width Input
+        width_text = self.gui.width_lineedit.text()
+        if width_text:
+            try:
+                mewidth = int(width_text)
+                self.gui.width_lineedit.clear()
+            except ValueError:
+                pass
+
+        # Check Height Input
+        height_text = self.gui.height_lineedit.text()
+        if height_text:
+            try:
+                meheight = int(height_text)
+                self.gui.height_lineedit.clear()
+            except ValueError:
+                pass
+
+        # Only call set_roi if at least one value is present
+        if mewidth is not None or meheight is not None:
+            self.camViewer.camera.set_roi(width=mewidth, height=meheight)
+            
+            # Update label with current camera values
+            # Note: Accessing GetValue() might be Pylon specific, using the wrapper methods is safer if available
+            # or just reading back the properties we set if the camera object updates them.
+            # Assuming self.camViewer.camera.width and .height are updated in set_roi
+            current_w = self.camViewer.camera.width
+            current_h = self.camViewer.camera.height
+            me_text = f"{current_h} x {current_w} H x W"
+            self.gui.frame_size_label.setText(me_text)
+
     def get_points(self):
         self.points = int(self.gui.points_input.text())
         self.gui.points_input.clear()
@@ -192,6 +243,7 @@ class MeasurementControls(QMainWindow):
         header += "Length of measurement (mm): " + str(MathUtils.um2mm(self.length)) +"\n"
         header += "Nr of measurement points + 1: " +  str(self.points + 1 ) + "\n"
         header += "Stepsize of measurement (mm): " + str(MathUtils.um2mm(self.stepsize)) + "\n"
+        header += "Laser intensity preset (mW): " + str(self.laser.get_inten) + "\n"
         header += "\t" + "X" + "\t\t" + "Y" + "\t\t" + "Centroid X" + "\t\t" + "Centroid Y"+ "\n"
         header += "\n"
         return header
@@ -391,7 +443,6 @@ class MeasurementControls(QMainWindow):
             self.gui.stopButton.setEnabled(True)
             self.camViewer.stop_while_measuring()
             self.camViewer.camera.camera.StopGrabbing() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
-            print("Stopped grabbing from on_start_pressed")
             self.slopes_plot.clearPlot()
             self.height_plot.clearPlot()
             self.measurement.get_save_directory()  # This updates the self.directory attribute
@@ -514,18 +565,19 @@ class MeasurementControls(QMainWindow):
                 pass
             self.measurement_thread.running = False
             self.measurement_thread = None
-        print("Thread killed")
+        #print("Thread killed")
         # Saving the data:
         #self.measurement.get_save_directory() # This updates the self.directory attribute moved to start_measurement, makes more sense, so the app does not hang.
         self.save_data(self.myposarray, self.slopesarray, self.slopes_to_be_plotted, self.heightsarray)
-
+        #self.motors.util.unlockmotors()
         act_speed = self.motors.X.jogspeed
         self.motors.X.setjogspeed(25)
         self.motors.xmove.move_abs(speed = "rapid", coord = float(self.xStartPos))
         print("End of Measurement!" + "\n" + f"Stage at the original position.")
         self.motors.X.setjogspeed(act_speed)
         self.motors.messenger.resume()
-        #self.camViewer.camera.camera.StopGrabbing()
+        #Reset camera to original width and height: 20260121 MA
+        self.camViewer.camera.reset_sensor()
         self.clear_gui()
 
     def centroid_calculation(self, image):

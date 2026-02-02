@@ -1,0 +1,124 @@
+### `TODO.txt` - Guide for 90-Degree Camera Rotation
+
+This guide outlines the necessary software changes to accommodate a 90-degree physical rotation of the camera. The goal is to achieve high-speed acquisition by using a vertical ROI while making the change transparent to the user.
+
+---
+
+#### **Step 1: Physical Camera Rotation**
+
+1.  **Power down** the system.
+2.  Physically rotate the camera by **90 degrees counter-clockwise**.
+3.  Ensure the camera is securely mounted.
+4.  Power the system back on.
+
+*Result: The sensor's native `width` is now your vertical axis, and `height` is your horizontal axis.*
+
+---
+
+#### **Step 2: Update ROI Settings in `MeasurementControls.py`**
+
+The goal is to use a narrow *vertical* strip for high speed. Since the camera is rotated, you will now set a narrow `Height` and use the full `Width`.
+
+**File:** `ControlCenter/MeasurementControls.py`
+**Method:** `on_start_pressed(self)`
+
+1.  **Find this block:**
+    ```python
+    # Reduce Horizontal ROI to ~1000px (using 1248), keep full Height (4600)
+    # Center the strip: (5280 - 1248) / 2 = 2016 this is the offset and must be such that a multiple of 48
+    self.camViewer.camera.set_roi(width = 1248, height = 4600, offset_x = 2016, offset_y= 0 )
+    ```
+
+2.  **Replace it with this:**
+    ```python
+    # ROI CHANGE FOR 90-DEGREE ROTATION
+    # Set a narrow VERTICAL ROI (~1024px) and use the full HORIZONTAL resolution (4600px after rotation).
+    # New Width = 4600 (full sensor dimension)
+    # New Height = 1024 (for speed)
+    # Center the vertical strip: (4600 - 1024) / 2 = 1788
+    self.camViewer.camera.set_roi(width=4600, height=1024, offset_x=0, offset_y=1788)
+    ```
+
+3.  **Find this line in `endmeasurement(self)`:**
+    ```python
+    self.camViewer.camera.set_roi(width =5280, height = 4600, offset_x= 0, offset_y=0)
+    ```
+4.  **Ensure it is correct for the un-rotated state (it is).** This resets the camera for the live view correctly.
+
+---
+
+#### **Step 3: Swap Centroid Calculation in `MeasurementControls.py`**
+
+Your measurement is now sensitive to horizontal displacement (`centroid[1]`), which corresponds to the original vertical axis.
+
+**File:** `ControlCenter/MeasurementControls.py`
+**Method:** `startMeasurement(self)`
+
+1.  **Find this block inside the `for grab in range(self.nrofgrabs):` loop:**
+    ```python
+    centroid = MathUtils.centroid(image)
+    self.averageX += centroid[1] # this is the HOR vector @ Y = centroid[1]
+    self.averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0]
+    ```
+
+2.  **Swap the indices** to reflect the new sensitivity axis:
+    ```python
+    centroid = MathUtils.centroid(image)
+    # SWAPPED FOR 90-DEGREE ROTATION
+    self.averageX += centroid[0] # Now corresponds to the rotated horizontal axis
+    self.averageY += centroid[1] # Now corresponds to the rotated vertical axis (the sensitive one)
+    ```
+
+3.  **Find this line a few lines below:**
+    ```python
+    slope = self.measurement.slope_calc(averageCentroidY)
+    ```
+
+4.  **Change it to use `averageCentroidX`**, as this is now the sensitive axis after rotation and centroid swap.
+    ```python
+    # CHANGED FOR 90-DEGREE ROTATION
+    slope = self.measurement.slope_calc(averageCentroidX)
+    ```
+
+---
+
+#### **Step 4: Rotate the Image for Display in `CameraViewer_MT.py`**
+
+To make the change transparent to the user, rotate the image back by 90 degrees clockwise before displaying it.
+
+**File:** `Graphics/CameraViewer_MT.py`
+**Method:** `display_image(self, image)`
+
+1.  **You will need to import `numpy` if it's not already there.** Add `import numpy as np` at the top of the file.
+
+2.  **Find the line where the `QImage` is created:**
+    ```python
+    height, width = image.shape
+    bytes_per_line = width
+    q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+    ```
+
+3.  **Insert this line *before* that block** to rotate the image:
+    ```python
+    # ROTATE IMAGE 90 DEGREES CLOCKWISE FOR DISPLAY
+    image = np.rot90(image, k=-1) # k=-1 for clockwise rotation
+
+    height, width = image.shape
+    bytes_per_line = width
+    q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
+    ```
+    *(Note: `k=3` is equivalent to `k=-1` for `np.rot90`)*.
+
+---
+
+#### **Step 5: Review Plot Labels (Optional but Recommended)**
+
+Your plots are now showing data derived from the horizontal centroid displacement. While the calculations are correct, your axis labels might be misleading.
+
+**File:** `ControlCenter/MeasurementControls.py`
+**Methods:** `initSlopesTab()` and `initHeightTab()`
+
+*   Review the labels set by `self.slopes_plot.setLabels(...)` and `self.height_plot.setLabels(...)`.
+*   No changes are strictly needed as the final "Height" and "Slope" values still correspond to the mirror's surface profile, but be aware that they are now derived from the camera's X-axis centroid data.
+
+---

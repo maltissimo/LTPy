@@ -49,6 +49,13 @@ Further to this, here below the motor definitions for the specific Gantry in use
 Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 
 """
+ALL = "selectAxes=selectAll"
+IDLE = "requestHost=requestIDLE"
+RTT_select = "selectAxes=selectABZ+selectC"
+ENC_OFF = "requestHost=requestEncoderPowerOff"
+HOME = "requestHost=requestHome"
+RESET = "requestHost=requestReset"
+CONTROL = "requestHost=requestControl"
 
 
 class Motor():
@@ -363,8 +370,8 @@ class MotorUtil():
 
     def homeGantry(self):
         self.resetGantry()
-        gohome = "requestHost=requestHome"
-        self.connection.send_receive(gohome)
+
+        self.connection.send_receive(HOME)
 
         """while not self.gantryHomed():
             print("still homing...")
@@ -372,11 +379,10 @@ class MotorUtil():
         print("system homed!")"""
 
     def resetGantry(self):
-        selectAxes = "selectAxes=selectAll"
-        reset = "requestHost=requestReset"
-        self.connection.send_receive(selectAxes)
-        time.sleep(0.07)
-        self.connection.send_receive(reset)
+
+        self.connection.send_receive(ALL)
+        time.sleep(0.09)
+        self.connection.send_receive(RESET)
 
     def motors(self):
         """
@@ -404,6 +410,23 @@ class MotorUtil():
                                rawarray[i][-1]])  # This is the list of motors present on the System.
                 # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
         return (motors)
+
+    def lockmotors(self):
+        """
+        This kills the motors, and locks them, hopefully reducing the motor jitter, and therefore
+        improving the measurement noise. This is after email from E. Jansen from QSYS on 20260126
+        :return:
+        """
+
+        self.connection.send_receive(RTT_select)
+        self.connection.send_receive(IDLE)
+        self.connection.send_receive(ENC_OFF)
+
+    def unlockmotors(self):
+        self.connection.send_receive(RTT_select)
+        self.connection.send_receive(IDLE)
+        self.connection.send_receive(CONTROL)
+
 
 
 class Move():

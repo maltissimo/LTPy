@@ -1,10 +1,23 @@
 from Hardware.Detector import *
 import time
 cam = Camera()
-nr_of_grabs = 1000
+print("Original settings:")
+print("Cam width: ", cam.camera.Width())
+print("Cam height: ", cam.camera.Height())
+cam.set_roi(width = 2000, height = 500)
+print("Atfter ROI Setting: ")
+print("Cam width: ", cam.camera.Width())
+print("Cam height: ", cam.camera.Height())
+print("Nr of grabs for test? ")
+nr_of_grabs = int(input())
+print(f"Starting test for {nr_of_grabs} grabs...")
 start = time.time()
 for _ in range (nr_of_grabs):
     cam.grabdata()
 end = time.time()
+cam.reset_sensor()
+print("Atfter resetting: ")
+print("Cam width: ", cam.camera.Width())
+print("Cam height: ", cam.camera.Height())
 cam.closecam()
-print(f"time for {nr_of_grabs} grabs : {end - start} seconds")
+print(f"time for {nr_of_grabs} grabs : {(round((end - start),3))} seconds")

@@ -1,6 +1,6 @@
 import pypylon.pylon as py
 
-from ControlCenter import MathUtils
+from ControlCenter.MathUtils import mult_check
 import threading
 
 """
@@ -19,12 +19,17 @@ class Camera:
     provided by Basler.
 
     03/07/2024
-
     Pixel size is:
-
     2.74um x 2.74 um
+    5280 x 4600
 
     12/10/2024
+    Detailed info about Acquisition card can be found at:
+    https://docs.baslerweb.com/configuring-a-cxp-12-interface-card
+    see also the emails from Basler support.
+    The top FPS is 100, but at full frame. Since the camera readout is row-by-row,
+    decreasing the HEIGHT of the camera increases the speed considerably.
+    By using 1500 instead of 4600, one gets about 250 fps. see the set_roi method.
 
     """
 
@@ -155,3 +160,71 @@ class Camera:
         self.camera.Gain = gain
         #self.gain = self.camera.Gain
 
+    def set_roi(self, width = None, height = None):
+        """
+        Sets the camera Region of Interest (ROI) in order to speed up acquisitions.
+        CRUCIAL: MUST stop grabbing before changing those parameters.
+        Also: The difference between the chosen width offset 48 must be dividable without rest by 48
+        The method takes care of setting the offest parameters correctly.
+        :param width: width parameter for calculating  the acquisition window in pixels
+                        Allowed values : 1 - 110
+        :param height: height parameter for calculating  the acquisition window in pixels,
+                        this is the crucial one for speeding up.
+                        Allowed values : 1 - 1150
+        :param offset_x: centering parameter,
+        :param offset_y: centering parameter.
+        :return:
+        """
+        was_grabbing = self.camera.IsGrabbing()
+        if was_grabbing:
+            self.camera.StopGrabbing()
+
+        # 1. reset camera Offsets to 0 first.
+
+        self.reset_sensor()
+
+        # 2. Set the  Dimensions
+        # I'm adding some code here to have the user putting in a number, and the code calculating the width
+        # and the offset.
+        #max_width =  5280, i.e. the max nr of pixels
+        #max_height =  4600, i.e. the max nr of pixels
+
+        if width is not None:
+            checkwidth = mult_check(width, 48)
+            camwidth = checkwidth * 48
+
+            offset_x = int((5280 - camwidth)/2)
+            self.camera.Width = camwidth
+            self.camera.OffsetX = offset_x
+
+        if height is not None:
+            checkheight = mult_check(height, 4)
+            camheight = checkheight * 4
+
+            offset_y = int((4600 - camheight)/2)
+            self.camera.Height = camheight
+            self.camera.OffsetY = offset_y
+
+        """#3. Set the new Offsets to center the ROI:
+        self.camera.OffsetX = offset_x
+        self.camera.OffsetY = offset_y"""
+
+        #4. update internal attributes:
+        self.width = self.camera.Width()
+        self.height =  self.camera.Height()
+        #5. restart grabbing:
+        if was_grabbing:
+            self.start_continuous_grabbing()
+
+    def reset_sensor(self):
+        was_grabbing = self.camera.IsGrabbing()
+        if was_grabbing:
+            self.camera.StopGrabbing()
+            
+        self.camera.OffsetX = 0
+        self.camera.OffsetY = 0
+        self.camera.Width = 5280
+        self.camera.Height = 4600
+
+        if was_grabbing:
+            self.start_continuous_grabbing()

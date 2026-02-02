@@ -132,3 +132,19 @@ def compare_within(number1, number2, tolerance):
         return True
     else:
         return False
+
+def mult_check(size, base):
+    """
+    This function checks if size is an even integer multiple of base. It returns that multiple.
+    If size//base is NOT an even integer multiple, it rounds the result to the next even value.
+    Used in Detector.py to set ROI, as the Basler camera is picky about values of Cols and rows
+
+    :param size: desired size of the ROI in px
+    :param base: Basler camera value, 48 for width and 4 for height.
+    :return: check the value then used to set the ROI.
+    """
+    check = size//base
+
+    if check % 2 != 0:
+        check +=1
+    return(check)

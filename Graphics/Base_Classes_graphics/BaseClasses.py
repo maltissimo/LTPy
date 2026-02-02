@@ -1,7 +1,7 @@
 from PyQt5.QtCore import QSize, pyqtSignal, Qt
 from PyQt5.QtGui import QFont
 from PyQt5.QtWidgets import QTextEdit, QTextBrowser, QLabel, QPushButton, QGroupBox, QWidget, QLineEdit, QComboBox, \
-    QSizePolicy
+    QSizePolicy, QFrame, QCheckBox, QVBoxLayout
 from PyQt5.QtWidgets import QVBoxLayout, QMessageBox
 
 # General values:
@@ -48,8 +48,6 @@ class MySubWindow(QWidget):
         label = MyLabel("This is my sub window")
         layout.addWidget(label)
         self.setLayout(layout)
-
-
 class MyTextEdit(QTextEdit):
     enter_pressed = pyqtSignal()
 
@@ -105,6 +103,7 @@ class MyLabel(QLabel):
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
+        self.setAlignment(Qt.AlignCenter)
         #self.setPlainText(u"")
 
     def get_dimensions(self):
@@ -370,7 +369,6 @@ class UnitsLabel(QLabel):
         else:
             self.setText("")
 
-
 class myWarningBox(QMessageBox):
     def __init__(self, title="Warning", message="", parent=None):
         super().__init__(parent)
@@ -381,3 +379,13 @@ class myWarningBox(QMessageBox):
 
     def show_warning(self):
         self.exec()
+
+class MyCellQFrame(QFrame):
+    def __init__(self, parent = None):
+        super().__init__(parent)
+        self.setFrameShape(QFrame.Shape.Box)
+        self.setFrameShadow(QFrame.Shadow.Plain)
+        self.setLineWidth(1)
+        layout = QVBoxLayout(self)
+        layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.setLayout(layout)

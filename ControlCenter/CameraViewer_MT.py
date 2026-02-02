@@ -1,13 +1,13 @@
 import sys
 import cv2
 import numpy as np
-from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtCore import QTimer, Qt
 from PyQt5.QtGui import QImage, QPixmap
 
 from ControlCenter import MathUtils
 from ControlCenter import Control_Utilities as cu
-from Graphics.Base_Classes_graphics.CameraViewer_GUI import Ui_PylonCamViewer
+from Graphics.Base_Classes_graphics.CameraViewer_GUI2 import Ui_PylonCamViewer
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Detector import Camera
 
@@ -28,8 +28,13 @@ class CamViewer(QMainWindow):
             self.camera = Camera()
         self.running = False
 
-        self.plot_layout = QVBoxLayout(self.gui.CamFrame)
+        # Fix 1: Use existing layout instead of creating a new one
+        self.plot_layout = self.gui.CamFrame.layout()
+        
         self.display_label = QLabel()
+        self.display_label.setAlignment(Qt.AlignCenter)
+        # Fix 2: Ensure label expands to fill the frame so image is visible
+        self.display_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.plot_layout.addWidget(self.display_label)
 
         self.gui.StartGrab.setEnabled(True)
@@ -141,10 +146,12 @@ class CamViewer(QMainWindow):
         #bytes_per_line = 2* width <- this is for 16 bits greyscales
         q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
         pixmap = QPixmap.fromImage(q_image)
-        self.display_label.setPixmap(pixmap)
-        self.display_label.setScaledContents(False)
-        self.display_label.setPixmap(pixmap.scaled(self.display_label.size(),
-                                                   aspectRatioMode=Qt.KeepAspectRatio))
+        
+        # Fix: Simplified display logic to ensure image is shown
+        if not pixmap.isNull():
+            self.display_label.setPixmap(pixmap.scaled(self.display_label.size(),
+                                                       aspectRatioMode=Qt.KeepAspectRatio,
+                                                       transformMode=Qt.SmoothTransformation))
 
     def show_warning(self, title, message):
         warning = myWarningBox(title=title, message=message, parent=self)
