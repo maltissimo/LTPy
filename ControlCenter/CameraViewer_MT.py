@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QImage, QPixmap
+from PyQt5.QtGui import QImage, QPixmap, QTransform
 
 from ControlCenter import MathUtils
 from ControlCenter import Control_Utilities as cu
@@ -99,15 +99,43 @@ class CamViewer(QMainWindow):
         fwhm_X, fwhm_Y = MathUtils.calc_2D_fwhm(nparray2D)
         fwhm_X = round((2.74 * fwhm_X), 2)
         fwhm_Y = round((2.74 * fwhm_Y), 2)
-        self.gui.FWHMX_label.setText(str(fwhm_X))
-        self.gui.FWHMY_label.setText(str(fwhm_Y))
+
+        # ==============================================================================
+        # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+        # ==============================================================================
+        # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+        self.gui.FWHMX_label.setText(str(fwhm_Y))
+        self.gui.FWHMY_label.setText(str(fwhm_X))
+        # ==============================================================================
+
+        # ==============================================================================
+        # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+        # ==============================================================================
+        # Uncomment this block for standard camera orientation (Horizontal ROI)
+        # self.gui.FWHMX_label.setText(str(fwhm_X))
+        # self.gui.FWHMY_label.setText(str(fwhm_Y))
+        # ==============================================================================
 
     def display_centroid(self, nparray2D):
         centroid = MathUtils.centroid(nparray2D)
         centroidX = round(centroid[1], 0)
         centroidY = round(centroid[0], 0)
-        self.gui.centroidX_label.setText(str(centroidX))
-        self.gui.centroidY_label.setText(str(centroidY))
+
+        # ==============================================================================
+        # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+        # ==============================================================================
+        # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+        self.gui.centroidX_label.setText(str(centroidY))
+        self.gui.centroidY_label.setText(str(centroidX))
+        # ==============================================================================
+
+        # ==============================================================================
+        # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+        # ==============================================================================
+        # Uncomment this block for standard camera orientation (Horizontal ROI)
+        # self.gui.centroidX_label.setText(str(centroidX))
+        # self.gui.centroidY_label.setText(str(centroidY))
+        # ==============================================================================
 
     def add_grid(self, image):
         """
@@ -146,7 +174,21 @@ class CamViewer(QMainWindow):
         #bytes_per_line = 2* width <- this is for 16 bits greyscales
         q_image = QImage(image.data, width, height, bytes_per_line, QImage.Format_Grayscale8)
         pixmap = QPixmap.fromImage(q_image)
-        
+
+        # ==============================================================================
+        # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+        # ==============================================================================
+        # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+        pixmap = pixmap.transformed(QTransform().rotate(90))
+        # ==============================================================================
+
+        # ==============================================================================
+        # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+        # ==============================================================================
+        # Uncomment this block for standard camera orientation (Horizontal ROI)
+        # pass # No rotation needed
+        # ==============================================================================
+
         # Fix: Simplified display logic to ensure image is shown
         if not pixmap.isNull():
             self.display_label.setPixmap(pixmap.scaled(self.display_label.size(),

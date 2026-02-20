@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>622</width>
-    <height>422</height>
+    <width>631</width>
+    <height>393</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,10 +29,10 @@
    <widget class="QTabWidget" name="MotorTabs">
     <property name="geometry">
      <rect>
-      <x>9</x>
+      <x>4</x>
       <y>0</y>
-      <width>611</width>
-      <height>321</height>
+      <width>620</width>
+      <height>331</height>
      </rect>
     </property>
     <property name="font">
@@ -55,13 +55,13 @@
      <attribute name="title">
       <string>Motors</string>
      </attribute>
-     <widget class="QFrame" name="motorsdisplay">
+     <widget class="MyFrame" name="motorsdisplay">
       <property name="geometry">
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>601</width>
-        <height>151</height>
+        <width>610</width>
+        <height>119</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -73,10 +73,10 @@
       <widget class="QWidget" name="layoutWidget">
        <property name="geometry">
         <rect>
-         <x>10</x>
+         <x>0</x>
          <y>0</y>
-         <width>591</width>
-         <height>151</height>
+         <width>610</width>
+         <height>119</height>
         </rect>
        </property>
        <layout class="QGridLayout" name="coord_display_layout" rowstretch="0,0,0,0">
@@ -84,7 +84,7 @@
          <number>10</number>
         </property>
         <property name="topMargin">
-         <number>0</number>
+         <number>5</number>
         </property>
         <property name="rightMargin">
          <number>10</number>
@@ -117,6 +117,12 @@
             <bold>true</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
           <property name="text">
            <string>X motor</string>
           </property>
@@ -134,6 +140,12 @@
             <bold>true</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
           <property name="text">
            <string>Pitch motor</string>
           </property>
@@ -150,6 +162,12 @@
             <weight>75</weight>
             <bold>true</bold>
            </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
           </property>
           <property name="text">
            <string>Yaw motor</string>
@@ -178,6 +196,12 @@
             <bold>true</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
           <property name="text">
            <string>Z motor</string>
           </property>
@@ -205,6 +229,12 @@
             <bold>true</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
           <property name="text">
            <string>Y motor</string>
           </property>
@@ -221,6 +251,12 @@
             <weight>75</weight>
             <bold>true</bold>
            </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
           </property>
           <property name="text">
            <string>Roll motor</string>
@@ -263,13 +299,13 @@
        </layout>
       </widget>
      </widget>
-     <widget class="QFrame" name="motoractions">
+     <widget class="MyFrame" name="motoractions">
       <property name="geometry">
        <rect>
-        <x>0</x>
-        <y>150</y>
-        <width>601</width>
-        <height>141</height>
+        <x>-2</x>
+        <y>119</y>
+        <width>612</width>
+        <height>89</height>
        </rect>
       </property>
       <property name="frameShape">
@@ -278,402 +314,86 @@
       <property name="frameShadow">
        <enum>QFrame::Raised</enum>
       </property>
-      <widget class="QWidget" name="layoutWidget">
+      <widget class="QWidget" name="gridLayoutWidget_4">
        <property name="geometry">
         <rect>
-         <x>10</x>
-         <y>0</y>
-         <width>591</width>
-         <height>141</height>
+         <x>1</x>
+         <y>5</y>
+         <width>609</width>
+         <height>83</height>
         </rect>
        </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_4">
-        <property name="spacing">
-         <number>10</number>
-        </property>
+       <layout class="QGridLayout" name="gridLayout_5" rowstretch="0,0,0">
         <property name="topMargin">
-         <number>10</number>
+         <number>5</number>
         </property>
         <property name="bottomMargin">
-         <number>10</number>
+         <number>5</number>
         </property>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0">
-          <property name="spacing">
-           <number>0</number>
-          </property>
-          <item>
-           <widget class="MyLabel" name="Move_label">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-              <weight>75</weight>
-              <bold>true</bold>
-             </font>
-            </property>
-            <property name="text">
-             <string>Move</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,2,0">
-            <property name="sizeConstraint">
-             <enum>QLayout::SetFixedSize</enum>
-            </property>
-            <property name="leftMargin">
-             <number>10</number>
-            </property>
-            <property name="topMargin">
-             <number>20</number>
-            </property>
-            <property name="rightMargin">
-             <number>10</number>
-            </property>
-            <property name="bottomMargin">
-             <number>20</number>
-            </property>
-            <item>
-             <widget class="MyComboBox" name="motor_selector"/>
-            </item>
-            <item>
-             <widget class="MyTextEdit" name="distance"/>
-            </item>
-            <item>
-             <widget class="MyLabel" name="units">
-              <property name="layoutDirection">
-               <enum>Qt::LeftToRight</enum>
-              </property>
-              <property name="text">
-               <string>units</string>
-              </property>
-              <property name="alignment">
-               <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <widget class="MyPushButton" name="pushButton_2">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="baseSize">
-             <size>
-              <width>160</width>
-              <height>30</height>
-             </size>
-            </property>
-            <property name="accessibleName">
-             <string notr="true"/>
-            </property>
-            <property name="text">
-             <string>Move</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-        <item>
-         <layout class="QVBoxLayout" name="verticalLayout_3">
-          <item>
-           <widget class="QRadioButton" name="move_abs">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string notr="true"/>
-            </property>
-            <property name="accessibleName">
-             <string notr="true"/>
-            </property>
-            <property name="text">
-             <string>Move Absolute</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="move_rel">
-            <property name="font">
-             <font>
-              <pointsize>12</pointsize>
-              <weight>50</weight>
-              <bold>false</bold>
-             </font>
-            </property>
-            <property name="toolTip">
-             <string notr="true"/>
-            </property>
-            <property name="accessibleName">
-             <string notr="true"/>
-            </property>
-            <property name="text">
-             <string>Move Relative</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-    </widget>
-    <widget class="QWidget" name="utilitieswidget">
-     <property name="toolTip">
-      <string notr="true"/>
-     </property>
-     <property name="accessibleName">
-      <string notr="true"/>
-     </property>
-     <property name="accessibleDescription">
-      <string notr="true"/>
-     </property>
-     <attribute name="title">
-      <string>Utilities</string>
-     </attribute>
-     <widget class="QFrame" name="system_utilities">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>0</y>
-        <width>591</width>
-        <height>171</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>170</x>
-         <y>30</y>
-         <width>421</width>
-         <height>41</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout">
-        <property name="spacing">
-         <number>30</number>
-        </property>
-        <property name="leftMargin">
-         <number>15</number>
-        </property>
-        <property name="rightMargin">
-         <number>15</number>
-        </property>
-        <item>
-         <widget class="MyPushButton" name="ResetAll">
-          <property name="text">
-           <string>Reset All</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyPushButton" name="HomeGantry">
-          <property name="text">
-           <string>Home Gantry</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>171</width>
-         <height>101</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout">
-        <property name="spacing">
-         <number>50</number>
-        </property>
-        <property name="leftMargin">
-         <number>10</number>
-        </property>
-        <property name="topMargin">
-         <number>10</number>
-        </property>
-        <property name="bottomMargin">
-         <number>10</number>
-        </property>
-        <item>
-         <widget class="MyLabel" name="sys_label">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>System Utilities</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="MyLabel" name="conn_label">
-          <property name="font">
-           <font>
-            <pointsize>12</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>PMAC connection:</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>100</y>
-         <width>591</width>
-         <height>114</height>
-        </rect>
-       </property>
-       <layout class="QHBoxLayout" name="horizontalLayout_5">
-        <property name="rightMargin">
-         <number>15</number>
-        </property>
-        <item>
-         <layout class="QGridLayout" name="gridLayout">
-          <property name="leftMargin">
-           <number>5</number>
-          </property>
-          <property name="topMargin">
-           <number>5</number>
-          </property>
-          <property name="rightMargin">
-           <number>5</number>
-          </property>
-          <property name="bottomMargin">
-           <number>5</number>
-          </property>
-          <property name="horizontalSpacing">
-           <number>50</number>
-          </property>
-          <property name="verticalSpacing">
-           <number>10</number>
-          </property>
-          <item row="0" column="1">
-           <widget class="MyLabel" name="uname_label">
-            <property name="text">
-             <string>Username:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="1">
-           <widget class="MyTextEdit" name="uname_field"/>
-          </item>
-          <item row="1" column="2">
-           <widget class="MyTextEdit" name="pword_field"/>
-          </item>
-          <item row="1" column="0">
-           <widget class="MyTextEdit" name="IP_field">
-            <property name="toolTip">
-             <string notr="true"/>
-            </property>
-            <property name="inputMethodHints">
-             <set>Qt::ImhNone</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="2">
-           <widget class="MyLabel" name="pword_label">
-            <property name="text">
-             <string>Password:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="0" column="0">
-           <widget class="MyLabel" name="IP_label">
-            <property name="text">
-             <string>PMAC IP:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item row="1" column="3">
-           <widget class="MyPushButton" name="connect">
-            <property name="text">
-             <string>Connect</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </item>
-       </layout>
-      </widget>
-     </widget>
-     <widget class="QFrame" name="motor_utilities">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>170</y>
-        <width>591</width>
-        <height>111</height>
-       </rect>
-      </property>
-      <property name="frameShape">
-       <enum>QFrame::StyledPanel</enum>
-      </property>
-      <property name="frameShadow">
-       <enum>QFrame::Raised</enum>
-      </property>
-      <widget class="QWidget" name="layoutWidget">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>0</y>
-         <width>591</width>
-         <height>111</height>
-        </rect>
-       </property>
-       <layout class="QVBoxLayout" name="verticalLayout_6">
         <property name="spacing">
          <number>0</number>
         </property>
-        <property name="leftMargin">
-         <number>10</number>
-        </property>
-        <property name="topMargin">
-         <number>5</number>
-        </property>
-        <property name="rightMargin">
-         <number>10</number>
-        </property>
-        <property name="bottomMargin">
-         <number>5</number>
-        </property>
-        <item>
-         <widget class="QLabel" name="mutil_label">
+        <item row="2" column="4">
+         <widget class="QRadioButton" name="move_rel">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string notr="true"/>
+          </property>
+          <property name="accessibleName">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Move Relative</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="1" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="MyTextEdit" name="distance">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>30</height>
+           </size>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="MyComboBox" name="motor_selector"/>
+        </item>
+        <item row="1" column="4">
+         <widget class="QRadioButton" name="move_abs">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>50</weight>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="toolTip">
+           <string notr="true"/>
+          </property>
+          <property name="accessibleName">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Move Absolute</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" alignment="Qt::AlignHCenter">
+         <widget class="MyLabel" name="Move_label">
           <property name="font">
            <font>
             <pointsize>12</pointsize>
@@ -681,115 +401,145 @@
             <bold>true</bold>
            </font>
           </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
           <property name="text">
-           <string>Motor Utilities</string>
+           <string>Move</string>
           </property>
          </widget>
         </item>
-        <item>
-         <widget class="QLabel" name="mutil_label_2">
+        <item row="1" column="3" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="MyLabel" name="units">
+          <property name="layoutDirection">
+           <enum>Qt::LeftToRight</enum>
+          </property>
           <property name="text">
-           <string>Jog Speed:</string>
+           <string>units</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item>
-         <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="2,1,0,1,1">
-          <property name="spacing">
-           <number>2</number>
+        <item row="2" column="1" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="MyPushButton" name="pushButton_2">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <item>
-           <widget class="MyComboBox" name="motor_selector_2">
-            <property name="styleSheet">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MyQLineEdit" name="set_display">
-            <property name="inputMask">
-             <string notr="true"/>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MyLabel" name="label">
-            <property name="text">
-             <string>units</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MyPushButton" name="getspeed">
-            <property name="text">
-             <string>Get Speed</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="MyPushButton" name="setspeed">
-            <property name="text">
-             <string>Set Speed</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
+          <property name="minimumSize">
+           <size>
+            <width>320</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>480</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="baseSize">
+           <size>
+            <width>0</width>
+            <height>0</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="accessibleName">
+           <string notr="true"/>
+          </property>
+          <property name="text">
+           <string>Move</string>
+          </property>
+         </widget>
         </item>
        </layout>
       </widget>
      </widget>
-    </widget>
-   </widget>
-   <widget class="QFrame" name="statusframe">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>320</y>
-      <width>611</width>
-      <height>61</height>
-     </rect>
-    </property>
-    <property name="frameShape">
-     <enum>QFrame::StyledPanel</enum>
-    </property>
-    <property name="frameShadow">
-     <enum>QFrame::Raised</enum>
-    </property>
-    <layout class="QHBoxLayout" name="horizontalLayout_7">
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_6" stretch="0,0,0">
-       <property name="spacing">
-        <number>20</number>
-       </property>
-       <property name="sizeConstraint">
-        <enum>QLayout::SetFixedSize</enum>
-       </property>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_4" stretch="1,1">
-         <property name="spacing">
-          <number>0</number>
-         </property>
+     <widget class="MyFrame" name="statusframe">
+      <property name="geometry">
+       <rect>
+        <x>-3</x>
+        <y>207</y>
+        <width>613</width>
+        <height>94</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::Box</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="0" column="0">
+        <layout class="QGridLayout" name="status_gridlayout" rowstretch="0,1" rowminimumheight="0,32">
          <property name="leftMargin">
-          <number>10</number>
+          <number>5</number>
+         </property>
+         <property name="topMargin">
+          <number>5</number>
          </property>
          <property name="rightMargin">
-          <number>10</number>
+          <number>5</number>
          </property>
-         <item>
+         <property name="bottomMargin">
+          <number>5</number>
+         </property>
+         <property name="horizontalSpacing">
+          <number>-1</number>
+         </property>
+         <property name="verticalSpacing">
+          <number>0</number>
+         </property>
+         <item row="1" column="2">
+          <widget class="MyPushButton" name="pushButton">
+           <property name="maximumSize">
+            <size>
+             <width>160</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="text">
+            <string>STOP</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1" alignment="Qt::AlignHCenter">
           <widget class="MyIndicator" name="sh_display">
            <property name="enabled">
             <bool>true</bool>
            </property>
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
-             <height>0</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -817,7 +567,7 @@
            </property>
           </widget>
          </item>
-         <item>
+         <item row="0" column="1" alignment="Qt::AlignHCenter">
           <widget class="MyLabel" name="sh_label">
            <property name="maximumSize">
             <size>
@@ -828,56 +578,59 @@
            <property name="font">
             <font>
              <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
             </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
            </property>
            <property name="text">
             <string>System homed</string>
            </property>
           </widget>
          </item>
-        </layout>
-       </item>
-       <item>
-        <widget class="MyPushButton" name="pushButton">
-         <property name="maximumSize">
-          <size>
-           <width>160</width>
-           <height>16777215</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <pointsize>12</pointsize>
-          </font>
-         </property>
-         <property name="text">
-          <string>STOP</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <layout class="QVBoxLayout" name="verticalLayout_5" stretch="1,1">
-         <property name="spacing">
-          <number>0</number>
-         </property>
-         <property name="leftMargin">
-          <number>10</number>
-         </property>
-         <property name="rightMargin">
-          <number>10</number>
-         </property>
-         <item>
+         <item row="0" column="3" alignment="Qt::AlignHCenter">
+          <widget class="MyLabel" name="pmac_label">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="font">
+            <font>
+             <pointsize>12</pointsize>
+             <weight>75</weight>
+             <bold>true</bold>
+            </font>
+           </property>
+           <property name="frameShape">
+            <enum>QFrame::Box</enum>
+           </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <property name="text">
+            <string>Pmac comms</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="3" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
           <widget class="MyIndicator" name="pmac_display">
            <property name="sizePolicy">
-            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+            <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
              <horstretch>0</horstretch>
              <verstretch>0</verstretch>
             </sizepolicy>
            </property>
            <property name="minimumSize">
             <size>
-             <width>0</width>
-             <height>0</height>
+             <width>32</width>
+             <height>32</height>
             </size>
            </property>
            <property name="maximumSize">
@@ -902,29 +655,270 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="MyLabel" name="pmac_label">
-           <property name="maximumSize">
-            <size>
-             <width>16777215</width>
-             <height>16777215</height>
-            </size>
-           </property>
-           <property name="font">
-            <font>
-             <pointsize>12</pointsize>
-            </font>
-           </property>
-           <property name="text">
-            <string>Pmac comms</string>
-           </property>
-          </widget>
-         </item>
         </layout>
        </item>
       </layout>
-     </item>
-    </layout>
+     </widget>
+    </widget>
+    <widget class="QWidget" name="utilitieswidget">
+     <property name="toolTip">
+      <string notr="true"/>
+     </property>
+     <property name="accessibleName">
+      <string notr="true"/>
+     </property>
+     <property name="accessibleDescription">
+      <string notr="true"/>
+     </property>
+     <attribute name="title">
+      <string>Utilities</string>
+     </attribute>
+     <widget class="QFrame" name="system_utilities">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>609</width>
+        <height>136</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QWidget" name="gridLayoutWidget">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>608</width>
+         <height>130</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_3">
+        <property name="topMargin">
+         <number>5</number>
+        </property>
+        <property name="bottomMargin">
+         <number>5</number>
+        </property>
+        <item row="3" column="2">
+         <widget class="MyTextEdit" name="pword_field">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0" alignment="Qt::AlignHCenter">
+         <widget class="MyLabel" name="conn_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>PMAC connection:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="MyLabel" name="IP_label">
+          <property name="text">
+           <string>PMAC IP:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0" alignment="Qt::AlignHCenter|Qt::AlignVCenter">
+         <widget class="MyLabel" name="sys_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="frameShape">
+           <enum>QFrame::Box</enum>
+          </property>
+          <property name="frameShadow">
+           <enum>QFrame::Raised</enum>
+          </property>
+          <property name="text">
+           <string>System Utilities</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="MyPushButton" name="ResetAll">
+          <property name="text">
+           <string>Reset All</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="MyPushButton" name="HomeGantry">
+          <property name="text">
+           <string>Home Gantry</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="1">
+         <widget class="MyTextEdit" name="uname_field">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="MyLabel" name="pword_label">
+          <property name="text">
+           <string>Password:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="0">
+         <widget class="MyTextEdit" name="IP_field">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="toolTip">
+           <string notr="true"/>
+          </property>
+          <property name="inputMethodHints">
+           <set>Qt::ImhNone</set>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="MyLabel" name="uname_label">
+          <property name="text">
+           <string>Username:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="3">
+         <widget class="MyPushButton" name="connect">
+          <property name="text">
+           <string>Connect</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+     <widget class="MyFrame" name="motor_utilities">
+      <property name="geometry">
+       <rect>
+        <x>2</x>
+        <y>142</y>
+        <width>606</width>
+        <height>119</height>
+       </rect>
+      </property>
+      <property name="frameShape">
+       <enum>QFrame::StyledPanel</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Raised</enum>
+      </property>
+      <widget class="QWidget" name="gridLayoutWidget_2">
+       <property name="geometry">
+        <rect>
+         <x>1</x>
+         <y>11</y>
+         <width>604</width>
+         <height>89</height>
+        </rect>
+       </property>
+       <layout class="QGridLayout" name="gridLayout_4">
+        <item row="2" column="4">
+         <widget class="MyPushButton" name="setspeed">
+          <property name="text">
+           <string>Set Speed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="2">
+         <widget class="MyLabel" name="label">
+          <property name="text">
+           <string>units</string>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="mutil_label_2">
+          <property name="text">
+           <string>Jog Speed:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="MyQLineEdit" name="set_display">
+          <property name="inputMask">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
+         <widget class="MyComboBox" name="motor_selector_2">
+          <property name="styleSheet">
+           <string notr="true"/>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="3">
+         <widget class="MyPushButton" name="getspeed">
+          <property name="text">
+           <string>Get Speed</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="mutil_label">
+          <property name="font">
+           <font>
+            <pointsize>12</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Motor Utilities</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+     </widget>
+    </widget>
    </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
@@ -950,7 +944,6 @@
    </widget>
    <zorder>layoutWidget</zorder>
    <zorder>layoutWidget</zorder>
-   <zorder>statusframe</zorder>
    <zorder>MotorTabs</zorder>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -958,8 +951,8 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>622</width>
-     <height>24</height>
+     <width>631</width>
+     <height>30</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuMotors_and_utilities">
@@ -978,11 +971,6 @@
    <header location="global">BaseClasses.py</header>
   </customwidget>
   <customwidget>
-   <class>MyQLineEdit</class>
-   <extends>QLineEdit</extends>
-   <header location="global">BaseClasses.py</header>
-  </customwidget>
-  <customwidget>
    <class>MyPushButton</class>
    <extends>QPushButton</extends>
    <header location="global">Graphics.BaseClasses</header>
@@ -990,12 +978,23 @@
   <customwidget>
    <class>MyTextEdit</class>
    <extends>QTextEdit</extends>
-   <header>Graphics.BaseClasses</header>
+   <header location="global">Graphics.BaseClasses</header>
   </customwidget>
   <customwidget>
    <class>MyIndicator</class>
    <extends>QLabel</extends>
    <header location="global">Graphics.BaseClasses</header>
+  </customwidget>
+  <customwidget>
+   <class>MyFrame</class>
+   <extends>QFrame</extends>
+   <header location="global">Graphics.BaseClasses</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MyQLineEdit</class>
+   <extends>QLineEdit</extends>
+   <header location="global">BaseClasses.py</header>
   </customwidget>
   <customwidget>
    <class>MyComboBox</class>

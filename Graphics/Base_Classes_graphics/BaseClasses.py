@@ -380,11 +380,11 @@ class myWarningBox(QMessageBox):
     def show_warning(self):
         self.exec()
 
-class MyCellQFrame(QFrame):
+class MyFrame(QFrame):
     def __init__(self, parent = None):
         super().__init__(parent)
         self.setFrameShape(QFrame.Shape.Box)
-        self.setFrameShadow(QFrame.Shadow.Plain)
+        self.setFrameShadow(QFrame.Shadow.Raised)
         self.setLineWidth(1)
         layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
