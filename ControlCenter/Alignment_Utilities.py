@@ -49,7 +49,7 @@ The code should
 class Aligner():
     def __init__(self, motors = None, detector = None, laser = None):
 
-        # here below the hardware resources needed, shich should be passeed by the caller:
+        # here below the hardware resources needed, should be passed by the caller:
         self.motors = MotorControls()
         self.detector = DetectorControls()
         self.laser = Laser()
@@ -93,7 +93,7 @@ class Aligner():
 
     def set_center(self, to_be_centered, coord1, coord2):
         """
-        exampple usage:
+        example usage:
 
         self.setCenter(self.Xcenter, self.X1, self.X2)
 

@@ -53,14 +53,18 @@ class Measurement():
     def save_data(self, filename, text):
         if self.directory:
             filename = os.path.join(self.directory, filename)
-            with open(filename, "w", encoding="ASCII") as f:
+            with open(filename, "w", encoding="utf-8") as f:
                 f.write(text)
         else:
             print("No directory selected")
 
-    def slope_calc(self, Y, focal=LENSFOCAL):
+    def slope_calcY(self, Y, focal=LENSFOCAL):
         # this is the core of the measurement
         slope_error = 0.5 * (math.atan((2.74 * (  ZERO_Y - Y)) / (focal * 1000)))
+        return (slope_error)
+    def slope_calcX(self, Y, focal=LENSFOCAL):
+        # this is the core of the measurement
+        slope_error = 0.5 * (math.atan((2.74 * (  ZERO_X - Y)) / (focal * 1000)))
         return (slope_error)
 
     def pretty_printing(self, *arrays):
@@ -77,7 +81,14 @@ class Measurement():
         for i in range(len(arrays[0])):
             row = []
             for array in arrays:
-                row.append(str(array[i]))
+                val = array[i]
+                try:
+                    # Try to format as a float with 6 decimal places
+                    formatted_val = "{:.10f}".format(float(val))
+                    row.append(formatted_val)
+                except (ValueError, TypeError):
+                    # If conversion fails, fallback to string representation
+                    row.append(str(val))
             text += "\t".join(row) + "\n"
         return (text)
 

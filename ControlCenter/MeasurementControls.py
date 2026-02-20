@@ -239,12 +239,23 @@ class MeasurementControls(QMainWindow):
         header = ""
         header += "Date of measurement: " + self.today + "\n"
         header += "Nr of camera grabs per point: " + str(self.nrofgrabs) + "\n"
-        header += "Camera exposure time per point: " + str(self.camViewer.camera.camera.ExposureTime()) + " usec" + "\n"
-        header += "Length of measurement (mm): " + str(MathUtils.um2mm(self.length)) +"\n"
+        header += "Camera exposure time per point: " + str(self.camViewer.camera.camera.ExposureTime()) + " [\u00B5sec]" + "\n"
+        header += "Length of measurement : " + str(MathUtils.um2mm(self.length)) +" [mm] \n"
         header += "Nr of measurement points + 1: " +  str(self.points + 1 ) + "\n"
-        header += "Stepsize of measurement (mm): " + str(MathUtils.um2mm(self.stepsize)) + "\n"
-        header += "Laser intensity preset (mW): " + str(self.laser.get_inten) + "\n"
-        header += "\t" + "X" + "\t\t" + "Y" + "\t\t" + "Centroid X" + "\t\t" + "Centroid Y"+ "\n"
+        header += "Stepsize of measurement: " + str(MathUtils.um2mm(self.stepsize)) + "[mm]\n"
+        header += "Laser intensity preset: " + str(float(self.laser.pow_level)*1000) + "[mW]" + "\n"
+        header += "Slope RMS: {{slope_rms}} [\u00B5rad]" + "\n"
+        header += "Height RMS: {{height_rms}} [\u00B5m]" + "\n"
+        header += "Radius from fit: {{radius}} [m]" + "\n"
+        header += ("X position" + "\t\t" +
+                   "Y Position" + "\t\t" +
+                   "Centroid X" + "\t\t" +
+                   "Centroid Y"+ "\t\t" +
+                   "Raw Slope[rad]" + "\t\t" +
+                   "Slope Error[rad]" + "\t\t" +
+                   "Height [\u00B5m]" +"\t\t" +
+                   "\n")
+
         header += "\n"
         return header
 
@@ -257,32 +268,70 @@ class MeasurementControls(QMainWindow):
         print("\033[H\033[J", end="")
         print("Console cleared, new measurement starting.")
 
+    def generate_data_string(self):
+        data_str = ""
+        # Safety check for array lengths to avoid index errors
+        limit = min(len(self.myposarray), len(self.y_pos_list), len(self.centroid_x_list), len(self.centroid_y_list), len(self.slopesarray))
+        
+        for i in range(limit):
+            # Reconstruct absolute position
+            # myposarray stores (mypos - self.xStartPos)
+            # So mypos = self.myposarray[i] + self.xStartPos
+            current_x = self.myposarray[i] + self.xStartPos
+
+            # Get other values
+            current_y = self.y_pos_list[i]
+            centroid_x = self.centroid_x_list[i]
+            centroid_y = self.centroid_y_list[i]
+            raw_slope = self.slopesarray[i]
+
+            # Handle fitted values
+            # self.slopes_to_be_plotted and self.heightsarray are updated at the end
+            # so they should cover the full range if the fit was successful.
+            if i < len(self.slopes_to_be_plotted):
+                slope_error = str(self.slopes_to_be_plotted[i])
+            else:
+                slope_error = "0.0"
+
+            if i < len(self.heightsarray):
+                height = str(self.heightsarray[i])
+            else:
+                height = "0.0"
+
+            data_str += (str(current_x) + "\t" +
+                         str(current_y) + "\t" +
+                         str(centroid_x) + "\t" +
+                         str(centroid_y) + "\t" +
+                         str(raw_slope) + "\t" +
+                         slope_error + "\t" +
+                         height +
+                         "\n"
+                         )
+        return data_str
+
     def startMeasurement(self):
 
         if not self.conditions_check():
             return
         self.measurement_thread.update_signal.emit({"type": "print_attributes"})
 
-        """ # Check if camera is running:
-        #print("Check if camera is running...")
-        if not self.camViewer.camera.camera.IsGrabbing():
-            #print("camera not running, starting it.")
-            self.camViewer.camera.startgrabbing()
-        # The lines above are used ONLY if grabdata is used as the method to grab images."""
-
-        self.results = self.writeheader()
+        self.header_str = self.writeheader()
         #Instantiating the arrays for storing the results
         self.myposarray = np.array([])
         mystepposarray = np.array([])
         self.slopesarray = np.array([])
         self.slopes_to_be_plotted = np.array([])
         self.heightsarray = np.array([])
+        
+        self.y_pos_list = []
+        self.centroid_x_list = []
+        self.centroid_y_list = []
         #print("Arrays instantiated")
 
         if self.xStartPos == None:
             self.xStartPos = self.getXposfromfull() # X stage is where it is... the issue is with the user.
 
-        elif not self.motors.messenger.coordinates["X"] - self.xStartPos > 1.0: # difference bigger than 1 micron
+        elif not self.motors.messenger.coordinates["X"] - self.xStartPos > 50.0: # difference bigger than 50 microns
             self.measurement_thread.update_signal.emit({"type": "startPosOk"})
         else:
             self.measurement_thread.update_signal.emit({"type": "Warning",
@@ -312,7 +361,8 @@ class MeasurementControls(QMainWindow):
                # print("Now checking if thread is running, line 258")
                 if not self.measurement_thread.running:
                     print("Thread killed for some reason...")
-                    self.save_data(self.myposarray, self.slopesarray, self.heightsarray)
+                    self.results = self.header_str + self.generate_data_string()
+                    self.save_data(self.myposarray, self.slopesarray, self.slopes_to_be_plotted, self.heightsarray)
                     self.measurement_thread.update_signal.emit({"type": "stop_measurement"})
                     self.measurement_thread.update_signal.emit(STOP_WARNING)
                     return
@@ -321,11 +371,22 @@ class MeasurementControls(QMainWindow):
                 #print(type(image))
 
                 if image is not None:
-                    """self.measurement_thread.update_signal.emit({"type": "centroid_calc",
-                                                                "image": image})"""
                     centroid = MathUtils.centroid(image)
-                    self.averageX += centroid[1] # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-                    self.averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
+                    # ==============================================================================
+                    # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+                    # ==============================================================================
+                    # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+                    self.averageX += centroid[0] # Now corresponds to the rotated horizontal axis
+                    self.averageY += centroid[1] # Now corresponds to the rotated vertical axis (the sensitive one)
+                    # ==============================================================================
+
+                    # ==============================================================================
+                    # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+                    # ==============================================================================
+                    # Uncomment this block for standard camera orientation (Horizontal ROI)
+                    # self.averageX += centroid[1] # this is the HOR vector @ Y = centroid[1]
+                    # self.averageY += centroid[0] # this is the VERTICAL vector @ X = centroid[0]
+                    # ==============================================================================
 
             self.measurement_thread.update_signal.emit({"type": "camimage",
                                                         "image": image}) # 20260120: this may be the slow-acquisition culprit.
@@ -333,18 +394,30 @@ class MeasurementControls(QMainWindow):
 
             self.myposarray = np.append(self.myposarray, mypos - self.xStartPos)
             mystepposarray = np.append(mystepposarray, mysteppos)
+            
+            self.y_pos_list.append(self.motors.messenger.coordinates["Y"])
+            self.centroid_x_list.append(self.averageX / self.nrofgrabs)
+            self.centroid_y_list.append(self.averageY / self.nrofgrabs)
+            
             nextpos = mypos + self.stepsize  # all should be in microns
 
             # One point taken, now the calculations:
             averageCentroidX = self.averageX / self.nrofgrabs
             averageCentroidY = self.averageY / self.nrofgrabs
 
-            ########################################
-            #       SLOPE CALCULATIONS
-            ########################################
-            slope = self.measurement.slope_calc(averageCentroidY)
-            ########################################
-            ########################################
+            # ==============================================================================
+            # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+            # ==============================================================================
+            # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+            slope = self.measurement.slope_calcX(averageCentroidY)
+            # ==============================================================================
+
+            # ==============================================================================
+            # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+            # ==============================================================================
+            # Uncomment this block for standard camera orientation (Horizontal ROI)
+            # slope = self.measurement.slope_calcY(averageCentroidY)
+            # ==============================================================================
 
             self.slopesarray = np.append(self.slopesarray, slope)
             if self.slopesarray.size >= 2:
@@ -360,8 +433,6 @@ class MeasurementControls(QMainWindow):
                                                         "heights": self.heightsarray
                                                         })
 
-            self.results += (str(mypos) + "\t\t" + str(self.motors.messenger.coordinates["Y"]) +
-                             "\t\t" + str(averageCentroidX) + "\t\t" + str(averageCentroidY) + "\n")
             if i != self.points:
                 if not self.measurement_thread.running:
                     self.measurement_thread.update_signal.emit(STOP_WARNING)
@@ -383,23 +454,42 @@ class MeasurementControls(QMainWindow):
                                                                 "message": stab_message})
 
         # Calculating heights:
+        
+        # Ensure we have enough points for a fit
+        if self.slopesarray.size >= 2:
+            fit, radius = MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
 
-        fit, radius = MathUtils.my_fit(arrayX = self.myposarray, arrayY = self.slopesarray, order = 1)
+            self.slopes_to_be_plotted = self.slopesarray - fit # this is the REAL measurement value\
+            self.heightsarray = self.measurement.height_calc(self.slopes_to_be_plotted, self.myposarray)
 
-        to_be_plotted = self.slopesarray - fit # this is the REAL measurement value\
+            to_be_plotted_smooth = self.measurement.FOP_smoothing(self.slopes_to_be_plotted)
 
-        to_be_plotted_smooth = self.measurement.FOP_smoothing(to_be_plotted)
-
-        #Calculating rms, then updating plots
-        self.measurement.slopes_rms = MathUtils.RMS(to_be_plotted_smooth)
-        self.measurement.heights_rms = MathUtils.RMS(self.heightsarray)
-        roundslope = round(1000000 * self.measurement.slopes_rms, 3)
-        roundheight = round(self.measurement.heights_rms, 3)
+            #Calculating rms, then updating plots
+            self.measurement.slopes_rms = MathUtils.RMS(to_be_plotted_smooth)
+            self.measurement.heights_rms = MathUtils.RMS(self.heightsarray)
+            roundslope = round(1000000 * self.measurement.slopes_rms, 3)
+            roundheight = round(self.measurement.heights_rms, 3)
+        else:
+            # Fallback if not enough points
+            radius = 0.0
+            roundslope = 0.0
+            roundheight = 0.0
+            to_be_plotted_smooth = self.slopesarray
+            self.slopes_to_be_plotted = self.slopesarray
+            self.heightsarray = np.zeros_like(self.slopesarray)
 
 
         end_message = "Radius as coeff[0], in m: " + str(radius / 1000000) + "\n"
-        end_message += "RMS slope of the measurement:  " + str(roundslope) + " urad \n"
-        end_message += "RMS height of the measurement: " + str(roundheight) + "um\n"
+        end_message += "RMS slope of the measurement:  " + str(roundslope) + " \u00B5rad \n"
+        end_message += "RMS height of the measurement: " + str(roundheight) + "\u00B5m\n"
+
+        #updating results in self.results:
+        self.header_str = self.header_str.replace("{{slope_rms}}", f"{roundslope}")
+        self.header_str = self.header_str.replace("{{height_rms}}", f"{roundheight}")
+        self.header_str = self.header_str.replace("{{radius}}", f"{radius / 1000000}")
+        
+        self.results = self.header_str + self.generate_data_string()
+
         self.measurement_thread.update_signal.emit({"type": "sumprint",
                                                     "message": end_message})
 
@@ -415,6 +505,10 @@ class MeasurementControls(QMainWindow):
         })
 
     def save_data(self, myposarray, slopesarray, fittedslopesarray, heightsarray):
+        if myposarray.size == 0:
+            print("Warning: No data to save. Measurement may have been stopped or failed.")
+            return
+            
         slopestobesaved = "Slope RMS: " + str(self.measurement.slopes_rms) + "\n"
         heightstobesaved = "Height RMS: " + str(self.measurement.heights_rms) + "\n"
         slopestobesaved += self.measurement.pretty_printing(myposarray, slopesarray, fittedslopesarray)
@@ -443,6 +537,21 @@ class MeasurementControls(QMainWindow):
             self.gui.stopButton.setEnabled(True)
             self.camViewer.stop_while_measuring()
             self.camViewer.camera.camera.StopGrabbing() # Commented out on 20250729 for testing self.camViewer.camera.grabdata() in startMeasurement method
+            
+            # ==============================================================================
+            # CONFIGURATION: CAMERA ROTATION (90 deg Clockwise)
+            # ==============================================================================
+            # Uncomment this block for 90-degree rotated camera (Vertical ROI)
+            # self.camViewer.camera.set_roi(width=4600, height=1024, offset_x=0, offset_y=1788)
+            # ==============================================================================
+
+            # ==============================================================================
+            # CONFIGURATION: STANDARD ORIENTATION (0 deg)
+            # ==============================================================================
+            # Uncomment this block for standard camera orientation (Horizontal ROI)
+            # self.camViewer.camera.set_roi(width=1024, height=4600, offset_x=2152, offset_y=0)
+            # ==============================================================================
+
             self.slopes_plot.clearPlot()
             self.height_plot.clearPlot()
             self.measurement.get_save_directory()  # This updates the self.directory attribute
@@ -454,7 +563,12 @@ class MeasurementControls(QMainWindow):
             self.measurement_thread = WorkerThread(self.startMeasurement)
             self.measurement_thread.end_signal.connect(self.endmeasurement)
             self.measurement_thread.update_signal.connect(self.on_update)
+            self.measurement_thread.error_signal.connect(self.on_thread_error) # Added error connection
             self.measurement_thread.start()
+
+    def on_thread_error(self, error_msg):
+        print(f"Measurement Thread Error: {error_msg}")
+        self.show_warning("Measurement Error", f"An error occurred during measurement:\n{error_msg}")
 
     def on_stop_pressed(self):
         if self.measurement_thread and self.measurement_thread.isRunning():
@@ -509,9 +623,6 @@ class MeasurementControls(QMainWindow):
             x_data = data["x_array"]/1000
             self.slopes_plot.updatePlotBatch(self.fittedslopes_plot, x_data, data["slopes"])
             self.height_plot.updatePlotBatch(self.heights, x_data, data["heights"])
-            """for i in range(len(data["heights"])):
-                self.slopes_plot.updatePlot(self.fittedslopes_plot,data["x_array"][i]/1000, data["slopes"][i])
-                self.height_plot.updatePlot(self.heights,data["x_array"][i]/1000, data["heights"][i])"""
             self.slopes_plot.setCustomLabel(slope_label)
             self.height_plot.setCustomLabel(height_label)
             self.slopes_plot.forceAutoRange()
@@ -583,9 +694,11 @@ class MeasurementControls(QMainWindow):
     def centroid_calculation(self, image):
         #print("inside centroid calculation", type(image))
         centroid = MathUtils.centroid(image)
-        self.averageX += centroid[1]  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
-        self.averageY += centroid[0]  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axi
-
+        """self.averageX += centroid[1]  # this is the HOR vector @ Y = centroid[1], i.e. parallel to HOR axis
+        self.averageY += centroid[0]  # this is the VERTICAL vector @ X = centroid[0], i.e. parallel to vertical axis"""
+        #SWAPPED 20260202 due to camera rotation:
+        self.averageX += centroid[0]
+        self.averageY += centroid[1]
     def clear_gui(self):
         """
         This is to reset the GUI after a measurement has finished or has stopped:
