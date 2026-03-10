@@ -108,10 +108,10 @@ class LaserControl(QtWidgets.QMainWindow):
             self.source.is_on = "ON"
 
     def setLaserPower(self):
-        mypower = float(self.gui.power_input_field.text())
+        mypower = float(self.gui.power_input_field.text()) # this is in mW from user now.
         self.gui.power_input_field.clear()
         self.source.set_power(mypower)
-        self.gui.power_preset_display.setText(str(mypower*1000))
+        self.gui.power_preset_display.setText(str(mypower))
 
     def int_low_high(self):
         low = float(self.source.p_low_lim)
@@ -151,7 +151,7 @@ class LaserControl(QtWidgets.QMainWindow):
         self.gui.cur_display.updateValue(current)  # updating laser current
         self.gui.int_display.updateValue(power)  # updating laser intensity
         self.gui.wlength_display.updateValue(self.getwlength())  # updating wavelength
-        self.gui.horizontalSlider.setValue(self.slider_value(power_preset))
+        #self.gui.horizontalSlider.setValue(self.slider_value(power_preset))
         self.update_comms_label()  # updating comms label
         self.update_laser_label()  # updating laser label
 

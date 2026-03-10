@@ -247,7 +247,7 @@ class MeasurementControls(QMainWindow):
         header += "Slope RMS: {{slope_rms}} [\u00B5rad]" + "\n"
         header += "Height RMS: {{height_rms}} [\u00B5m]" + "\n"
         header += "Radius from fit: {{radius}} [m]" + "\n"
-        header += ("X position" + "\t\t" +
+        header += ("\t" + "X position" + "\t\t" +
                    "Y Position" + "\t\t" +
                    "Centroid X" + "\t\t" +
                    "Centroid Y"+ "\t\t" +
@@ -298,12 +298,12 @@ class MeasurementControls(QMainWindow):
             else:
                 height = "0.0"
 
-            data_str += (str(current_x) + "\t" +
-                         str(current_y) + "\t" +
-                         str(centroid_x) + "\t" +
-                         str(centroid_y) + "\t" +
-                         str(raw_slope) + "\t" +
-                         slope_error + "\t" +
+            data_str += (str(current_x) + "\t\t" +
+                         str(current_y) + "\t\t" +
+                         str(centroid_x) + "\t\t" +
+                         str(centroid_y) + "\t\t" +
+                         str(raw_slope) + "\t\t" +
+                         slope_error + "\t\t" +
                          height +
                          "\n"
                          )
@@ -316,6 +316,8 @@ class MeasurementControls(QMainWindow):
         self.measurement_thread.update_signal.emit({"type": "print_attributes"})
 
         self.header_str = self.writeheader()
+        self.results = self.header_str # Initialize results with header to avoid AttributeError if loop fails
+        
         #Instantiating the arrays for storing the results
         self.myposarray = np.array([])
         mystepposarray = np.array([])
@@ -433,6 +435,9 @@ class MeasurementControls(QMainWindow):
                                                         "heights": self.heightsarray
                                                         })
 
+            # REMOVED INCREMENTAL self.results UPDATE TO AVOID INDEX ERRORS AND REDUNDANCY
+            # The full data string is generated at the end using generate_data_string()
+
             if i != self.points:
                 if not self.measurement_thread.running:
                     self.measurement_thread.update_signal.emit(STOP_WARNING)
@@ -488,6 +493,7 @@ class MeasurementControls(QMainWindow):
         self.header_str = self.header_str.replace("{{height_rms}}", f"{roundheight}")
         self.header_str = self.header_str.replace("{{radius}}", f"{radius / 1000000}")
         
+        # REGENERATE FULL DATA STRING HERE
         self.results = self.header_str + self.generate_data_string()
 
         self.measurement_thread.update_signal.emit({"type": "sumprint",
@@ -876,8 +882,6 @@ class MeasurementControls(QMainWindow):
         self.camViewer.camera.closecam() #closes the Cam.
         event.accept()  # Allow the window to close
         event.ignore()  # Prevent the window from closing
-
-
 
 
 if __name__ == "__main__":

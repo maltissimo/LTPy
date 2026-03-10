@@ -167,8 +167,8 @@ class Ui_LaserController(object):
     def retranslateUi(self, LaserController):
         _translate = QtCore.QCoreApplication.translate
         self.pushButton.setText(_translate("LaserController", "Laser ON/OFF"))
-        self.power_level_label.setText(_translate("LaserController", "Power Level input:"))
-        self.power_preset_label.setText(_translate("LaserController", "Preset power (mW):"))
+        self.power_level_label.setText(_translate("LaserController", "Preset power input (mW):"))
+        self.power_preset_label.setText(_translate("LaserController", "Power readout (mW):"))
         self.groupBox.setTitle(_translate("LaserController", "Status Indicators"))
         self.comms_label.setText(_translate("LaserController", "Comms:"))
         self.laser_label.setText(_translate("LaserController", "Laser:"))

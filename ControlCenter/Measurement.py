@@ -78,12 +78,19 @@ class Measurement():
             return ""
         text = ""
 
-        for i in range(len(arrays[0])):
+        # Calculate the minimum length among all provided arrays to avoid IndexError
+        min_len = min(len(arr) for arr in arrays)
+
+        # Original unsafe loop commented out:
+        # for i in range(len(arrays[0])):
+        
+        # New safe loop:
+        for i in range(min_len):
             row = []
             for array in arrays:
                 val = array[i]
                 try:
-                    # Try to format as a float with 6 decimal places
+                    # Try to format as a float with 10 decimal places
                     formatted_val = "{:.10f}".format(float(val))
                     row.append(formatted_val)
                 except (ValueError, TypeError):

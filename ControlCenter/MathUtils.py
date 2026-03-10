@@ -49,8 +49,16 @@ def centroid( ndarray):
     """
     max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
 
-    x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
-    y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
+    # Original code commented out to fix boundary issues
+    # x_min, x_max = int(max_index[0]) - 150, int(max_index[0]) + 150
+    # y_min, y_max = int(max_index[1]) - 150, int(max_index[1]) + 150
+
+    # New code with boundary clamping
+    h, w = ndarray.shape
+    x_min = max(0, int(max_index[0]) - 150)
+    x_max = min(h, int(max_index[0]) + 150)
+    y_min = max(0, int(max_index[1]) - 150)
+    y_max = min(w, int(max_index[1]) + 150)
 
     roi = ndarray[x_min:x_max, y_min:y_max]
     back_sub = roi - np.min(roi)
