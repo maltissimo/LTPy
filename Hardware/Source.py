@@ -3,7 +3,12 @@ from Communication.MCL import *
 
 
 class Laser (SerialConn):
-    def         __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0, pow_level = None, cur_level = None, p_low_lim = None, p_high_lim = None):
+    def         __init__(self, comms_on = "OFF", is_on = 'OFF', wlength = 0.0,
+                         pow_level = None,
+                         cur_level = None,
+                         p_low_lim = None,
+                         p_high_lim = None,
+                         op_mode = None):
         super().__init__()
         self.comms_on = comms_on
         self.is_on = self.serialmessage(isLASON)
@@ -12,6 +17,7 @@ class Laser (SerialConn):
         self.cur_level = cur_level
         self.p_low_lim = p_low_lim
         self.p_high_lim = p_high_lim
+        self.op_mode = op_mode
 
         if self.comms_on == "OFF":
             response = self.serialmessage(isHSHAKE)
@@ -37,6 +43,9 @@ class Laser (SerialConn):
 
         if self.p_high_lim == p_high_lim:
             self.p_high_lim = self.serialmessage(isPOWHIGHLIM)
+
+        if self.op_mode == op_mode:
+            self.op_mode = self.serialmessage(isLASOPMODE)
 
     def __str__(self):
         return f"Laser: Comms = {self.comms_on}, laser on ={self.is_on}, wavelength = {self.wlength}, power level = {self.power_level},\
@@ -72,27 +81,43 @@ class Laser (SerialConn):
         #self.serialread()
         self.is_on = "OFF"
 
-    def set_power(self, power):
+    def set_power(self, power, keep_in_cwp = True):
         """
-        Sets the power level to a user-defined value. Updates the self.pow_level and self.cur_level in the object accordingly
+            Alternative power setting method: Sets laser power level. 
+            If keep_in_cwp=True, remains in CWP mode.
+            If keep_in_cwp=False, captures stabilized operating current and applies it to CWC mode.
+            """
+        # Ensure laser is in Constant Power mode to adjust optical output
+        if self.op_mode != "CWP":
+            self.serialmessage(LASOPMODEINTCWP)
+            self.op_mode = "CWP"
 
-        :param power: preset value of laser power,
-        :return:
-        """
-        original_power = self.serialmessage(isLASPOWLEVEL) # just checking the presets.
-        pow = ' ' + str(power) # makes a string with a space for setting the power
-        message = LASPOWLEVEL + pow # this is the complete message to be sent to the laser
-        self.serialmessage(message) # message sent
-        system_output = self.serialmessage(isOUTPOWLEVEL)
-        #print(f"system_output: {system_output}")  # Debugging
-        #print(f"power level: {self.pow_level}")
-        #print("difference output - pow_level: ", float(system_output.strip()) - float(self.pow_level.strip()))
-        if abs(float(system_output.strip()) - float(self.pow_level.strip())) <3e-6:
-            self.pow_level = system_output
-            self.cur_level = self.serialmessage(isOUTCURLEVEL)
 
-        else:
-            self.pow_level = original_power # better leave it unchanged
+        # Send power setpoint
+        message = f"{LASPOWLEVEL} {power}"
+        self.serialmessage(message)
+
+        # Stabilization loop using absolute tolerance
+        tolerance = 5e-4
+        timeout = 10.0
+        start_time = time.time()
+
+        while True:
+            system_output = float(self.serialmessage(isOUTPOWLEVEL))
+            if abs(system_output - power) <= tolerance:
+                break
+            if time.time() - start_time > timeout:
+                raise TimeoutError(f"Laser power failed to stabilize within {timeout}s")
+            time.sleep(0.5)
+
+        self.pow_level = system_output
+        self.cur_level = float(self.serialmessage(isOUTCURLEVEL))
+
+        if not keep_in_cwp:
+            # Transfer operating current to CWC setpoint before switching modes
+            self.serialmessage(f"{LASCURLEVEL} {self.cur_level}")
+            self.serialmessage(LASOPMODEINTCWC)
+            self.op_mode = self.serialmessage(isLASOPMODE)
 
     @synchronized_method
     def get_all_status(self):

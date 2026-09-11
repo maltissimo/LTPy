@@ -1,5 +1,5 @@
 import sys
-from Graphics.Base_Classes_graphics.Laser_GUI3_1 import *
+from Graphics.Base_Classes_graphics.Laser_GUI import *
 from ControlCenter.Control_Utilities import Utilities as Uti
 from Hardware.Source import *
 from ControlCenter.MultiThreading import *
@@ -27,13 +27,12 @@ class LaserControl(QtWidgets.QMainWindow):
         #Connect the various bits in the UI:
         self.gui.pushButton.clicked.connect(self.toggle_laser)
         self.gui.power_input_field.returnPressed.connect(self.setLaserPower)
-
-        #self.gui.horizontalSlider.setMinimum(0)
-        #self.gui.horizontalSlider.setMaximum(1000)
-        #self.gui.horizontalSlider.setValue(0)
-        #self.gui.horizontalSlider.valueChanged.connect(self.slider_change)
-
+        self.gui.sel_const_cur.toggled.connect(self.setConstantCurrent)
+        self.gui.sel_const_pow.toggled.connect(self.setConstantPower)
         #self.show()
+
+        #Check what mode is the laser currently On:
+        self.check_op_status()
 
         # Create worker thread, calling self.source.get_all_status() every 100 ms.
         self.monitor_thread = WorkerThread(task=self.source.get_all_status, sleep_time=150)
@@ -42,6 +41,20 @@ class LaserControl(QtWidgets.QMainWindow):
         self.monitor_thread.begin_signal.connect(lambda: print("Monitoring started"))
         self.monitor_thread.end_signal.connect(lambda: print("Monitoring Stopped"))
         self.monitor_thread.start()
+
+    def check_op_status(self):
+        """
+        Checking laser conditions at class initialization
+        :return:
+        """
+        op_status = self.source.serialmessage(isLASOPMODE)
+        self.gui.sel_const_cur.blockSignals(True)
+        self.gui.sel_const_pow.blockSignals(True)
+        if op_status == "CWC":
+            self.gui.sel_const_cur.click()
+        elif op_status == "CWP":
+            self.gui.sel_const_pow.click()
+
 
     def update_gui(self, status):
         """
@@ -108,10 +121,18 @@ class LaserControl(QtWidgets.QMainWindow):
             self.source.is_on = "ON"
 
     def setLaserPower(self):
-        mypower = float(self.gui.power_input_field.text()) # this is in mW from user now.
+        mypower = float(self.gui.power_input_field.text())/1000
+        print(f"Set power to: {mypower}  ")# this is in mW from user now.
         self.gui.power_input_field.clear()
         self.source.set_power(mypower)
-        self.gui.power_preset_display.setText(str(mypower))
+        self.gui.power_preset_display.setText(str(1000*mypower))
+
+    def setConstantCurrent(self):
+        if self.gui.sel_const_cur.isChecked():
+            self.source.serialmessage(LASOPMODEINTCWC)
+
+    def setConstantPower(self):
+        self.source.serialmessage(LASOPMODEINTCWP)
 
     def int_low_high(self):
         low = float(self.source.p_low_lim)
@@ -129,20 +150,6 @@ class LaserControl(QtWidgets.QMainWindow):
     def curlevel(self):
         return (self.source.cur_level)
 
-    def slider_value(self, act_value):
-        """
-        position is integers. So I'll divide the length in thousandths.
-        the actual value is act, x is the value in thousandths, and high_lim is the top value:
-        x = 1000 * act / highlim
-        :return:
-        """
-        return int(1000 * float(act_value)/float(self.source.p_high_lim))
-
-    def slider_change(self):
-
-        slider_pos = self.gui.horizontalSlider.value()
-        act_power = slider_pos * float(self.source.p_high_lim) / 1000
-        self.source.set_power(act_power)
 
     def update_all(self):
         current = self.source.serialmessage(isOUTCURLEVEL)

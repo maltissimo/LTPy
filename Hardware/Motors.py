@@ -1,6 +1,7 @@
 
 import time
-
+import threading
+from re import search
 from ControlCenter import MathUtils
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from ControlCenter.MultiThreading import MoveWorker
@@ -50,7 +51,7 @@ Author M. Altissimo c/o Elettra Sincrotrone Trieste SCpA
 
 """
 ALL = "selectAxes=selectAll"
-IDLE = "requestHost=requestIDLE"
+IDLE = "requestHost=requestIdle"
 RTT_select = "selectAxes=selectABZ+selectC"
 ENC_OFF = "requestHost=requestEncoderPowerOff"
 HOME = "requestHost=requestHome"
@@ -369,8 +370,8 @@ class MotorUtil():
         return (ret)
 
     def homeGantry(self):
-        self.resetGantry()
-
+        self.connection.send_receive(ALL)
+        time.sleep(0.09)
         self.connection.send_receive(HOME)
 
         """while not self.gantryHomed():
@@ -442,6 +443,7 @@ class Move():
         self.motor = motor  # object fo class Motor or CompMotor
         self.cs = 0
         self.util = util  # an object of class MotorUtil
+        self.move_done_event = threading.Event()
         self.movecomplete = movecomplete
         self.name = name
         if hasattr(self.motor, "motorID"):
@@ -456,23 +458,47 @@ class Move():
             self.name = self.motor.pmac_name
 
     def _init_worker(self, move_cmd):
-        def send_move_command():
-            self.connection.send_message(move_cmd)
+        self.move_done_event.clear()
+        self.movecomplete = False
+        """ def send_move_command():
+            self.connection.send_message(move_cmd)"""
 
-        self.worker = MoveWorker(self)
+        self.worker = MoveWorker(self, move_cmd)
 
-        self.worker.begin_signal.connect(send_move_command)
+        #self.worker.begin_signal.connect(send_move_command)
         self.worker.update_signal.connect(self._on_update_inpos)
         self.worker.end_signal.connect(self._on_move_complete)
         self.worker.error_signal.connect(self._on_move_error)
+        self.worker.start()
 
-    def move_rel(self, speed="rapid", distance=0.0):
+    def move_rel(self, speed="rapid", distance=0.0, timeout = 60.0):
         self.movecomplete = False
         if isinstance(self.motor, Motor):
             move = f'&{str(self.cs)} cpx {speed} inc {self.name} {distance}\n'
+            self.connection.send_message(move)
+            #time.sleep (0.1)
+            t0 = time.time()
+
+            while time.time() - t0 < 0.8:
+                if self.check_in_pos() == 0:
+                    break
+                time.sleep(0.02)
+
+            while True:
+                if self.check_in_pos() == 1:
+                    break
+                if time.time() - t0 > timeout:
+                    self.movecomplete = True
+                    raise TimeoutError(f"Relative move {distance} timed out on axis {self.name}")
+                time.sleep(0.05)
+
+            time.sleep(0.05)
+            self.movecomplete = True
+            return True
+
             #print("called move: ", move)
-            self._init_worker(move)
-            self.worker.start()
+            #self._init_worker(move)
+            #self.worker.start()
             """#movetime = abs(distance) / self.motor.getjogspeed()  # jogspeed is in microns/ms for X, Y and Z, deg/ms for pitch, roll and yaw
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {(speed)} inc {self.name} {distance}\n'
@@ -488,24 +514,66 @@ class Move():
 
             # Composing the message  to be sent:
             move = f'&{str(self.cs)} cpx {speed} inc {self.name} {distance}\n'
-            self._init_worker(move)
-            self.worker.start()
+            self.connection.send_message(move)
+            t0 = time.time()
+
+            while time.time() - t0 < 0.8:
+                if self.check_in_pos() == 0:
+                    break
+                time.sleep(0.02)
+
+            while True:
+                if self.check_in_pos() == 1:
+                    break
+                if time.time() - t0 > timeout:
+                    self.movecomplete = True
+                    raise TimeoutError(f"Relative move {distance} timed out on axis {self.name}")
+                time.sleep(0.05)
+
+            time.sleep(0.05)
+            self.movecomplete = True
+            return True
+            #self._init_worker(move)
+            #self.worker.start()
             """#time.sleep(0.5)  # half a second wait time for rotational moves, seems ok.
             # print("move command issued: ", move)
             while not self.check_in_pos():
                 self.movecomplete = False
             self.movecomplete = True"""
+        self.movecomplete = True
 
-    def move_abs(self, speed="rapid", coord=0.0):
+    def move_abs(self, speed="rapid", coord=0.0, timeout = 60.0):
         self.movecomplete = False
 
         # Composing the message  to be sent:
         move = f'&{str(self.cs)} cpx {speed} abs {self.name} {coord}\n'
-        self._init_worker(move)
-        self.worker.start()
+        self.connection.send_message(move)
+
+        #self._init_worker(move)
+        #self.worker.start()
         """ while not self.check_in_pos():
             self.movecomplete = False
         self.movecomplete = True"""
+        #time.sleep(0.1)
+
+        t0 = time.time()
+        while time.time() - t0 <0.8:
+            if self.check_in_pos() == 0:
+                break
+            time.sleep(0.02)
+
+        while True:
+            if self.check_in_pos() == 1:
+                break
+
+            if time.time() - t0 > timeout:
+                self.movecomplete = True
+                raise TimeoutError(f"Move to {coord} timed out on axis {self.name}")
+            time.sleep(0.05)
+
+        time.sleep(0.05)
+        self.movecomplete = True
+        return True
 
     def _on_update_inpos(self, in_pos):
        pass
@@ -514,43 +582,57 @@ class Move():
     def _on_move_complete(self):
         #print("[complete] Move completed.")
         self.movecomplete = True
+        self.move_done_event.set()
         # Optional: trigger GUI updates or callbacks
 
     def _on_move_error(self, error_msg):
-        move_error = myWarningBox(title = "Move error!", message = f"[error] MoveWorker reported: {error_msg}")
-        move_error.show_warning()
+        self.movecomplete = True
+        self.move_done_event.set()
+        print(f"[Move Error] {error_msg}")
+        """move_error = myWarningBox(title = "Move error!", message = f"[error] MoveWorker reported: {error_msg}")
+        move_error.show_warning()"""
         # Optional: show a warning dialog
 
-
+    def wait_until_done(self, timeout = 60.0):
+        return(self.move_done_event.wait(timeout = timeout))
     def check_in_pos(self, max_retries=15):
         if self.motor is not None:
-            mess = "Coord[" + str(self.motor.cs) + "].InPos"
-
-            for attempt in range(max_retries):
+            mess = f"Coord[{str(self.motor.cs)}].InPos\n"
+            for _ in range(max_retries):
                 out = self.connection.send_receive(mess)
-                #print(f"Attempt {attempt + 1}, received output: {out}")
-                #print("check_in_pos output: ", out)
+                if out and out not in ("timeout", "error", "No response"):
+                    match = search(r'\b([01])\b', str(out))
+                    if match:
+                        return int(match.group(1))
+                time.sleep(0.02)
+            return -1
+        return 1
 
-                try:
-                    value = int(out.strip())
-                    if value in (0,1):
-                        #print("Check in pos final value: ", value)
-                        return value
-                except ValueError:
-                    pass
-                    #print(f"Still moving...")
+    """for attempt in range(max_retries):
+        out = self.connection.send_receive(mess)
+        #print(f"Attempt {attempt + 1}, received output: {out}")
+        #print("check_in_pos output: ", out)
 
-                #print("Retrying...")
+        try:
+            value = int(out.strip())
+            if value in (0,1):
+                #print("Check in pos final value: ", value)
+                return value
+        except ValueError:
+            pass
+            #print(f"Still moving...")
 
-            #print("Max retries reached with invalid responses.")
-            return 1  # default/fallback return
+        #print("Retrying...")
 
-        else:
-            mot_emessaage = "No motors specified!"
-            mot_ewindow = myWarningBox(title="Motor issues!", message=mot_emessaage)
-            mot_ewindow.show_warning()
-            return 0
+    #print("Max retries reached with invalid responses.")
+    return 1  # default/fallback return"""
 
+
+    """else:
+        mot_emessaage = "No motors specified!"
+        mot_ewindow = myWarningBox(title="Motor issues!", message=mot_emessaage)
+        mot_ewindow.show_warning()
+        return 0"""
 
 
 

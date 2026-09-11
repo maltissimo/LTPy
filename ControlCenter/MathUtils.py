@@ -69,6 +69,122 @@ def centroid( ndarray):
 
     return (com_global)
 
+def centroid_thresholded(image, roi_radius =  40, threshold_ratio= 0.15):
+    """
+    Sub-pixel centroiding using a symmetric ROI and thresholded center of mass.
+
+    :param image: 2D detector array.
+    :param roi_radius: Half-width of the square ROI (pixels). Should be ~3-4x the beam 1/e^2 radius.
+    :param threshold_ratio: Relative cutoff (0.0 to 1.0) below which intensity is zeroed.
+    :return: (y_centroid, x_centroid) in global sensor coordinates (row, col).
+    """
+    # 1. Peak location
+    row_peak, col_peak = np.unravel_index(np.argmax(image), image.shape)
+
+    # 2. Extract symmetric ROI with padding to prevent boundary truncation artifacts
+    r_min = row_peak - roi_radius
+    r_max = row_peak + roi_radius + 1
+    c_min = col_peak - roi_radius
+    c_max = col_peak + roi_radius + 1
+
+    pad_top = max(0, -r_min)
+    pad_bottom = max(0, r_max - image.shape[0])
+    pad_left = max(0, -c_min)
+    pad_right = max(0, c_max - image.shape[1])
+
+    # Crop valid sensor area
+    valid_r_min = max(0, r_min)
+    valid_r_max = min(image.shape[0], r_max)
+    valid_c_min = max(0, c_min)
+    valid_c_max = min(image.shape[1], c_max)
+
+    roi = image[valid_r_min:valid_r_max, valid_c_min:valid_c_max].astype(np.float64)
+
+    # Pad with constant estimated background if the window intersects detector edges
+    if any((pad_top, pad_bottom, pad_left, pad_right)):
+        bg_val = np.median(roi)
+        roi = np.pad(roi, ((pad_top, pad_bottom), (pad_left, pad_right)), mode='constant', constant_values=bg_val)
+
+    # 3. Background subtraction & thresholding
+    # Estimate local background from ROI periphery
+    border = np.concatenate([roi[0, :], roi[-1, :], roi[:, 0], roi[:, -1]])
+    local_bg = np.median(border)
+    roi_sub = roi - local_bg
+    roi_sub[roi_sub < 0] = 0.0
+
+    peak_val = np.max(roi_sub)
+    if peak_val <= 0:
+        return float(row_peak), float(col_peak)
+
+    # Zero-out pixels below threshold ratio
+    cutoff = threshold_ratio * peak_val
+    roi_sub[roi_sub < cutoff] = 0.0
+
+    # 4. First moment on thresholded signal
+    total_mass = np.sum(roi_sub)
+    if total_mass == 0:
+        return float(row_peak), float(col_peak)
+
+    # Grid relative to the padded window
+    grid_r, grid_c = np.indices(roi_sub.shape)
+    com_r = np.sum(grid_r * roi_sub) / total_mass
+    com_c = np.sum(grid_c * roi_sub) / total_mass
+
+    # Global coordinates: unpad and offset
+    global_r = com_r - pad_top + r_min
+    global_c = com_c - pad_left + c_min
+
+    return (float(global_r), float(global_c))
+
+def compute_ltp_centroid(image, roi_half_width=150, soft_power=1.15):
+    """
+    Drop-in replacement that preserves true 2D center-of-mass weighting
+    while fixing background offset and edge clamping artifacts.
+    """
+    img = image.astype(np.float64)
+    h, w = img.shape
+
+    # 1. Peak location
+    r_peak, c_peak = np.unravel_index(np.argmax(img), (h, w))
+
+    # 2. Extract symmetric ROI without asymmetric shape changes
+    r_min = r_peak - roi_half_width
+    r_max = r_peak + roi_half_width + 1
+    c_min = c_peak - roi_half_width
+    c_max = c_peak + roi_half_width + 1
+
+    # Bounds clipping
+    r_min_clamped = max(0, r_min)
+    r_max_clamped = min(h, r_max)
+    c_min_clamped = max(0, c_min)
+    c_max_clamped = min(w, c_max)
+
+    roi = img[r_min_clamped:r_max_clamped, c_min_clamped:c_max_clamped]
+
+    # 3. Robust background subtraction via border median
+    # (np.min leaves positive noise bias; median removes true baseline)
+    border = np.concatenate([roi[0, :], roi[-1, :], roi[:, 0], roi[:, -1]])
+    bg = np.median(border)
+    roi_sub = np.maximum(roi - bg, 0.0)
+
+    # 4. Soft weighting instead of hard thresholding
+    # soft_power=1.0 is pure standard 2D center_of_mass
+    # soft_power=1.5 or 2.0 gently supresses baseline tails without digital step noise
+    if soft_power != 1.0:
+        roi_sub = roi_sub ** soft_power
+
+    # 5. True 2D center of mass
+    com_local = center_of_mass(roi_sub)
+
+    # Fallback if ROI is completely dark
+    if np.isnan(com_local[0]) or np.isnan(com_local[1]):
+        return np.array([float(r_peak), float(c_peak)])
+
+    global_r = com_local[0] + r_min_clamped
+    global_c = com_local[1] + c_min_clamped
+
+    return np.array([global_r, global_c])
+
 def splitimage( nparray2D):
     """"
     This is used to provide arrays of a laser image (i.e. a spot).
@@ -113,6 +229,30 @@ def my_fit(arrayX, arrayY, order):
     #print("Radius as coeff[0], in m: ", radius/1000000)
     return (fit, radius)
 
+def gaussian_filter ( residual_slope_array,
+                    beam_step=None,
+                    beam_waist=None):
+
+    """"
+    This method takes the residual slope array, and gaussian-smoothes it due to beam big size/
+    The math is as follows:
+    fitted_slope, radius_of_curvature =  my_fit(arrayX, arrayY, order)
+    residual_slope = measured_slope - fitted_slope
+    then the Gaussian filter is applied to the residual to deconvolve the laser spot size at the mirror:
+    smoothed_slope = gaussian_filter(residual_slope).
+
+    """
+    from scipy.ndimage import gaussian_filter1d
+
+    if beam_step is None:
+        beam_step = self.stepsize  # this is in mm
+    if beam_waist is None:
+        beam_waist = 2.2  # FHWM I know in px time px size
+    sigma_points = (beam_waist / 2.355) / beam_step
+    smoothed_slope = gaussian_filter1d(residual_slope_array,
+                                       sigma=sigma_points,
+                                       mode='reflect')
+    return (smoothed_slope)
 
 def RMS(array):
     """

@@ -74,7 +74,7 @@ class MotorControls(QMainWindow):
 
 
         try:
-            self.gui.ResetAll.clicked.connect(MotorUtil.resetGantry)
+            self.gui.ResetAll.clicked.connect(lambda:self.util.resetGantry())
             if not self.shell.alive:
                 raise ConnectionError("No connection to PMAC")
             # QtWidgets.QMessageBox.warning("System reset!"   )
@@ -82,7 +82,7 @@ class MotorControls(QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Connection Error: ", str(e))
 
         try:
-            self.gui.HomeGantry.clicked.connect(MotorUtil.homeGantry)
+            self.gui.HomeGantry.clicked.connect(lambda: self.util.homeGantry())
             if not self.shell.alive:
                 raise ConnectionResetError("No connection to PMAC")
             self.gui.sh_display.turn_green()
@@ -343,15 +343,73 @@ class MotorControls(QMainWindow):
         killed.show_warning()
     def movemotor(self):
         motorkey = self.gui.motor_selector.currentText()
+        self.mot2move = self.movesdict.get(motorkey)
+        if not self.mot2move:
+            QtWidgets.QMessageBox.warning(self, "Error!", "No motor selected.")
+            return
+
+        try:
+            self.move_distance = float(self.gui.distance.on_enter_pressed())
+        except (ValueError, TypeError):
+            QtWidgets.QMessageBox.warning(self, "Error!", "Invalid distance/coordinate value")
+            return
+
+        is_rel = self.gui.move_rel.isChecked()
+        is_abs = self.gui.move_abs.isChecked()
+
+        if not is_rel and not is_abs:
+            QtWidgets.QMessageBox.warning(self, "Error!", "Check either Move Rel or Move Abs")
+            return
+
+        # Format the PMAC command string
+        speed = "rapid"
+        if is_rel:
+            move_cmd = f'&{str(self.mot2move.cs)} cpx {speed} inc {self.mot2move.name} {self.move_distance}\n'
+        else:
+            move_cmd = f'&{str(self.mot2move.cs)} cpx {speed} abs {self.mot2move.name} {self.move_distance}\n'
+
+        # Disable button during travel
+        self.gui.pushButton_2.setEnabled(False)
+
+        # Launch MoveWorker with both required arguments
+        self.move_worker = MoveWorker(self.mot2move, move_cmd)
+        self.move_worker.end_signal.connect(self.on_move_end)
+        self.move_worker.error_signal.connect(self.on_move_error)
+        self.move_worker.start()
+        """motorkey = self.gui.motor_selector.currentText()
         # print(type(self.movesdict))
         self.mot2move = self.movesdict.get(motorkey) # This should be a Move object, i.e. xmove, ymove, ..., yawmove
         self.move_distance = float(self.gui.distance.on_enter_pressed())
         self.move_worker = MoveWorker(self.mot2move)
 
-        self.move_worker.begin_signal.connect(self.on_move_begin)
-        self.move_worker.end_signal.connect(self.on_move_end)
-        self.move_worker.update_signal.connect(self.still_moving)
-        self.move_worker.start()
+        if not self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
+            try:
+                raise ValueError("Check either Move Rel or Move Abs")
+            except ValueError as e:
+                QtWidgets.QMessageBox.warning(self, "Error!", str(e))
+
+        #Move Relative:
+        elif self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
+            self.gui.pushButton_2.setEnabled(False)
+            #self.messenger.pause()
+            self.mot2move.move_rel(distance = self.move_distance )
+
+        #Move Absolute:
+        elif not self.gui.move_rel.isChecked() and self.gui.move_abs.isChecked():
+            self.gui.pushButton_2.setEnabled(False)
+            #self.messenger.pause()
+            self.mot2move.move_abs(coord = self.move_distance)
+
+        #self.move_worker.begin_signal.connect(self.on_move_begin)
+        self.gui.pushButton_2.setEnabled(True)
+        self.mot2move.movecomplete = True
+
+        # self.messenger.resume()
+        self.mot2move = None
+        self.move_distance = None
+        #self.move_worker.end_signal.connect(self.on_move_end)
+        #self.move_worker.update_signal.connect(self.still_moving)
+        #self.move_worker.start()"""
 
     @synchronized_method
     def on_move_begin(self):
@@ -378,11 +436,17 @@ class MotorControls(QMainWindow):
     def on_move_end(self):
         #print("[Controller] on_move_end triggered")
         self.gui.pushButton_2.setEnabled(True)
-        self.mot2move.movecomplete = True
+        #self.mot2move.movecomplete = True
 
         #self.messenger.resume()
         self.mot2move = None
         self.move_distance = None
+
+    def on_move_error(self, err_msg):
+        self.gui.pushButton_2.setEnabled(True)
+        self.mot2move = None
+        self.move_distance = None
+        self.show_warning("Move Error", f"Move failed: {err_msg}")
 
     def still_moving(self, in_pos):
         if self.mot2move is not None:

@@ -181,7 +181,7 @@ class Camera:
 
         # 1. reset camera Offsets to 0 first.
 
-        self.reset_sensor()
+        #self.reset_sensor() MA 20260911
 
         # 2. Set the  Dimensions
         # I'm adding some code here to have the user putting in a number, and the code calculating the width
@@ -194,6 +194,7 @@ class Camera:
             camwidth = checkwidth * 48
 
             offset_x = int((5280 - camwidth)/2)
+            self.camera.OffsetX.SetValue(0) #MA 20260911
             self.camera.Width = camwidth
             self.camera.OffsetX = offset_x
 
@@ -202,6 +203,7 @@ class Camera:
             camheight = checkheight * 4
 
             offset_y = int((4600 - camheight)/2)
+            self.camera.OffsetY.SetValue(0) #MA 20260911
             self.camera.Height = camheight
             self.camera.OffsetY = offset_y
 

@@ -1,5 +1,5 @@
 import threading
-
+import time
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 
 
@@ -83,14 +83,49 @@ class MoveWorker(QThread):
     end_signal = pyqtSignal()
     error_signal = pyqtSignal(str)
 
-    def __init__(self, move_obj, sleep_time = 90, parent = None):
+    def __init__(self, move_obj, move_cmd, sleep_time = 90, timeout = 60, parent = None):
         super().__init__(parent)
         self.move_obj = move_obj # Instance of Move class must be passed @ worker creation
-        self.running = True
+        #self.running = True
+        self.move_cmd = move_cmd
         self.sleep_time = sleep_time
+        self.timeout = timeout
 
     def run(self):
-        #print("[MoveWorker] started...")
+        try:
+            # 1. Dispatch move command via SSH
+            self.move_obj.connection.send_message(self.move_cmd)
+            #self.begin_signal.emit()
+
+            # 2. Guard delay: Give PMAC & SSH channel time to register motion start
+            time.sleep(0.1)
+
+            t0 = time.time()
+
+            # 3. Wait for InPos to drop to 0 (motion acknowledged)
+            # Short timeout here in case the move distance is sub-resolution
+            while self.move_obj.check_in_pos() == 1:
+                if time.time() - t0 > 10.0:
+                    break
+                time.sleep(0.03)
+
+            # 4. Wait for InPos to return to 1 (in position target reached)
+            while self.move_obj.check_in_pos() == 0:
+                if time.time() - t0 > self.timeout:
+                    raise TimeoutError(f"Move timed out on {self.move_obj.name}")
+                self.update_signal.emit(0)
+                time.sleep(0.05)
+
+            # 5. Success
+            self.update_signal.emit(1)
+            self.move_obj.move_done_event.set()
+            self.end_signal.emit()
+
+        except Exception as e:
+            self.move_obj.movecomplete = True
+            self.move_obj.move_done_event.set()
+            self.error_signal.emit(str(e))
+        """#print("[MoveWorker] started...")
         self.begin_signal.emit() # THis has to be connected to something that moves the motor.
         while self.running:
             self.msleep(self.sleep_time)
@@ -105,7 +140,7 @@ class MoveWorker(QThread):
                 #print("[MoveWorker] Move completed, emitting end_signal")
                 self.end_signal.emit()
                 break
-        #print("[MoveWorker] Thread ending")
+        #print("[MoveWorker] Thread ending")"""
 
 
 class SpeedWorker(QRunnable):

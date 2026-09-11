@@ -49,6 +49,7 @@ class Pmac_Shell():
         self.nbytes = nbytes # nr of bites for the receiver function
         self.rawoutput = rawoutput # Initialize the output bytes buffer string as None
         self.textoutput = textoutput
+        self.lock = threading.Lock() #MA 20260831
 
         #Multithreading facilities
 
@@ -115,13 +116,18 @@ class Pmac_Shell():
         :return:
 
         """
-        if self.username == "root":
-            self.send_message(EOT) # sends the End of Transmission character sequence as specified above the class
-        else:
-            self.send_message("exit")
-
-        self.pmac_shell.close()
-        self.alive = False
+        with self.lock:
+            if self.alive and self.pmac_shell:
+                try:
+                    if self.username == "root":
+                        self.pmac_shell.send(EOT)
+                    else:
+                        self.pmac_shell.send("exit\n")
+                    time.sleep(0.1)
+                    self.pmac_shell.close()
+                except Exception:
+                    pass
+            self.alive = False
 
     def send_message(self, message = ""):
         """
@@ -131,15 +137,28 @@ class Pmac_Shell():
        :param shell: a shell connection to the Pmac
        :param message: a string containing the message to be sent the Pmac
        """
-        if self.alive:
+        with self.lock:
+            if not self.alive or not self.pmac_shell:
+                return
             if not message.endswith("\n"):
-                message = message + "\n"
-            self.pmac_shell.send(message)
-            message = ''
-        else:
-           conn_error = myWarningBox(title = "Error! ",
-                                     message = "Connection not active")
-           conn_error.show_warning()
+                message += "\n"
+            try:
+                self.pmac_shell.send(message)
+            except Exception:
+                pass
+
+                """if self.alive:
+                if not message.endswith("\n"):
+                    message = message + "\n"
+                self.pmac_shell.send(message)
+                message = ''
+            else:
+               conn_error = myWarningBox(title = "Error! ",
+                                         message = "Connection not active")
+               conn_error.show_warning()
+               
+               MA - 20260831
+               """
 
     def receive_message(self):
         """
@@ -189,6 +208,14 @@ class Pmac_Shell():
         if not self.alive == self.pmac_shell.get_transport().is_active():
             self.alive = False
 
+    def flush_channel(self):
+        """Discards any lingering unread bytes in the buffer."""
+        try:
+            while self.pmac_shell.recv_ready():
+                self.pmac_shell.recv(self.nbytes)
+        except Exception:
+            pass
+
 
 class Gantry(Pmac_Shell):
 
@@ -209,33 +236,80 @@ class Gantry(Pmac_Shell):
         """
         return f"Gantry: IP = {self.pmac_ip}, username = {self.username}, password = {self.password}, alive = {self.alive}, echo = {self.echo}, isinit = {self.isinit}"
 
-    def send_receive(self, message):
+    def send_receive(self, message, timeout = 1.0):
 
         """This function compounds the send_message and the simple_output methods of the Pmac_Shell class. This function is
         to be used ONLY with an open SSH on a PMAC terminal, as it will otherwise produce unintellegible outputs.
 
         :param message: a string containing the message to be set to the PMAC
         :return: a string output"""
+        if not self.alive:
+            return "Connection not active"
 
-        if self.alive:
-            self.start_receiving()
-            self.send_message(message) # this sends the message down to the SSH connection
-            #print(message)
-            #self.receive_message()
-            start_time = time.time()
-            time.sleep(0.051) # this is  a critical parameter!! the function doesn't work if it's 0.05, so careful.
+        with self.lock:
+            try:
+                self.flush_channel()
 
-            while True:
-                if self.pmac_shell.recv_ready():
-                    self.store_message(self.receive_message())
-                    break
-                if time.time() - start_time >0.51:
+                if not message.endswith("\n"):
+                    message += "\n"
+                self.pmac_shell.send(message)
+
+                raw_response = ""
+                t0 = time.time()
+
+                # Read until delimiter arrives or timeout
+                while time.time() - t0 < timeout:
+                    if self.pmac_shell.recv_ready():
+                        chunk = self.pmac_shell.recv(self.nbytes).decode("ascii", errors="ignore")
+                        raw_response += chunk
+                        if delim in raw_response or ACK in raw_response:
+                            break
+                    time.sleep(0.01)
+
+                if not raw_response:
+                    self.textoutput = []
                     return "timeout"
-            self.worker_stop()
-            return (self.textoutput[1]) if self.textoutput else "No response"
+
+                # Populate legacy self.textoutput exactly as before
+                # rawoutput.split(delim) gives ['', '<response>', '']
+                self.rawoutput = raw_response
+                self.textoutput = raw_response.split(delim)
+
+                # Return self.textoutput[1] if available, otherwise fallback cleanly
+                if len(self.textoutput) > 1:
+                    return self.textoutput[1]
+                elif len(self.textoutput) == 1:
+                    return self.textoutput[0]
+                else:
+                    return "No response"
+
+            except Exception as e:
+                print(f"[PMAC Comms Error] {e}")
+                return "error"
+
+
+    """ 
+        if self.alive:
+        self.start_receiving()
+        self.send_message(message) # this sends the message down to the SSH connection
+        #print(message)
+        #self.receive_message()
+        start_time = time.time()
+        time.sleep(0.051) # this is  a critical parameter!! the function doesn't work if it's 0.05, so careful.
+
+        while True:
+            if self.pmac_shell.recv_ready():
+                self.store_message(self.receive_message())
+                break
+            if time.time() - start_time >0.51:
+                return "timeout"
+        self.worker_stop()
+        return (self.textoutput[1]) if self.textoutput else "No response"
         else:
             #self.worker.stop()
             return("Connection not active")
+        
+     """
 
     def pmac_init(self):
         """
@@ -244,16 +318,34 @@ class Gantry(Pmac_Shell):
         :return:
         """
         #print(GPASCII)
-        self.send_message(GPASCII)
-        time.sleep(0.2)
-        self.receive_message()
-        #print(self.textoutput)
-        response = self.textoutput[-2]
-        if response == right:
-            self.isinit = True
-            return(response)
-        else:
-            return(response)
+        if not self.alive:
+            return "Connection not active."
+
+        with self.lock:
+            self.flush_channel()
+            self.pmac_shell.send(GPASCII + "\n")
+            time.sleep(0.2)
+
+            raw = ""
+            t0 = time.time()
+            while time.time() - t0 < 2.0:
+                if self.pmac_shell.recv_ready():
+                    raw += self.pmac_shell.recv(self.nbytes).decode("ascii", errors="ignore")
+                    if right in raw:
+                        self.isinit = True
+                        return right
+                time.sleep(0.05)
+
+            return raw.strip()
+
+    """ self.receive_message()
+    #print(self.textoutput)
+    response = self.textoutput[-2]
+    if response == right:
+        self.isinit = True
+        return(response)
+    else:
+        return(response)"""
 
     def set_echo(self):
         """

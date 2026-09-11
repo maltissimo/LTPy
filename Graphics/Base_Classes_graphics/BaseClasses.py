@@ -381,11 +381,16 @@ class myWarningBox(QMessageBox):
         self.exec()
 
 class MyFrame(QFrame):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None, default_layout = False):
         super().__init__(parent)
         self.setFrameShape(QFrame.Shape.Box)
         self.setFrameShadow(QFrame.Shadow.Raised)
         self.setLineWidth(1)
-        layout = QVBoxLayout(self)
+
+        if default_layout:
+            layout = QVBoxLayout(self)
+            layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        """layout = QVBoxLayout(self)
         layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(layout)
+        self.setLayout(layout)"""
+

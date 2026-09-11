@@ -114,6 +114,7 @@ class Measurement():
         heights = integrate.cumtrapz(arrayY, arrayX, initial=0)
         return (heights)
 
+
     def FOP_smoothing(self, arrayX):
         """"
         This function is designed to smooth out the Fuck Off Points (FOP) in the measurement.
@@ -123,16 +124,16 @@ class Measurement():
         :param arrayX: an array of slopes.
         :return: an array of smoothed slopes
         """
-        smoothed_array = arrayX # first just a copy
+        smoothed_array = arrayX.copy()  # or list(arrayX) if passing raw Python lists
         rms = MathUtils.RMS(arrayX)
-        topvalue = 4 * rms
-        FOP = [] # array of indices of Fuck Off Points
-        for i in range(len(arrayX)):
+        topvalue = 8 * rms
+        n = len(arrayX)
+
+        for i in range(1, n - 1):
             if arrayX[i] >= topvalue:
-                FOP.append(i)
-        for i in FOP:
-            smoothed_array[i] = (arrayX[i - 1] + arrayX[i + 1]) / 2 # substituting the FOPs with the average in the smoothed array.
-        return (smoothed_array)
+                smoothed_array[i] = (arrayX[i - 1] + arrayX[i + 1]) / 2.0
+
+        return smoothed_array
 
     def compute_spot_intensity(self, ndarray):
         max_index = np.unravel_index(np.argmax(ndarray), ndarray.shape)
@@ -146,19 +147,18 @@ class Measurement():
         intensity = np.sum(back_sub)
         return(intensity)
 
-
-
-    """def figure_error(self, arrayX, arrayY):
-        
-                Calculates the figure error given and array of positions/slopes
-                :param arrayX: y-position of the centroid? or X-position of the head?
-                :param arrayY: slopes
-                :return: an array, heights.
-
-
+    def figure_error(self, arrayX, arrayY):
+        """
+        Calculates the figure error given and array of positions/slopes
+        :param arrayX: y-position of the centroid? or X-position of the head?
+        :param arrayY: slopes
+        :return: an array, heights.
+        """
         heights = np.array([])
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
-        return (heights)"""
+        return (heights)
+
+
 
 """class StabilityMeasurement(Measurement):
     def __init__(self, *args, **kwargs):

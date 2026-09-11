@@ -1,5 +1,6 @@
 import sys
 import os
+import threading
 
 # Add the project root directory to sys.path
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -177,7 +178,7 @@ class MainLTPApp:
 
             self.autoaligner = Aligner()
             print()
-            prin("AutoAligner Initialized")
+            print("AutoAligner Initialized")
 
         except Exception as e:
             error_msg = f"Error initializing controls: {str(e)}"

@@ -30,6 +30,9 @@ class CamViewer(QMainWindow):
 
         # Fix 1: Use existing layout instead of creating a new one
         self.plot_layout = self.gui.CamFrame.layout()
+        if self.plot_layout is None:
+            self.plot_layout = QVBoxLayout(self.gui.CamFrame)
+            self.plot_layout.setAlignment(Qt.AlignCenter)
         
         self.display_label = QLabel()
         self.display_label.setAlignment(Qt.AlignCenter)
