@@ -87,7 +87,7 @@ class RealTime_plotter(QWidget):
         self.plotWidget.plotItem.getAxis('right').linkToView(self.rightViewBox)
         self.rightViewBox.setXLink(self.plotWidget.plotItem)
 
-        self.plotWidget.plotItem.showAxis("right")
+        #self.plotWidget.plotItem.showAxis("right")
 
         self.plots_left = [] # a list to store all the incoming plots
         self.plots_right = []
@@ -103,13 +103,13 @@ class RealTime_plotter(QWidget):
         self.plotWidget.getAxis('left').setTextPen(mypen)
         self.plotWidget.getAxis('bottom').setTextPen(mypen)
         self.plotWidget.getAxis('left').gridPen = grid_pen
-        self.plotWidget.getAxis('right').gridPen = grid_pen
+        #self.plotWidget.getAxis('right').gridPen = grid_pen
         self.plotWidget.getAxis('bottom').gridPen = grid_pen
 
         #Right Axis:
-        self.plotWidget.getAxis('right').setPen(mypen)
-        self.plotWidget.getAxis('right').setTickPen(mypen)
-        self.plotWidget.getAxis('right').setTextPen(mypen)
+        #self.plotWidget.getAxis('right').setPen(mypen)
+        #self.plotWidget.getAxis('right').setTickPen(mypen)
+        #self.plotWidget.getAxis('right').setTextPen(mypen)
 
         #self.plotWidget.showGrid(x=True, y=True, alpha = 0.75)
         self.plotWidget.enableAutoRange('xy')

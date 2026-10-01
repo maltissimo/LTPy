@@ -2,7 +2,7 @@ from PyQt5.QtCore import QThreadPool
 from PyQt5.QtWidgets import QMainWindow
 import sys
 import time
-from Communication.MCG import *
+from Communication.MCG_TCP import *
 from ControlCenter.Control_Utilities import Connection_initer as Conn_init
 from ControlCenter.Control_Utilities import Utilities as Uti
 from ControlCenter.MultiThreading import WorkerThread, SpeedWorker, synchronized_method, MoveWorker, CoordMessenger
@@ -91,6 +91,7 @@ class MotorControls(QMainWindow):
             QtWidgets.QMessageBox.warning(self, "Connection Error", str(e))
 
         self.gui.pushButton.clicked.connect(self.stopall)
+        self.gui.pushButton.setEnabled(False) #grey if no move is on.
         self.gui.setspeed.clicked.connect(self.set_speed)
 
         self.gui.getspeed.clicked.connect(self.get_speed)
@@ -328,7 +329,11 @@ class MotorControls(QMainWindow):
 
         #motor = self.gui.motor_selector_2.itemText(index)
 
-        speed = self.gui.set_display.text()
+        try:
+            speed = float(self.gui.set_display.on_enter_pressed())
+        except (ValueError, TypeError):
+            QtWidgets.QMessageBox.warning(self, "Error!", "Invalid speed value")
+            return
         #print(speed, type(speed))
 
         self.motor.setjogspeed(float(speed))
@@ -337,11 +342,12 @@ class MotorControls(QMainWindow):
         #self.get_speed() # this is just a sanity check...
 
     def stopall(self):
-        message = "#*abort\n"
+        message = "&* abort\n"
         self.shell.send_message(message)
         killed = myWarningBox(title = "Warning!!", message = "All motor stopped!")
         killed.show_warning()
     def movemotor(self):
+        self.gui.pushButton.setEnabled(True)
         motorkey = self.gui.motor_selector.currentText()
         self.mot2move = self.movesdict.get(motorkey)
         if not self.mot2move:
@@ -376,40 +382,6 @@ class MotorControls(QMainWindow):
         self.move_worker.end_signal.connect(self.on_move_end)
         self.move_worker.error_signal.connect(self.on_move_error)
         self.move_worker.start()
-        """motorkey = self.gui.motor_selector.currentText()
-        # print(type(self.movesdict))
-        self.mot2move = self.movesdict.get(motorkey) # This should be a Move object, i.e. xmove, ymove, ..., yawmove
-        self.move_distance = float(self.gui.distance.on_enter_pressed())
-        self.move_worker = MoveWorker(self.mot2move)
-
-        if not self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
-            try:
-                raise ValueError("Check either Move Rel or Move Abs")
-            except ValueError as e:
-                QtWidgets.QMessageBox.warning(self, "Error!", str(e))
-
-        #Move Relative:
-        elif self.gui.move_rel.isChecked() and not self.gui.move_abs.isChecked():
-            self.gui.pushButton_2.setEnabled(False)
-            #self.messenger.pause()
-            self.mot2move.move_rel(distance = self.move_distance )
-
-        #Move Absolute:
-        elif not self.gui.move_rel.isChecked() and self.gui.move_abs.isChecked():
-            self.gui.pushButton_2.setEnabled(False)
-            #self.messenger.pause()
-            self.mot2move.move_abs(coord = self.move_distance)
-
-        #self.move_worker.begin_signal.connect(self.on_move_begin)
-        self.gui.pushButton_2.setEnabled(True)
-        self.mot2move.movecomplete = True
-
-        # self.messenger.resume()
-        self.mot2move = None
-        self.move_distance = None
-        #self.move_worker.end_signal.connect(self.on_move_end)
-        #self.move_worker.update_signal.connect(self.still_moving)
-        #self.move_worker.start()"""
 
     @synchronized_method
     def on_move_begin(self):
@@ -436,6 +408,7 @@ class MotorControls(QMainWindow):
     def on_move_end(self):
         #print("[Controller] on_move_end triggered")
         self.gui.pushButton_2.setEnabled(True)
+        self.gui.pushButton.setEnabled(False)
         #self.mot2move.movecomplete = True
 
         #self.messenger.resume()
@@ -444,6 +417,7 @@ class MotorControls(QMainWindow):
 
     def on_move_error(self, err_msg):
         self.gui.pushButton_2.setEnabled(True)
+        self.gui.pushButton.setEnabled(False)
         self.mot2move = None
         self.move_distance = None
         self.show_warning("Move Error", f"Move failed: {err_msg}")
@@ -468,6 +442,16 @@ class MotorControls(QMainWindow):
     def homeGantry(self):
         MotorUtil.resetGantry()
         while not self.MotorUtil.gantryHomed():
+            self.gui.gotopos_button.setEnabled(False)
+            self.gui.ResetAll.setEnabled(False)
+            self.gui.HomeGantry.setEnabled(False)
+            self.gui.setspeed.setEnabled(False)
+            self.gui.getspeed.setEnabled(False)
+            self.gui.savepos_button.setEnabled(False)
+            self.gui.gotopos_button.setEnabled(False)
+            self.gui.connect.setEnabled(False)
+            self.gui.pushButton_2.setEnabled(False) # this is the MOVE button
+            self.gui.pushButton_2.setEnabled(False) # this is the STOP button
             time.sleep(2)
         homed = myWarningBox(title="Success!", message="Home Completed")
         homed.show_warning()

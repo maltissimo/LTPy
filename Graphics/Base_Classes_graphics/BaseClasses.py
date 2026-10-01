@@ -48,6 +48,7 @@ class MySubWindow(QWidget):
         label = MyLabel("This is my sub window")
         layout.addWidget(label)
         self.setLayout(layout)
+
 class MyTextEdit(QTextEdit):
     enter_pressed = pyqtSignal()
 
@@ -89,90 +90,40 @@ class MyTextEdit(QTextEdit):
         return(text)
 
 class MyLabel(QLabel):
-
-    def __init__(self, parent = None, width = WIDTH, height = HEIGHT):
+    def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent)
-        self.setFixedSize(width, height)
         self.initialize()
-        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
 
     def initialize(self):
-        self.setMaximumSize(QSize(160,32))
-        self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
         self.setAlignment(Qt.AlignCenter)
-        #self.setPlainText(u"")
 
     def get_dimensions(self):
 
         return(self.width(), self.height())
 
-    def setGeometry(self, rect):
+    """def setGeometry(self, rect):
         # Ensure a minimum width and height
         rect.setWidth(max(rect.width(), self.width()))
         rect.setHeight(max(rect.height(), self.height()))
-        super().setGeometry(rect)
+        super().setGeometry(rect)"""
 
-"""class MyTextEdit(QTextEdit):
-
-    def __init__(self, parent = None, width = WIDTH, height = HEIGHT ):
-        super().__init__(parent)
-        self.setFixedSize(width, height)
-
-    def initialize(self):
-        self.setMaximumSize(QSize(160, 20))
-        self.setSizeIncrement(QSize(5, 0))
-        font = QFont()
-        font.setFamily(FONT)
-        font.setPointSize(FONTSIZE)
-        self.setFont(font)
-        self.setPlainText(u"")
-        #if QT_config(statustip)
-        self.setStatusTip(u"")
-        # endif // QT_config(statustip)
-        #if QT_config(whatsthis)
-        self.setWhatsThis(u"")
-        #endif //QT_config(statustip)
-        #if QT_config(accessibility)
-        self.setAccessibleName(u"")
-        #endif // QT_config(accessibility)
-        self.setInputMethodHints(Qt.ImhPreferNumbers)
-
-    def get_dimensions(self):
-        return (self.width(), self.height())
-
-    def setGeometry(self, rect):
-        # Ensure a minimum width and height
-        rect.setWidth(max(rect.width(), self.width()))
-        rect.setHeight(max(rect.height(), self.height()))
-        super().setGeometry(rect)
-
-    def keyPressEvent(self, event):
-        if event.key() == Qt.Key_Enter or event.key() == Qt.Key_Return:
-            self.handle_enter_key()
-        else:
-            super().keyPressEvent(event)
-    
-    def get_text(self):"""
 
 
 class MyPushButton(QPushButton):
-    def __init__(self, parent = None, width =  1.5 * WIDTH, height = 1.6 * HEIGHT):
+    def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent)
-        self.setFixedSize(int(width), int(height))
-        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.initialize()
 
     def initialize(self):
-        self.setMaximumSize(QSize(240, 40))
-        self.setSizeIncrement(QSize(5,2))
         font = QFont()
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
-        self.setPlainText(u"")
+        #self.setPlainText(u"")
         # if QT_config(statustip)
         self.setStatusTip(u"")
         # endif // QT_config(statustip)
@@ -190,11 +141,11 @@ class MyPushButton(QPushButton):
         return (self.width(), self.height())
 
 
-    def setGeometry(self, rect):
+    """def setGeometry(self, rect):
         # Ensure a minimum width and height
         rect.setWidth(max(rect.width(), self.width()))
         rect.setHeight(max(rect.height(), self.height()))
-        super().setGeometry(rect)
+        super().setGeometry(rect)"""
 
 class MyTextBrowser(QTextBrowser):
 
@@ -254,30 +205,35 @@ class MyGroupBox(QGroupBox):
         super().setGeometry(rect)
 
 class MyQLineEdit(QLineEdit):
-    def __init__(self, parent = None, width = WIDTH, height = HEIGHT):
+    enter_pressed = pyqtSignal()
+    def __init__(self, parent=None, *args, **kwargs):
         super().__init__(parent)
-        self.setFixedSize(width, height)
-        #self.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
         self.initialize()
 
     def initialize(self):
-
-        self.setMaximumSize(QSize(160, 20))
-        self.setSizeIncrement(QSize(5, 0))
         font = QFont()
         font.setFamily(FONT)
         font.setPointSize(FONTSIZE)
         self.setFont(font)
 
-
     def get_dimensions(self):
         return (self.width(), self.height())
 
-    def setGeometry(self, rect):
+    def keyPressEvent(self, event):
+        if event.key() == Qt.Key_Return or event.key() == Qt.Key_Enter:
+            self.enter_pressed.emit()
+        else:
+            super().keyPressEvent(event)
+
+    def on_enter_pressed(self):
+        text = self.toPlainText()
+        return(text)
+
+    """def setGeometry(self, rect):
         # Ensure a minimum width and height
         rect.setWidth(max(rect.width(), self.width()))
         rect.setHeight(max(rect.height(), self.height()))
-        super().setGeometry(rect)
+        super().setGeometry(rect)"""
 
     def changeText(self, text):
         text = self.text()

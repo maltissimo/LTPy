@@ -67,6 +67,13 @@ class Camera:
     def getWidth(self):
         return (self.camera.Width())
 
+    def getGain(self):
+        return(self.camera.Gain())
+
+    def setGain(self, mygain):
+        self.camera.Gain(mygain)
+        self.gain= self.camera.Gain()
+
     def opencam(self):
         """
         this takes about 300 ms once it is called, but its called only once during execution, so the overhead is acceptable.
@@ -227,6 +234,8 @@ class Camera:
         self.camera.OffsetY = 0
         self.camera.Width = 5280
         self.camera.Height = 4600
+        self.width = self.camera.Width()
+        self.height = self.camera.Height()
 
         if was_grabbing:
             self.start_continuous_grabbing()

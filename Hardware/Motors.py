@@ -335,10 +335,10 @@ class MotorUtil():
     def __init__(self, connection, stillhoming=1, motor=None):
         self.connection = connection  # an active PMAC shell.
         if self.connection.alive == False:
-            conn_wmessage = "Connection to PMAC not active, inizialization impossible!"
-            conn_wwindonw = myWarningBox(title = "Connection error!",
-                                         message = conn_wmessage)
-            conn_wwindonw.show_warning()
+            conn_message = "Connection to PMAC not active, inizialization impossible!"
+            conn_window = myWarningBox(title = "Connection error!",
+                                         message = conn_message)
+            conn_window.show_warning()
         self.stillhoming = stillhoming
         self.motor = motor
 
@@ -371,7 +371,7 @@ class MotorUtil():
 
     def homeGantry(self):
         self.connection.send_receive(ALL)
-        time.sleep(0.09)
+        #time.sleep(0.09)
         self.connection.send_receive(HOME)
 
         """while not self.gantryHomed():
@@ -382,7 +382,7 @@ class MotorUtil():
     def resetGantry(self):
 
         self.connection.send_receive(ALL)
-        time.sleep(0.09)
+        #time.sleep(0.09)
         self.connection.send_receive(RESET)
 
     def motors(self):
@@ -403,13 +403,14 @@ class MotorUtil():
             #time.sleep(0.01)
             self.connection.receive_message()"""
             #print(self.connection.textoutput)
-            rawarray.append(self.connection.textoutput[1])  # This initializes the array with all the outputs from interrogating the Pmac
+            rawarray.append(self.connection.textoutput)  # This initializes the array with all the outputs from interrogating the Pmac
+            #print(rawarray)
             #print(self.connection.textoutput[1])
         for i in range(len(rawarray)):
-            if rawarray[i][0] == "&":
-                motors.append([rawarray[i][1], rawarray[i][3],
-                               rawarray[i][-1]])  # This is the list of motors present on the System.
-                # motors[i][0] is the CS of motor nr motors[i][1], named motors[i][2] in the PMAC convention
+            if rawarray[i][0][0] == "&":
+                motors.append([rawarray[i][0][1], rawarray[i][0][3],
+                               rawarray[i][0][-1]])  # This is the list of motors present on the System.
+                # motors[i][0][0] is the CS of motor nr motors[i][0][1], named motors[i][0][3] in the PMAC convention
         return (motors)
 
     def lockmotors(self):

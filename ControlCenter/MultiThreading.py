@@ -199,7 +199,7 @@ class CoordMessenger():
     def update_coordinates(self, response):
         flag = 0
         #print("update method called, with result: ", response)
-        response = list(response)
+
         if not response:
             return
         try:
@@ -207,16 +207,20 @@ class CoordMessenger():
                 print("full Response: ", response)
                 flag =1"""
             while response and response[0] != '&1,2,3p':
-                response.pop(0)
+                interm = response.pop(0)
+                correct = interm.split()
             """ The two lines above clean the PMAC response, so that only coordinates are received. """
             """if flag == 0:
                 print("Cleaned response: ", response)
                 flag = 0"""
-            if len(response) < 4:
+            if len(correct) < 4:
                 return # this avoids crashes from not-well formed responses. since the update is rapid this should not be an issue
-            CS1 = response[1].split()
-            CS2 = response[2].split()
-            CS3 = response[3].split()
+            #CS1 = response[1].split()
+            CS1 = correct[0:3]
+            #CS2 = response[2].split()
+            CS2 = correct[3]
+            #CS3 = response[3].split()
+            CS3 = correct[4:6]
             
             # Check if we have enough data in the split strings to avoid IndexError
             if len(CS1) < 3 or len(CS2) < 1 or len(CS3) < 2:
@@ -229,7 +233,7 @@ class CoordMessenger():
                     "pitch" : float(CS1[1][1:]),
                     "roll": float(CS1[0][1:]),
                     "Z": float(CS1[2][1:]),
-                    "yaw": float(CS2[0][1:]),
+                    "yaw": float(CS2[1:]),
                     "X": float(CS3[0][1:]),
                     "Y": float(CS3[1][1:])
                 })

@@ -79,7 +79,7 @@
          <number>2</number>
         </property>
         <item>
-         <widget class="QGroupBox" name="groupBox_2">
+         <widget class="QGroupBox" name="grab_ctrl_group">
           <property name="font">
            <font>
             <weight>75</weight>
@@ -89,7 +89,7 @@
           <property name="title">
            <string>Grab Controls</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout">
+          <layout class="QGridLayout" name="grab_ctrl_grid">
            <property name="leftMargin">
             <number>2</number>
            </property>
@@ -102,8 +102,11 @@
            <property name="bottomMargin">
             <number>2</number>
            </property>
-           <property name="spacing">
+           <property name="horizontalSpacing">
             <number>2</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>5</number>
            </property>
            <item row="2" column="0">
             <widget class="MyPushButton" name="StopGrab">
@@ -161,7 +164,7 @@
            <item row="1" column="0">
             <widget class="MyPushButton" name="StartGrab">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -214,13 +217,6 @@
              </property>
              <property name="alignment">
               <set>Qt::AlignCenter</set>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1" rowspan="3">
-            <widget class="Line" name="line">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
              </property>
             </widget>
            </item>
@@ -293,11 +289,18 @@
              </property>
             </spacer>
            </item>
+           <item row="0" column="1" rowspan="4">
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox">
+         <widget class="QGroupBox" name="frame_ctrl_group">
           <property name="font">
            <font>
             <weight>75</weight>
@@ -307,7 +310,7 @@
           <property name="title">
            <string>Frame size Controls</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_2">
+          <layout class="QGridLayout" name="frame_ctrl_grid">
            <property name="leftMargin">
             <number>2</number>
            </property>
@@ -320,8 +323,11 @@
            <property name="bottomMargin">
             <number>2</number>
            </property>
-           <property name="spacing">
+           <property name="horizontalSpacing">
             <number>2</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>5</number>
            </property>
            <item row="7" column="0">
             <widget class="QPushButton" name="reset_frame_button">
@@ -352,7 +358,7 @@
            <item row="3" column="2">
             <widget class="MyQLineEdit" name="width_lineedit">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -415,7 +421,7 @@
            <item row="3" column="0">
             <widget class="MyQLineEdit" name="height_lineedit">
              <property name="sizePolicy">
-              <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
                <horstretch>0</horstretch>
                <verstretch>0</verstretch>
               </sizepolicy>
@@ -463,7 +469,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QGroupBox" name="groupBox_3">
+         <widget class="QGroupBox" name="data_display_group">
           <property name="font">
            <font>
             <weight>75</weight>
@@ -473,7 +479,10 @@
           <property name="title">
            <string>Data display</string>
           </property>
-          <layout class="QGridLayout" name="gridLayout_3">
+          <layout class="QGridLayout" name="data_display_grid">
+           <property name="leftMargin">
+            <number>2</number>
+           </property>
            <property name="topMargin">
             <number>2</number>
            </property>
@@ -483,8 +492,11 @@
            <property name="bottomMargin">
             <number>2</number>
            </property>
-           <property name="spacing">
+           <property name="horizontalSpacing">
             <number>2</number>
+           </property>
+           <property name="verticalSpacing">
+            <number>5</number>
            </property>
            <item row="2" column="4">
             <widget class="MyLabel" name="FWHMY_label">
@@ -719,12 +731,12 @@
               <enum>Qt::Vertical</enum>
              </property>
              <property name="sizeType">
-              <enum>QSizePolicy::Preferred</enum>
+              <enum>QSizePolicy::Fixed</enum>
              </property>
              <property name="sizeHint" stdset="0">
               <size>
                <width>0</width>
-               <height>20</height>
+               <height>18</height>
               </size>
              </property>
             </spacer>

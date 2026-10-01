@@ -243,7 +243,7 @@ class Gantry(Pmac_Shell):
 
         :param message: a string containing the message to be set to the PMAC
         :return: a string output"""
-        if not self.alive:
+        if not self.alive or not self.sock:
             return "Connection not active"
 
         with self.lock:
@@ -252,65 +252,40 @@ class Gantry(Pmac_Shell):
 
                 if not message.endswith("\n"):
                     message += "\n"
-                self.pmac_shell.send(message)
 
-                raw_response = ""
-                t0 = time.time()
+                self.sock.sendall(message.encode("ascii"))
 
-                # Read until delimiter arrives or timeout
-                while time.time() - t0 < timeout:
-                    if self.pmac_shell.recv_ready():
-                        chunk = self.pmac_shell.recv(self.nbytes).decode("ascii", errors="ignore")
-                        raw_response += chunk
-                        if delim in raw_response or ACK in raw_response:
-                            break
-                    time.sleep(0.01)
+                buffer = bytearray()
+                self.sock.settimeout(timeout)
 
-                if not raw_response:
-                    self.textoutput = []
-                    return "timeout"
+                while True:
+                    chunk = self.sock.recv(self.nbytes)
+                    if not chunk:
+                        self.alive = False
+                        return "Connection closed by PMAC"
+                    buffer.extend(chunk)
+                    if ACK in chunk:
+                        break
 
-                # Populate legacy self.textoutput exactly as before
-                # rawoutput.split(delim) gives ['', '<response>', '']
-                self.rawoutput = raw_response
-                self.textoutput = raw_response.split(delim)
+                # Strip out ACK delimiter and decode
+                clean_payload = buffer.replace(ACK, b"").decode("ascii", errors="ignore").strip()
 
-                # Return self.textoutput[1] if available, otherwise fallback cleanly
-                if len(self.textoutput) > 1:
-                    return self.textoutput[1]
-                elif len(self.textoutput) == 1:
-                    return self.textoutput[0]
-                else:
-                    return "No response"
+                self.rawoutput = clean_payload
+                # Emulate legacy split behavior expected by Motor/CompMotor
+                self.textoutput = clean_payload.split(delim)
 
+                if clean_payload:
+                    # In TCP mode without shell echo, the answer is usually clean_payload itself
+                    return clean_payload
+                return ""
+
+            except socket.timeout:
+                self.textoutput = []
+                return "timeout"
             except Exception as e:
                 print(f"[PMAC Comms Error] {e}")
+                self.alive = False
                 return "error"
-
-
-    """ 
-        if self.alive:
-        self.start_receiving()
-        self.send_message(message) # this sends the message down to the SSH connection
-        #print(message)
-        #self.receive_message()
-        start_time = time.time()
-        time.sleep(0.051) # this is  a critical parameter!! the function doesn't work if it's 0.05, so careful.
-
-        while True:
-            if self.pmac_shell.recv_ready():
-                self.store_message(self.receive_message())
-                break
-            if time.time() - start_time >0.51:
-                return "timeout"
-        self.worker_stop()
-        return (self.textoutput[1]) if self.textoutput else "No response"
-        else:
-            #self.worker.stop()
-            return("Connection not active")
-        
-     """
-
     def pmac_init(self):
         """
         Initializes the Pmac with the proper string, defined above the Gantry_Connection class.

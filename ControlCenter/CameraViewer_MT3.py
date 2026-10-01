@@ -3,11 +3,11 @@ import cv2
 import numpy as np
 from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtCore import QTimer, Qt
-from PyQt5.QtGui import QImage, QPixmap, QTransform
+from PyQt5.QtGui import QImage, QPixmap, QTransform, QIntValidator
 
 from ControlCenter import MathUtils
 from ControlCenter import Control_Utilities as cu
-from Graphics.Base_Classes_graphics.CameraViewer_GUI2 import Ui_PylonCamViewer
+from Graphics.Base_Classes_graphics.CameraViewer_GUI3 import Ui_PylonCamViewer
 from Graphics.Base_Classes_graphics.BaseClasses import myWarningBox
 from Hardware.Detector import Camera
 
@@ -17,16 +17,13 @@ class CamViewer(QMainWindow):
         self.gui = Ui_PylonCamViewer()
         self.gui.setupUi(self)
 
-        # Button Connections
-        self.gui.StartGrab.clicked.connect(self.start_grab)
-        self.gui.StopGrab.clicked.connect(self.stop_grab)
-        self.gui.SetAcqTime.clicked.connect(self.setAcqTime)
-
         if detector is not None:
             self.camera = detector
+
         else:
             self.camera = Camera()
         self.running = False
+
 
         # Fix 1: Use existing layout instead of creating a new one
         self.plot_layout = self.gui.CamFrame.layout()
@@ -40,8 +37,76 @@ class CamViewer(QMainWindow):
         self.display_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
         self.plot_layout.addWidget(self.display_label)
 
+        self.exposure_time = self.camera.MyExpTime()
+        self.gain = self.camera.gain
+
+        # Button Connections
+        self.gui.StartGrab.clicked.connect(self.start_grab)
+        self.gui.StopGrab.clicked.connect(self.stop_grab)
+        self.gui.SetAcqTime.clicked.connect(self.setAcqTime)
         self.gui.StartGrab.setEnabled(True)
         self.gui.StopGrab.setEnabled(False)
+
+        #Connecting the extra bits to the GUI:
+        self.gui.reset_frame_button.clicked.connect(self.reset_sensor)
+        self.gui.height_lineedit.returnPressed.connect(self.set_acq_size)
+        self.gui.width_lineedit.returnPressed.connect(self.set_acq_size)
+        self.gui.acq_size_set.clicked.connect(self.set_acq_size)
+        self.gui.width_lineedit.setValidator(QIntValidator(48, 5280))
+        self.gui.height_lineedit.setValidator(QIntValidator(4, 4600))
+        frame_text = "4600x5280 px (W x H)"
+        self.set_frame_size_label_text()
+        self.set_exp_time_label_text()
+
+
+    def set_exp_time_label_text(self):
+
+        self.gui.exp_time_label.setText(str(self.exposure_time))
+
+    def set_frame_size_label_text(self):
+        current_w = self.camera.width
+        current_h = self.camera.height
+        me_text = f"{current_h} x {current_w} (H x W)"
+        self.gui.frame_size_label.setText(me_text)
+
+    def reset_sensor(self):
+        self.camera.reset_sensor()
+        self.set_frame_size_label_text()
+
+    def set_acq_size(self):
+        mewidth = None
+        meheight = None
+
+        # Check Width Input
+        width_text = self.gui.width_lineedit.text()
+        if width_text:
+            try:
+                mewidth = int(width_text)
+                self.gui.width_lineedit.clear()
+            except ValueError:
+                pass
+
+        # Check Height Input
+        height_text = self.gui.height_lineedit.text()
+        if height_text:
+            try:
+                meheight = int(height_text)
+                self.gui.height_lineedit.clear()
+            except ValueError:
+                pass
+
+        # Only call set_roi if at least one value is present
+        if mewidth is not None or meheight is not None:
+            self.camera.set_roi(width=mewidth, height=meheight)
+
+            # Update label with current camera values
+            # Note: Accessing GetValue() might be Pylon specific, using the wrapper methods is safer if available
+            # or just reading back the properties we set if the camera object updates them.
+            # Assuming self.camera.width and .height are updated in set_roi
+            current_w = self.camera.width
+            current_h = self.camera.height
+            me_text = f"{current_h} x {current_w} H x W"
+            self.set_frame_size_label_text()
 
     def start_grab(self):
         """self.timer.start(100)  # Update every 100 ms
@@ -84,8 +149,13 @@ class CamViewer(QMainWindow):
             self.display_image(self.camera.frame)
 
     def setAcqTime(self):
+        print(f"Exp time before {self.exposure_time}")
         newtime = float(self.gui.AcqTLineEdit.text())
-        self.camera.set_exp_time(newtime)
+        self.exposure_time = newtime
+        print(f"Exp time after: {self.exposure_time}")
+        self.camera.set_exp_time(self.exposure_time)
+        self.set_exp_time_label_text()
+
 
     def plot_center_mark(self, image):
         #print("image.shape : ", image.shape)

@@ -30,12 +30,17 @@ class Measurement():
         self.points = nr_of_points  # these are the number of measurement points
         self.stepsize = 0.0  # this is the stepsize ( in mm) of the measurement
         self.nrofgrabs = nr_of_grabs  # default nr of camera grabs per measurement point
+        self.nr_of_measurements_for_avg = 1 # set to 1 for safety
         self.xStartPos = 650000  # default @ middle of stage travel...
         self.today = datetime.datetime.now().strftime("%H-%M_%Y%m%d")
         self.directory = os.path.expanduser("~") # selecting the default directory as users home directory
 
         self.slopes_rms = 0.0
+        self.slopes_fwd_rms = 0.0
+        self.slopes_bwd_rms = 0.0
         self.heights_rms = 0.0
+        self.heights_fwd_rms = 0.0
+        self.heights_bwd_rms = 0.0
 
     def get_save_directory(self):
         options = QFileDialog.Options()
@@ -157,7 +162,36 @@ class Measurement():
         heights = np.array([])
         heights = np.cumtrapz(arrayX, arrayY, initial=0)
         return (heights)
+    def _measurement_diagnostics(self,
+                                 pos_forward,
+                                 pos_backward,
+                                 slopes_forward,
+                                 slopes_backward_rev,
+                                 ):
 
+        pos_diff = pos_forward - pos_backward[::-1]
+        print("Max positional discrepancy between FWD and BWD:", np.max(np.abs(pos_diff)))
+
+        fit_fwd, rad_fwd = MathUtils.my_fit(pos_forward, slopes_forward, order=1)
+        err_fwd = slopes_forward - fit_fwd
+
+        fit_bwd, rad_bwd = MathUtils.my_fit(pos_backward[::-1], slopes_backward_rev, order=1)
+        err_bwd = slopes_backward_rev - fit_bwd
+
+        rms_fwd = 1e6 * MathUtils.RMS(self.measurement.FOP_smoothing(err_fwd))
+        rms_bwd = 1e6 * MathUtils.RMS(self.measurement.FOP_smoothing(err_bwd))
+
+        err_avg = 0.5 * (err_fwd + err_bwd)
+        rms_avg_detrended = 1e6 * MathUtils.RMS(self.measurement.FOP_smoothing(err_avg))
+
+        print(f"\n--- DIAGNOSTICS ---")
+        print(f"FWD Detrended RMS:     {rms_fwd:.3f} \u00B5rad (R = {rad_fwd / 1e6:.3f} m)")
+        print(f"BWD Detrended RMS:     {rms_bwd:.3f} \u00B5rad (R = {rad_bwd / 1e6:.3f} m)")
+        print(f"Avg of Detrended RMS:  {rms_avg_detrended:.3f} \u00B5rad")
+        print(f"Max coordinate offset: {np.max(np.abs(pos_forward - pos_backward[::-1])):.2f} \u00B5m")
+        print(f"-------------------\n")
+        # =====================================================================
+        return
 
 
 """class StabilityMeasurement(Measurement):

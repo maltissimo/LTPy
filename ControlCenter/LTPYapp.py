@@ -15,7 +15,7 @@ from PyQt5.QtWidgets import QApplication, QMainWindow
 from ControlCenter.MultiThreading import WorkerThread
 from ControlCenter.Control_Utilities import console_welcome
 from PyQt5.QtCore import QObject, pyqtSignal
-from ControlCenter.MeasurementControls import *
+from ControlCenter.MeasurementControls2 import *
 from ControlCenter.Alignment_Utilities import *
 from PyQt5.QtCore import QObject, pyqtSignal
 from Hardware.Detector import Camera

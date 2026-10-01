@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QInputDialog, QLineEdit, QDialog, QVBoxLayout, QLabel, QDialogButtonBox
 
-from Communication import MCG
+from Communication import MCG_TCP
 from Hardware import Source, Motors # , Detector
 from ControlCenter.MultiThreading import *
 
@@ -32,7 +32,7 @@ class Utilities():
 
     def create(my_object, **kwargs):
         if my_object == "shell":
-            shell = MCG.Gantry(
+            shell = MCG_TCP.Gantry(
                 pmac_ip=kwargs.get("pmac_ip"),
                 username=kwargs.get("username"),
                 password=kwargs.get("password"),
@@ -173,7 +173,7 @@ class SSHConnectionManager:
         self._initialize_connection()
 
     def _initialize_connection(self):
-        self.connection = MCG.Gantry(
+        self.connection = MCG_TCP.Gantry(
             pmac_ip=self.credentials["ip"],
             username=self.credentials["username"],
             password=self.credentials["password"]
